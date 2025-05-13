@@ -46,7 +46,7 @@ public class PostServiceImpl implements PostService {
 
         Community community = null;
         if (dto.getVisibility() == Visibility.COMMUNITY)
-            community = communityValidator.validateCommunity(dto.getCommunityId(), user);
+            community = communityValidator.validateMemberCommunity(dto.getCommunityId(), user);
 
         Post post = Post.builder()
                 .title(dto.getTitle())

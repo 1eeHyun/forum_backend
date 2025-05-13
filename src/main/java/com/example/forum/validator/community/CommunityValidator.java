@@ -1,5 +1,6 @@
 package com.example.forum.validator.community;
 
+import com.example.forum.exception.community.CommunityExistsNameException;
 import com.example.forum.exception.community.CommunityNotFoundException;
 import com.example.forum.exception.community.UserNotMemberException;
 import com.example.forum.model.community.Community;
@@ -14,7 +15,7 @@ public class CommunityValidator {
 
     private final CommunityRepository communityRepository;
 
-    public Community validateCommunity(Long id, User user) {
+    public Community validateMemberCommunity(Long id, User user) {
 
         Community community = communityRepository.findById(id)
                 .orElseThrow(CommunityNotFoundException::new);
@@ -24,5 +25,10 @@ public class CommunityValidator {
             throw new UserNotMemberException();
 
         return community;
+    }
+
+    public void validateUniqueName(String name) {
+        if (communityRepository.existsByName(name))
+            throw new CommunityExistsNameException();
     }
 }

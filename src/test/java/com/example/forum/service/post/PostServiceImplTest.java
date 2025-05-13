@@ -94,7 +94,7 @@ class PostServiceImplTest {
         PostRequestDTO dto = new PostRequestDTO("Title", "Content", Visibility.COMMUNITY, 100L);
 
         when(authValidator.validateUser("tester")).thenReturn(mockUser);
-        when(communityValidator.validateCommunity(100L, mockUser)).thenReturn(mockCommunity);
+        when(communityValidator.validateMemberCommunity(100L, mockUser)).thenReturn(mockCommunity);
         when(postRepository.save(any(Post.class))).thenReturn(mockPost);
 
         var result = postService.createPost(dto, "tester");

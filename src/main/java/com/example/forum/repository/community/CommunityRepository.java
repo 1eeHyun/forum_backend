@@ -10,5 +10,6 @@ import java.util.List;
 @Repository
 public interface CommunityRepository extends JpaRepository<Community, Long> {
 
+    boolean existsByName(String name);
     List<Community> findAllByMembersContaining(User user);
 }
