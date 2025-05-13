@@ -2,6 +2,7 @@ package com.example.forum.controller.auth;
 
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginRequestDTO;
+import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
 import com.example.forum.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,10 @@ public class AuthController implements AuthApiDocs {
     }
 
     @Override
-    @GetMapping("/login")
-    public ResponseEntity<CommonResponse<String>> login(@RequestBody LoginRequestDTO dto) {
+    @PostMapping("/login")
+    public ResponseEntity<CommonResponse<LoginResponseDTO>> login(@RequestBody LoginRequestDTO dto) {
 
-//        String token = authService.login(dto);
-//        return ResponseEntity.ok(CommonResponse.success(token));
-        return null;
+        LoginResponseDTO responseToken = authService.login(dto);
+        return ResponseEntity.ok(CommonResponse.success(responseToken));
     }
 }

@@ -2,6 +2,7 @@ package com.example.forum.controller.auth;
 
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginRequestDTO;
+import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,5 +21,5 @@ public interface AuthApiDocs {
             summary = "Login",
             description = "Authenticates a user with username and password, and returns a JWT access token upon success."
     )
-    ResponseEntity<CommonResponse<String>> login(LoginRequestDTO dto);
+    ResponseEntity<CommonResponse<LoginResponseDTO>> login(LoginRequestDTO dto);
 }
