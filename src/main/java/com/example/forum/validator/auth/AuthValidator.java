@@ -1,9 +1,9 @@
 package com.example.forum.validator.auth;
 
-import com.example.forum.exception.DuplicateEmailException;
-import com.example.forum.exception.DuplicateUsernameException;
-import com.example.forum.exception.InvalidPasswordException;
-import com.example.forum.exception.UserNotFoundException;
+import com.example.forum.exception.auth.DuplicateEmailException;
+import com.example.forum.exception.auth.DuplicateUsernameException;
+import com.example.forum.exception.auth.InvalidPasswordException;
+import com.example.forum.exception.auth.UserNotFoundException;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,5 +35,11 @@ public class AuthValidator {
             throw new InvalidPasswordException();
 
         return user;
+    }
+
+    public User validateUser(String username) {
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(UserNotFoundException::new);
     }
 }

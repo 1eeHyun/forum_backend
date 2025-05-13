@@ -1,8 +1,11 @@
 package com.example.forum.service.auth;
 
+import com.example.forum.dto.auth.LoginRequestDTO;
+import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.user.UserRepository;
+import com.example.forum.security.JwtTokenProvider;
 import com.example.forum.validator.auth.AuthValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,5 +87,34 @@ class AuthServiceImplTest {
 
         assertEquals("Username exists", ex.getMessage());
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void login_withValidCredentials_shouldReturnToken() {
+        // given
+        LoginRequestDTO dto = new LoginRequestDTO();
+        dto.setUsernameOrEmail("testuser");
+        dto.setPassword("password123");
+
+        User mockUser = User.builder()
+                .username("testuser")
+                .build();
+
+        when(authValidator.validateLogin(dto.getUsernameOrEmail(), dto.getPassword()))
+                .thenReturn(mockUser);
+
+        JwtTokenProvider mockJwtProvider = mock(JwtTokenProvider.class);
+        String mockToken = "mock.jwt.token";
+
+        // inject mocked jwtTokenProvider
+        ReflectionTestUtils.setField(authService, "jwtTokenProvider", mockJwtProvider);
+        when(mockJwtProvider.generateToken(mockUser.getUsername())).thenReturn(mockToken);
+
+        // when
+        LoginResponseDTO response = authService.login(dto);
+
+        // then
+        assertNotNull(response);
+        assertEquals(mockToken, response.getToken());
     }
 }

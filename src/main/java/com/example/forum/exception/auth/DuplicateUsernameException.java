@@ -1,4 +1,6 @@
-package com.example.forum.exception;
+package com.example.forum.exception.auth;
+
+import com.example.forum.exception.CustomException;
 
 public class DuplicateUsernameException extends CustomException {
 
