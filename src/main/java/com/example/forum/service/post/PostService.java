@@ -8,8 +8,8 @@ import java.util.List;
 public interface PostService {
 
     // Retrieve posts - GET
-    List<PostResponseDTO> getAllPostsByASC();
-    List<PostResponseDTO> getAllPostsByDESC();
+    List<PostResponseDTO> getAllPublicPostsByASC();
+    List<PostResponseDTO> getAllPublicPostsByDESC();
 
     // Post posts - POST
     PostResponseDTO createPost(PostRequestDTO dto, String username);

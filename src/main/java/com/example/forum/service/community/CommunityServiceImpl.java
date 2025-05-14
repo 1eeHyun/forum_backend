@@ -26,7 +26,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public CommunityResponseDTO create(CommunityRequestDTO dto, String username) {
 
-        User user = authValidator.validateUser(username);
+        User user = authValidator.validateUserByUsername(username);
 
         communityValidator.validateUniqueName(dto.getName());
 
@@ -46,7 +46,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public List<CommunityResponseDTO> getMyCommunities(String username) {
 
-        User user = authValidator.validateUser(username);
+        User user = authValidator.validateUserByUsername(username);
         return communityRepository.findAllByMembersContaining(user).stream()
                 .map(CommunityMapper::toDTO)
                 .toList();

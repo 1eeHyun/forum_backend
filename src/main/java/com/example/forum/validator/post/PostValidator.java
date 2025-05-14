@@ -13,9 +13,13 @@ public class PostValidator {
 
     private final PostRepository postRepository;
 
-    public Post validatePost(Long id, String username) {
-        Post post = postRepository.findById(id)
+    public Post validatePost(Long id) {
+        return postRepository.findById(id)
                 .orElseThrow(PostNotFoundException::new);
+    }
+
+    public Post validatePostAuthor(Long id, String username) {
+        Post post = validatePost(id);
 
         if (!post.getAuthor().getUsername().equals(username))
             throw new PostNotAuthorException();

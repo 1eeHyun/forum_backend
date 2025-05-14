@@ -13,6 +13,8 @@ public class PostResponseDTO {
     private String title;
     private String content;
     private String authorNickname;
+    private int commentCount;
+    private int likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

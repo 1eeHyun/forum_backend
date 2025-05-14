@@ -7,6 +7,7 @@ public class CommunityMapper {
 
     public static CommunityResponseDTO toDTO(Community community) {
         return CommunityResponseDTO.builder()
+                .id(community.getId())
                 .name(community.getName())
                 .description(community.getDescription())
                 .createdAt(community.getCreatedAt())

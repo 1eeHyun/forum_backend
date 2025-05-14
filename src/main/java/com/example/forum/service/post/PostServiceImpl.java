@@ -26,23 +26,24 @@ public class PostServiceImpl implements PostService {
     private final CommunityValidator communityValidator;
 
     @Override
-    public List<PostResponseDTO> getAllPostsByASC() {
-        return postRepository.findAll().stream()
+    public List<PostResponseDTO> getAllPublicPostsByASC() {
+        return postRepository.findAllByVisibilityOrderByCreatedAtAsc(Visibility.PUBLIC).stream()
                 .map(PostMapper::toDTO)
                 .toList();
     }
 
     @Override
-    public List<PostResponseDTO> getAllPostsByDESC() {
-        return postRepository.findAllByOrderByCreatedAtDesc().stream()
+    public List<PostResponseDTO> getAllPublicPostsByDESC() {
+        return postRepository.findAllByVisibilityOrderByCreatedAtDesc(Visibility.PUBLIC).stream()
                 .map(PostMapper::toDTO)
                 .toList();
     }
+
 
     @Override
     public PostResponseDTO createPost(PostRequestDTO dto, String username) {
 
-        User user = authValidator.validateUser(username);
+        User user = authValidator.validateUserByUsername(username);
 
         Community community = null;
         if (dto.getVisibility() == Visibility.COMMUNITY)
@@ -51,6 +52,7 @@ public class PostServiceImpl implements PostService {
         Post post = Post.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
+                .visibility(dto.getVisibility())
                 .author(user)
                 .build();
 
@@ -62,18 +64,19 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostResponseDTO updatePost(Long postId, PostRequestDTO dto, String username) {
 
-        Post post = postValidator.validatePost(postId, username);
+        Post post = postValidator.validatePostAuthor(postId, username);
 
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
 
-        return PostMapper.toDTO(post);
+        Post savedPost = postRepository.save(post);
+        return PostMapper.toDTO(savedPost);
     }
 
     @Override
     public void deletePost(Long postId, String username) {
 
-        Post post = postValidator.validatePost(postId, username);
+        Post post = postValidator.validatePostAuthor(postId, username);
         postRepository.delete(post);
     }
 }

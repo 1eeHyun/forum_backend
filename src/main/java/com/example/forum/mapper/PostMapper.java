@@ -10,6 +10,8 @@ public class PostMapper {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .authorNickname(post.getAuthor().getProfile().getNickname())
+                .commentCount(post.getComments() != null ? post.getComments().size() : 0)
+                .likeCount(post.getLikes() != null ? post.getLikes().size() : 0)
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();

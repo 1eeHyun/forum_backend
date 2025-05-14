@@ -17,5 +17,6 @@ public class PostRequestDTO {
     private String content;
 
     private Visibility visibility;
+
     private Long communityId; // Optional: community selection
 }

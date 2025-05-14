@@ -37,9 +37,15 @@ public class AuthValidator {
         return user;
     }
 
-    public User validateUser(String username) {
+    public User validateUserByUsername(String username) {
 
         return userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new);
     }
+
+//    public User validateUserById(Long id) {
+//
+//        return userRepository.findById(id)
+//                .orElseThrow(UserNotFoundException::new);
+//    }
 }

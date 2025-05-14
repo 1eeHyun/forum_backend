@@ -20,18 +20,18 @@ public class PostController implements PostApiDocs {
     private final PostService postService;
 
     @Override
-    @GetMapping("/asc")
-    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllAsc() {
+    @GetMapping("/public/asc")
+    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostAsc() {
 
-        List<PostResponseDTO> posts = postService.getAllPostsByASC();
+        List<PostResponseDTO> posts = postService.getAllPublicPostsByASC();
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 
     @Override
-    @GetMapping("/desc")
-    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllDesc() {
+    @GetMapping("/public/desc")
+    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc() {
 
-        List<PostResponseDTO> posts = postService.getAllPostsByDESC();
+        List<PostResponseDTO> posts = postService.getAllPublicPostsByDESC();
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 

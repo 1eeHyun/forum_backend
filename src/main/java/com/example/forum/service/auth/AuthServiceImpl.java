@@ -5,6 +5,7 @@ import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
+import com.example.forum.repository.profile.ProfileRepository;
 import com.example.forum.repository.user.UserRepository;
 import com.example.forum.security.JwtTokenProvider;
 import com.example.forum.validator.auth.AuthValidator;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService{
 
     private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthValidator authValidator;
     private final JwtTokenProvider jwtTokenProvider;
@@ -46,6 +48,7 @@ public class AuthServiceImpl implements AuthService{
 
         user.setProfile(profile);
         userRepository.save(user);
+        profileRepository.save(profile);
     }
 
     @Override

@@ -31,7 +31,8 @@ public class CommunityController implements CommunityApiDocs {
 
     @Override
     @GetMapping("/my")
-    public ResponseEntity<CommonResponse<List<CommunityResponseDTO>>> getMyCommunities(UserDetails userDetails) {
+    public ResponseEntity<CommonResponse<List<CommunityResponseDTO>>> getMyCommunities(
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         List<CommunityResponseDTO> response = communityService.getMyCommunities(userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success(response));

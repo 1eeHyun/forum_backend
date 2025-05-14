@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -72,6 +73,8 @@ class PostServiceImplTest {
                 .visibility(Visibility.PUBLIC)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .comments(new ArrayList<>())
+                .likes(new ArrayList<>())
                 .build();
     }
 
@@ -79,7 +82,7 @@ class PostServiceImplTest {
     void createPost_withPublicVisibility_shouldReturnCreatedPost() {
         PostRequestDTO dto = new PostRequestDTO("Title", "Content", Visibility.PUBLIC, null);
 
-        when(authValidator.validateUser("tester")).thenReturn(mockUser);
+        when(authValidator.validateUserByUsername("tester")).thenReturn(mockUser);
         when(postRepository.save(any(Post.class))).thenReturn(mockPost);
 
         var result = postService.createPost(dto, "tester");
@@ -93,7 +96,7 @@ class PostServiceImplTest {
     void createPost_withCommunityVisibility_shouldReturnCreatedPost() {
         PostRequestDTO dto = new PostRequestDTO("Title", "Content", Visibility.COMMUNITY, 100L);
 
-        when(authValidator.validateUser("tester")).thenReturn(mockUser);
+        when(authValidator.validateUserByUsername("tester")).thenReturn(mockUser);
         when(communityValidator.validateMemberCommunity(100L, mockUser)).thenReturn(mockCommunity);
         when(postRepository.save(any(Post.class))).thenReturn(mockPost);
 
@@ -107,7 +110,8 @@ class PostServiceImplTest {
     void updatePost_shouldModifyPostAndReturnUpdatedDto() {
         PostRequestDTO dto = new PostRequestDTO("New Title", "New Content", Visibility.PRIVATE, null);
 
-        when(postValidator.validatePost(1L, "tester")).thenReturn(mockPost);
+        when(postValidator.validatePostAuthor(1L, "tester")).thenReturn(mockPost);
+        when(postRepository.save(any(Post.class))).thenReturn(mockPost);
 
         var result = postService.updatePost(1L, dto, "tester");
 
@@ -117,7 +121,7 @@ class PostServiceImplTest {
 
     @Test
     void deletePost_shouldCallRepositoryDelete() {
-        when(postValidator.validatePost(1L, "tester")).thenReturn(mockPost);
+        when(postValidator.validatePostAuthor(1L, "tester")).thenReturn(mockPost);
 
         postService.deletePost(1L, "tester");
 
@@ -126,9 +130,10 @@ class PostServiceImplTest {
 
     @Test
     void getAllPostsByDESC_shouldReturnPostList() {
-        when(postRepository.findAllByOrderByCreatedAtDesc()).thenReturn(List.of(mockPost));
+        when(postRepository.findAllByVisibilityOrderByCreatedAtDesc(Visibility.PUBLIC))
+                .thenReturn(List.of(mockPost));
 
-        var result = postService.getAllPostsByDESC();
+        var result = postService.getAllPublicPostsByDESC();
 
         assertEquals(1, result.size());
         assertEquals("Title", result.get(0).getTitle());

@@ -63,7 +63,7 @@ class CommunityServiceImplTest {
                 .members(new HashSet<>()) // ✅ initialize members
                 .build();
 
-        when(authValidator.validateUser("tester")).thenReturn(mockUser);
+        when(authValidator.validateUserByUsername("tester")).thenReturn(mockUser);
         doNothing().when(communityValidator).validateUniqueName(dto.getName());
         when(communityRepository.save(any(Community.class))).thenReturn(savedCommunity);
 
@@ -84,7 +84,7 @@ class CommunityServiceImplTest {
                 .members(new HashSet<>()) // initialize members
                 .build();
 
-        when(authValidator.validateUser("tester")).thenReturn(mockUser);
+        when(authValidator.validateUserByUsername("tester")).thenReturn(mockUser);
         when(communityRepository.findAllByMembersContaining(mockUser)).thenReturn(List.of(community));
 
         var result = communityService.getMyCommunities("tester");
