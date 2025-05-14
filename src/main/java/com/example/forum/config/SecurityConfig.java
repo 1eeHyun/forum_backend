@@ -42,10 +42,10 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/communities/**").permitAll()
                         .requestMatchers("/api/posts/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/communities/**").permitAll()
                         .requestMatchers("/api/communities/**").authenticated()
+                        .requestMatchers("/api/profiles/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

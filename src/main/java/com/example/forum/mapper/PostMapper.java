@@ -9,7 +9,7 @@ public class PostMapper {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .authorNickname(post.getAuthor().getProfile().getNickname())
+                .author(AuthorMapper.toDto(post.getAuthor()))
                 .commentCount(post.getComments() != null ? post.getComments().size() : 0)
                 .likeCount(post.getLikes() != null ? post.getLikes().size() : 0)
                 .createdAt(post.getCreatedAt())

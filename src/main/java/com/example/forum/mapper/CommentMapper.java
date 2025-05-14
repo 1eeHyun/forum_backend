@@ -9,7 +9,7 @@ public class CommentMapper {
         return CommentResponseDTO.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
-                .authorNickname(comment.getAuthor().getProfile().getNickname())
+                .author(AuthorMapper.toDto(comment.getAuthor()))
                 .createdAt(comment.getCreatedAt())
                 .replies(comment.getReplies().stream()
                         .map(CommentMapper::toDTO)

@@ -1,5 +1,6 @@
 package com.example.forum.dto.community;
 
+import com.example.forum.dto.post.AuthorDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,5 +14,5 @@ public class CommunityResponseDTO {
     private String name;
     private String description;
     private LocalDateTime createdAt;
-    private String creatorNickname;
+    private AuthorDTO author;
 }

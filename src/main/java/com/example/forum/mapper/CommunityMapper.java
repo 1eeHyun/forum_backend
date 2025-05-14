@@ -11,7 +11,7 @@ public class CommunityMapper {
                 .name(community.getName())
                 .description(community.getDescription())
                 .createdAt(community.getCreatedAt())
-                .creatorNickname(community.getCreator().getProfile().getNickname())
+                .author(AuthorMapper.toDto(community.getCreator()))
                 .build();
     }
 }
