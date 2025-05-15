@@ -1,6 +1,7 @@
 package com.example.forum.dto.profile;
 
 import com.example.forum.dto.post.PostResponseDTO;
+import com.example.forum.dto.util.ImageDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,9 +14,7 @@ public class ProfileResponseDTO {
     private String username;
     private String nickname;
     private String bio;
-    private String imageUrl;
-    private Double imagePositionX;
-    private Double imagePositionY;
+    private ImageDTO imageDTO;
     private Boolean isMe;
     private List<PostResponseDTO> posts;
 }

@@ -1,6 +1,7 @@
 package com.example.forum.mapper;
 
 import com.example.forum.dto.profile.ProfileResponseDTO;
+import com.example.forum.dto.util.ImageDTO;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 
@@ -13,9 +14,11 @@ public class ProfileMapper {
                 .username(targetUser.getUsername())
                 .nickname(targetUser.getProfile().getNickname())
                 .bio(targetUser.getProfile().getBio())
-                .imageUrl(targetUser.getProfile().getImageUrl())
-                .imagePositionX(targetUser.getProfile().getImagePositionX())
-                .imagePositionY(targetUser.getProfile().getImagePositionY())
+                .imageDTO(ImageDTO.builder()
+                        .imageUrl(targetUser.getProfile().getImageUrl())
+                        .imagePositionX(targetUser.getProfile().getImagePositionX())
+                        .imagePositionY(targetUser.getProfile().getImagePositionY())
+                        .build())
                 .isMe(isMe)
                 .posts(posts.stream().map(PostMapper::toDTO).toList())
                 .build();

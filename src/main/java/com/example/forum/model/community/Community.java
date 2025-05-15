@@ -27,6 +27,12 @@ public class Community {
     private String imageUrl;
     private LocalDateTime createdAt;
 
+    @Column(nullable = true)
+    private Double imagePositionX;
+
+    @Column(nullable = true)
+    private Double imagePositionY;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id")
     private User creator;

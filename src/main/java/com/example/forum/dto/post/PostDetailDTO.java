@@ -6,8 +6,11 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class AuthorDTO {
-    private String username;
-    private String nickname;
+public class PostDetailDTO {
+
+    private Long id;
+    private String title;
+    private String content;
+    private AuthorDTO author;
     private ImageDTO imageDTO;
 }

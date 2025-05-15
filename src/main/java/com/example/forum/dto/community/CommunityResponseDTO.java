@@ -1,6 +1,7 @@
 package com.example.forum.dto.community;
 
 import com.example.forum.dto.post.AuthorDTO;
+import com.example.forum.dto.util.ImageDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,7 +14,7 @@ public class CommunityResponseDTO {
     private Long id;
     private String name;
     private String description;
-    private String imageUrl;
+    private ImageDTO imageDTO;
     private LocalDateTime createdAt;
     private AuthorDTO author;
 }

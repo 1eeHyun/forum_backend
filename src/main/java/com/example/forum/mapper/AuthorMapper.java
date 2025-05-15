@@ -2,6 +2,7 @@ package com.example.forum.mapper;
 
 import com.example.forum.dto.auth.MeResponseDTO;
 import com.example.forum.dto.post.AuthorDTO;
+import com.example.forum.dto.util.ImageDTO;
 import com.example.forum.model.user.User;
 import lombok.Getter;
 
@@ -12,16 +13,22 @@ public class AuthorMapper {
         return AuthorDTO.builder()
                 .username(user.getUsername())
                 .nickname(user.getProfile().getNickname())
-                .imageUrl(user.getProfile().getImageUrl())
+                .imageDTO(ImageDTO.builder()
+                        .imageUrl(user.getProfile().getImageUrl())
+                        .imagePositionX(user.getProfile().getImagePositionX())
+                        .imagePositionY(user.getProfile().getImagePositionY())
+                        .build())
                 .build();
     }
 
     public static MeResponseDTO toMeDto(User user) {
         return MeResponseDTO.builder()
                 .username(user.getUsername())
-                .imageUrl(user.getProfile().getImageUrl())
-                .imagePositionX(user.getProfile().getImagePositionX())
-                .imagePositionY(user.getProfile().getImagePositionY())
+                .imageDTO(ImageDTO.builder()
+                        .imageUrl(user.getProfile().getImageUrl())
+                        .imagePositionX(user.getProfile().getImagePositionX())
+                        .imagePositionY(user.getProfile().getImagePositionY())
+                        .build())
                 .nickname(user.getProfile().getNickname())
                 .email(user.getEmail())
                 .build();

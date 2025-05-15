@@ -9,6 +9,7 @@ import com.example.forum.repository.community.CommunityRepository;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -23,6 +24,9 @@ public class CommunityServiceImpl implements CommunityService {
     private final CommunityValidator communityValidator;
     private final CommunityRepository communityRepository;
 
+    @Value("${app.default-community-image}")
+    private String defaultCommunityImageUrl;
+
     @Override
     public CommunityResponseDTO create(CommunityRequestDTO dto, String username) {
 
@@ -33,7 +37,7 @@ public class CommunityServiceImpl implements CommunityService {
         Community community = Community.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
-                .imageUrl("")
+                .imageUrl(defaultCommunityImageUrl)
                 .creator(user)
                 .members(new HashSet<>())
                 .build();

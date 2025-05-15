@@ -7,8 +7,8 @@ public interface ProfileService {
 
     ProfileResponseDTO getProfile(String targetUsername, String loginUsername);
 
-    void updateNickname(String targetUsername, String username, NicknameUpdateDTO dto);
-    LoginResponseDTO updateUsername(String targetUsername, String currUsername, UsernameUpdateDTO dto);
-    void updateBio(String targetUsername, String username, BioUpdateDTO dto);
-    void updateProfileImage(String targetUsername, String username, ProfileImageUpdateDTO dto);
+    void updateNickname(String username, NicknameUpdateDTO dto);
+    LoginResponseDTO updateUsername(String currUsername, UsernameUpdateDTO dto);
+    void updateBio(String username, BioUpdateDTO dto);
+    void updateProfileImage(String username, ProfileImageUpdateDTO dto);
 }

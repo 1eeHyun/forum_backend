@@ -3,6 +3,7 @@ package com.example.forum.controller.profile;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.profile.*;
+import com.example.forum.exception.auth.ForbiddenException;
 import com.example.forum.service.profile.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -36,7 +37,10 @@ public class ProfileController implements ProfileApiDocs {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody NicknameUpdateDTO dto) {
 
-        profileService.updateNickname(targetUsername, userDetails.getUsername(), dto);
+        if (!targetUsername.equals(userDetails.getUsername()))
+            throw new ForbiddenException();
+
+        profileService.updateNickname(userDetails.getUsername(), dto);
         return ResponseEntity.ok(CommonResponse.success());
     }
 
@@ -47,7 +51,10 @@ public class ProfileController implements ProfileApiDocs {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody UsernameUpdateDTO dto) {
 
-        LoginResponseDTO result = profileService.updateUsername(targetUsername, userDetails.getUsername(), dto);
+        if (!targetUsername.equals(userDetails.getUsername()))
+            throw new ForbiddenException();
+
+        LoginResponseDTO result = profileService.updateUsername(userDetails.getUsername(), dto);
         return ResponseEntity.ok(CommonResponse.success(result));
     }
 
@@ -58,7 +65,10 @@ public class ProfileController implements ProfileApiDocs {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody BioUpdateDTO dto) {
 
-        profileService.updateBio(targetUsername, userDetails.getUsername(), dto);
+        if (!targetUsername.equals(userDetails.getUsername()))
+            throw new ForbiddenException();
+
+        profileService.updateBio(userDetails.getUsername(), dto);
         return ResponseEntity.ok(CommonResponse.success());
     }
 
@@ -71,12 +81,15 @@ public class ProfileController implements ProfileApiDocs {
             @RequestParam Double positionX,
             @RequestParam Double positionY) {
 
+        if (!targetUsername.equals(userDetails.getUsername()))
+            throw new ForbiddenException();
+
         ProfileImageUpdateDTO dto = new ProfileImageUpdateDTO();
         dto.setImage(image);
         dto.setPositionX(positionX);
         dto.setPositionY(positionY);
 
-        profileService.updateProfileImage(targetUsername, userDetails.getUsername(), dto);
+        profileService.updateProfileImage(userDetails.getUsername(), dto);
         return ResponseEntity.ok(CommonResponse.success());
     }
 }

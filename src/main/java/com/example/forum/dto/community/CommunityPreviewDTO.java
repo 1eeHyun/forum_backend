@@ -1,5 +1,6 @@
 package com.example.forum.dto.community;
 
+import com.example.forum.dto.util.ImageDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,5 +10,5 @@ public class CommunityPreviewDTO {
 
     private Long id;
     private String name;
-    private String imageUrl;
+    private ImageDTO imageDTO;
 }

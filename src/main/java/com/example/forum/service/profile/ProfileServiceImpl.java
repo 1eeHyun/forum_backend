@@ -74,7 +74,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     // Nickname
     @Override
-    public void updateNickname(String targetUsername, String username, NicknameUpdateDTO dto) {
+    public void updateNickname(String username, NicknameUpdateDTO dto) {
 
         User user = userValidator.validateUserByUsername(username);
         Profile profile = profileValidator.getProfileByUser(user);
@@ -85,7 +85,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     // Username
     @Override
-    public LoginResponseDTO updateUsername(String targetUsername, String currUsername, UsernameUpdateDTO dto) {
+    public LoginResponseDTO updateUsername(String currUsername, UsernameUpdateDTO dto) {
 
         userValidator.validateUniqueUsername(dto.getUsername());
 
@@ -100,7 +100,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     // Bio
     @Override
-    public void updateBio(String targetUsername, String username, BioUpdateDTO dto) {
+    public void updateBio(String username, BioUpdateDTO dto) {
 
         User user = userValidator.validateUserByUsername(username);
         Profile profile = profileValidator.getProfileByUser(user);
@@ -111,7 +111,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     // Image
     @Override
-    public void updateProfileImage(String targetUsername, String username, ProfileImageUpdateDTO dto) {
+    public void updateProfileImage(String username, ProfileImageUpdateDTO dto) {
 
         User user = userValidator.validateUserByUsername(username);
         Profile profile = profileValidator.getProfileByUser(user);

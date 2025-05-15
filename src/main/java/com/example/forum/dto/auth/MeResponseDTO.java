@@ -1,6 +1,7 @@
 package com.example.forum.dto.auth;
 
 
+import com.example.forum.dto.util.ImageDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -11,8 +12,6 @@ public class MeResponseDTO {
     private String username;
     private String email;
     private String nickname;
-    private String imageUrl;
-    private Double imagePositionX;
-    private Double imagePositionY;
+    private ImageDTO imageDTO;
 }
 
