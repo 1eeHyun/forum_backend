@@ -12,5 +12,7 @@ public class MeResponseDTO {
     private String email;
     private String nickname;
     private String imageUrl;
+    private Double imagePositionX;
+    private Double imagePositionY;
 }
 

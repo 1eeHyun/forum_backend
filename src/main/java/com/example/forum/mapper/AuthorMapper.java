@@ -20,6 +20,8 @@ public class AuthorMapper {
         return MeResponseDTO.builder()
                 .username(user.getUsername())
                 .imageUrl(user.getProfile().getImageUrl())
+                .imagePositionX(user.getProfile().getImagePositionX())
+                .imagePositionY(user.getProfile().getImagePositionY())
                 .nickname(user.getProfile().getNickname())
                 .email(user.getEmail())
                 .build();
