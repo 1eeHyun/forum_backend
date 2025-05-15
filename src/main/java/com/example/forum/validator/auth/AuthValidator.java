@@ -1,9 +1,6 @@
 package com.example.forum.validator.auth;
 
-import com.example.forum.exception.auth.DuplicateEmailException;
-import com.example.forum.exception.auth.DuplicateUsernameException;
-import com.example.forum.exception.auth.InvalidPasswordException;
-import com.example.forum.exception.auth.UserNotFoundException;
+import com.example.forum.exception.auth.*;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,9 +40,14 @@ public class AuthValidator {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-//    public User validateUserById(Long id) {
-//
-//        return userRepository.findById(id)
-//                .orElseThrow(UserNotFoundException::new);
-//    }
+    public void validateUniqueUsername(String username) {
+        if (userRepository.existsByUsername(username))
+            throw new DuplicateUsernameException();
+    }
+
+    public void validateSameUsername(String targetUsername, String username) {
+        if (userRepository.findByUsername(targetUsername) != userRepository.findByUsername(username))
+            throw new NotAuthorizedException();
+    }
+
 }

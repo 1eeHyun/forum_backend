@@ -14,6 +14,8 @@ public class ProfileResponseDTO {
     private String nickname;
     private String bio;
     private String imageUrl;
+    private Double imagePositionX;
+    private Double imagePositionY;
     private Boolean isMe;
     private List<PostResponseDTO> posts;
 }

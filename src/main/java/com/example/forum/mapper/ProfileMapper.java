@@ -14,6 +14,8 @@ public class ProfileMapper {
                 .nickname(targetUser.getProfile().getNickname())
                 .bio(targetUser.getProfile().getBio())
                 .imageUrl(targetUser.getProfile().getImageUrl())
+                .imagePositionX(targetUser.getProfile().getImagePositionX())
+                .imagePositionY(targetUser.getProfile().getImagePositionY())
                 .isMe(isMe)
                 .posts(posts.stream().map(PostMapper::toDTO).toList())
                 .build();

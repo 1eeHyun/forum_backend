@@ -22,6 +22,12 @@ public class Profile {
     private String bio;
     private String imageUrl;
 
+    @Column(nullable = true)
+    private Double imagePositionX;
+
+    @Column(nullable = true)
+    private Double imagePositionY;
+
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

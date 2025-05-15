@@ -21,6 +21,7 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
+    @Setter
     private String username; // Login username
 
     @Column(nullable = false)
