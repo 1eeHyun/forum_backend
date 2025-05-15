@@ -20,18 +20,32 @@ public class PostController implements PostApiDocs {
     private final PostService postService;
 
     @Override
-    @GetMapping("/public/asc")
-    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostAsc() {
+    @GetMapping("/accessible/asc")
+    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostAsc(
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        List<PostResponseDTO> posts = postService.getAllPublicPostsByASC();
+        List<PostResponseDTO> posts;
+        if (userDetails == null)
+            posts = postService.getAccessiblePostsByASC(null);
+        else
+            posts = postService.getAccessiblePostsByASC(userDetails.getUsername());
+
+//        List<PostResponseDTO> posts = postService.getAccessiblePostsByASC(userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 
     @Override
-    @GetMapping("/public/desc")
-    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc() {
+    @GetMapping("/accessible/desc")
+    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc(
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        List<PostResponseDTO> posts = postService.getAllPublicPostsByDESC();
+        List<PostResponseDTO> posts;
+        if (userDetails == null)
+            posts = postService.getAccessiblePostsByDESC(null);
+        else
+            posts = postService.getAccessiblePostsByDESC(userDetails.getUsername());
+
+//        List<PostResponseDTO> posts = postService.getAccessiblePostsByDESC(userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 

@@ -10,6 +10,7 @@ public class PostMapper {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .author(AuthorMapper.toDto(post.getAuthor()))
+                .community(CommunityMapper.toPreviewDTO(post.getCommunity()))
                 .commentCount(post.getComments() != null ? post.getComments().size() : 0)
                 .likeCount(post.getLikes() != null ? post.getLikes().size() : 0)
                 .createdAt(post.getCreatedAt())

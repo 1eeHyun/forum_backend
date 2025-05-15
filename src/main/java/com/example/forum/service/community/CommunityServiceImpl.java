@@ -33,6 +33,7 @@ public class CommunityServiceImpl implements CommunityService {
         Community community = Community.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
+                .imageUrl("")
                 .creator(user)
                 .members(new HashSet<>())
                 .build();
@@ -50,5 +51,10 @@ public class CommunityServiceImpl implements CommunityService {
         return communityRepository.findAllByMembersContaining(user).stream()
                 .map(CommunityMapper::toDTO)
                 .toList();
+    }
+
+    @Override
+    public CommunityResponseDTO getCommunity(Long id) {
+        return null;
     }
 }

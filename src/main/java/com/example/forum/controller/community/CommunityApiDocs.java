@@ -24,4 +24,10 @@ public interface CommunityApiDocs {
             description = "Retrieve a user's every community. Only logged-in user can do it."
     )
     ResponseEntity<CommonResponse<List<CommunityResponseDTO>>> getMyCommunities(UserDetails userDetails);
+
+    @Operation(
+            summary = "Retrieve a community",
+            description = "Retrieve a community's information."
+    )
+    ResponseEntity<CommonResponse<CommunityResponseDTO>> getCommunity(Long id);
 }

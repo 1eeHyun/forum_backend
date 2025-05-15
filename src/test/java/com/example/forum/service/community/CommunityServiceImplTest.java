@@ -60,7 +60,7 @@ class CommunityServiceImplTest {
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .creator(mockUser)
-                .members(new HashSet<>()) // ✅ initialize members
+                .members(new HashSet<>())
                 .build();
 
         when(authValidator.validateUserByUsername("tester")).thenReturn(mockUser);
@@ -71,7 +71,7 @@ class CommunityServiceImplTest {
 
         assertEquals(dto.getName(), result.getName());
         assertEquals(dto.getDescription(), result.getDescription());
-        assertEquals("tester", result.getCreatorNickname());
+        assertEquals("tester", result.getAuthor().getNickname());
     }
 
     @Test

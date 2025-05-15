@@ -57,5 +57,31 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("sharedCommunities") List<Community> sharedCommunities
     );
 
+    @Query(
+        """
+            SELECT p FROM Post p
+            JOIN FETCH p.author a
+            JOIN FETCH a.profile
+            LEFT JOIN FETCH p.community c
+            WHERE p.visibility = 'PUBLIC'
+               OR (p.visibility = 'COMMUNITY' AND p.community IN :communities)
+            ORDER BY p.createdAt DESC
+        """
+    )
+    List<Post> findAccessiblePosts(@Param("communities") List<Community> communities);
+
+
+    @Query(
+        """
+            SELECT p FROM Post p
+            JOIN FETCH p.author a
+            JOIN FETCH a.profile
+            LEFT JOIN FETCH p.community c
+            WHERE p.visibility = 'PUBLIC'
+               OR (p.visibility = 'COMMUNITY' AND p.community IN :communities)
+            ORDER BY p.createdAt ASC
+        """
+    )
+    List<Post> findAccessiblePostsAsc(@Param("communities") List<Community> communities);
 
 }

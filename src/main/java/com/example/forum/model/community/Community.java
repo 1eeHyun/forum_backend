@@ -24,6 +24,7 @@ public class Community {
     private String name;
 
     private String description;
+    private String imageUrl;
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

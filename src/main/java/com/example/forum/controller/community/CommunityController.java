@@ -37,4 +37,11 @@ public class CommunityController implements CommunityApiDocs {
         List<CommunityResponseDTO> response = communityService.getMyCommunities(userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
+
+    @Override
+    @GetMapping("/{id}")
+    public ResponseEntity<CommonResponse<CommunityResponseDTO>> getCommunity(@PathVariable Long id) {
+
+        return null;
+    }
 }

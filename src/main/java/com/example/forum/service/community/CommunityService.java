@@ -9,4 +9,5 @@ public interface CommunityService {
 
     CommunityResponseDTO create(CommunityRequestDTO dto, String username);
     List<CommunityResponseDTO> getMyCommunities(String username);
+    CommunityResponseDTO getCommunity(Long id);
 }

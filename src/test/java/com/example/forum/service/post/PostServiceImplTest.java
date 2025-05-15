@@ -1,142 +1,194 @@
 package com.example.forum.service.post;
 
 import com.example.forum.dto.post.PostRequestDTO;
+import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
+import com.example.forum.repository.community.CommunityRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import com.example.forum.validator.post.PostValidator;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceImplTest {
 
+    @Mock private AuthValidator authValidator;
+    @Mock private PostRepository postRepository;
+    @Mock private PostValidator postValidator;
+    @Mock private CommunityValidator communityValidator;
+    @Mock private CommunityRepository communityRepository;
+
     @InjectMocks
     private PostServiceImpl postService;
 
-    @Mock
-    private AuthValidator authValidator;
-
-    @Mock
-    private PostRepository postRepository;
-
-    @Mock
-    private PostValidator postValidator;
-
-    @Mock
-    private CommunityValidator communityValidator;
-
-    private User mockUser;
-    private Post mockPost;
-    private Community mockCommunity;
-
-    @BeforeEach
-    void setUp() {
-        Profile profile = Profile.builder()
-                .nickname("tester")
-                .build();
-
-        mockUser = User.builder()
-                .id(1L)
-                .username("tester")
-                .email("test@example.com")
-                .profile(profile)
-                .build();
-        profile.setUser(mockUser);
-
-        mockCommunity = Community.builder()
-                .id(100L)
-                .name("Dev Community")
-                .build();
-
-        mockPost = Post.builder()
-                .id(1L)
-                .title("Title")
-                .content("Content")
-                .author(mockUser)
-                .visibility(Visibility.PUBLIC)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .comments(new ArrayList<>())
-                .likes(new ArrayList<>())
-                .build();
-    }
-
     @Test
-    void createPost_withPublicVisibility_shouldReturnCreatedPost() {
+    @DisplayName("Create public post successfully")
+    void testCreatePublicPostSuccess() {
+        User user = createTestUser();
         PostRequestDTO dto = new PostRequestDTO("Title", "Content", Visibility.PUBLIC, null);
 
-        when(authValidator.validateUserByUsername("tester")).thenReturn(mockUser);
-        when(postRepository.save(any(Post.class))).thenReturn(mockPost);
+        when(authValidator.validateUserByUsername("john")).thenReturn(user);
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        var result = postService.createPost(dto, "tester");
+        PostResponseDTO result = postService.createPost(dto, "john");
 
         assertEquals("Title", result.getTitle());
         assertEquals("Content", result.getContent());
-        assertEquals("tester", result.getAuthorNickname());
+        assertEquals("tester-nickname", result.getAuthor().getNickname());
     }
 
     @Test
-    void createPost_withCommunityVisibility_shouldReturnCreatedPost() {
-        PostRequestDTO dto = new PostRequestDTO("Title", "Content", Visibility.COMMUNITY, 100L);
+    @DisplayName("Create community-only post successfully")
+    void testCreateCommunityPostSuccess() {
+        User user = createTestUser();
+        Community community = new Community();
+        PostRequestDTO dto = new PostRequestDTO("CommTitle", "CommContent", Visibility.COMMUNITY, 1L);
 
-        when(authValidator.validateUserByUsername("tester")).thenReturn(mockUser);
-        when(communityValidator.validateMemberCommunity(100L, mockUser)).thenReturn(mockCommunity);
-        when(postRepository.save(any(Post.class))).thenReturn(mockPost);
+        when(authValidator.validateUserByUsername("john")).thenReturn(user);
+        when(communityValidator.validateMemberCommunity(1L, user)).thenReturn(community);
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        var result = postService.createPost(dto, "tester");
+        PostResponseDTO result = postService.createPost(dto, "john");
 
-        assertEquals("Title", result.getTitle());
-        assertEquals("tester", result.getAuthorNickname());
+        assertEquals("CommTitle", result.getTitle());
+        assertEquals("CommContent", result.getContent());
     }
 
     @Test
-    void updatePost_shouldModifyPostAndReturnUpdatedDto() {
-        PostRequestDTO dto = new PostRequestDTO("New Title", "New Content", Visibility.PRIVATE, null);
+    @DisplayName("Fail to create community-only post: user not member")
+    void testCreateCommunityPostFail() {
+        User user = createTestUser();
+        PostRequestDTO dto = new PostRequestDTO("FailTitle", "FailContent", Visibility.COMMUNITY, 999L);
 
-        when(postValidator.validatePostAuthor(1L, "tester")).thenReturn(mockPost);
-        when(postRepository.save(any(Post.class))).thenReturn(mockPost);
+        when(authValidator.validateUserByUsername("john")).thenReturn(user);
+        when(communityValidator.validateMemberCommunity(999L, user))
+                .thenThrow(new IllegalArgumentException("User is not a member of the community"));
 
-        var result = postService.updatePost(1L, dto, "tester");
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> postService.createPost(dto, "john"));
 
-        assertEquals("New Title", result.getTitle());
-        assertEquals("New Content", result.getContent());
+        assertEquals("User is not a member of the community", exception.getMessage());
     }
 
     @Test
-    void deletePost_shouldCallRepositoryDelete() {
-        when(postValidator.validatePostAuthor(1L, "tester")).thenReturn(mockPost);
+    @DisplayName("Update post successfully")
+    void testUpdatePostSuccess() {
+        User user = createTestUser();
+        Post post = Post.builder()
+                .id(1L)
+                .title("Old Title")
+                .content("Old Content")
+                .author(user)
+                .build();
 
-        postService.deletePost(1L, "tester");
+        PostRequestDTO dto = new PostRequestDTO("Updated Title", "Updated Content", Visibility.PUBLIC, null);
 
-        verify(postRepository, times(1)).delete(mockPost);
+        when(postValidator.validatePostAuthor(1L, "john")).thenReturn(post);
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        PostResponseDTO result = postService.updatePost(1L, dto, "john");
+
+        assertEquals("Updated Title", result.getTitle());
+        assertEquals("Updated Content", result.getContent());
+        assertEquals("tester-nickname", result.getAuthor().getNickname());
     }
 
     @Test
-    void getAllPostsByDESC_shouldReturnPostList() {
-        when(postRepository.findAllByVisibilityOrderByCreatedAtDesc(Visibility.PUBLIC))
-                .thenReturn(List.of(mockPost));
+    @DisplayName("Fail to update post: not the author")
+    void testUpdatePostFail() {
+        PostRequestDTO dto = new PostRequestDTO("Fail", "Fail", Visibility.PUBLIC, null);
 
-        var result = postService.getAllPublicPostsByDESC();
+        when(postValidator.validatePostAuthor(1L, "john"))
+                .thenThrow(new IllegalArgumentException("Not the author"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> postService.updatePost(1L, dto, "john"));
+    }
+
+    @Test
+    @DisplayName("Delete post successfully")
+    void testDeletePostSuccess() {
+        Post post = Post.builder().id(1L).build();
+
+        when(postValidator.validatePostAuthor(1L, "john")).thenReturn(post);
+
+        postService.deletePost(1L, "john");
+
+        verify(postRepository, times(1)).delete(post);
+    }
+
+    @Test
+    @DisplayName("Fail to delete post: not the author")
+    void testDeletePostFail() {
+        when(postValidator.validatePostAuthor(1L, "john"))
+                .thenThrow(new IllegalArgumentException("Not the author"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> postService.deletePost(1L, "john"));
+    }
+
+    @Test
+    @DisplayName("Get public posts in ASC order when not logged in")
+    void testGetPublicPostsASC() {
+        User user = createTestUser();
+        Post post = Post.builder()
+                .title("Title")
+                .author(user)
+                .build();
+
+        when(postRepository.findAllByVisibilityOrderByCreatedAtAsc(Visibility.PUBLIC))
+                .thenReturn(List.of(post));
+
+        List<PostResponseDTO> result = postService.getAccessiblePostsByASC(null);
 
         assertEquals(1, result.size());
         assertEquals("Title", result.get(0).getTitle());
-        assertEquals("tester", result.get(0).getAuthorNickname());
+    }
+
+    @Test
+    @DisplayName("Get accessible posts by DESC for logged-in user")
+    void testGetAccessiblePostsDESC_User() {
+        User user = createTestUser();
+        Community community = new Community();
+        Post post = Post.builder()
+                .title("Latest Post")
+                .author(user)
+                .build();
+
+        when(authValidator.validateUserByUsername("john")).thenReturn(user);
+        when(communityRepository.findAllByMembersContaining(user)).thenReturn(List.of(community));
+        when(postRepository.findAccessiblePosts(List.of(community))).thenReturn(List.of(post));
+
+        List<PostResponseDTO> result = postService.getAccessiblePostsByDESC("john");
+
+        assertEquals(1, result.size());
+        assertEquals("Latest Post", result.get(0).getTitle());
+    }
+
+    private User createTestUser() {
+        Profile profile = Profile.builder()
+                .nickname("tester-nickname")
+                .build();
+
+        return User.builder()
+                .username("tester")
+                .profile(profile)
+                .build();
     }
 }

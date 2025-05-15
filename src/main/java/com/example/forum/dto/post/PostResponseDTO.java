@@ -1,5 +1,6 @@
 package com.example.forum.dto.post;
 
+import com.example.forum.dto.community.CommunityPreviewDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,6 +14,7 @@ public class PostResponseDTO {
     private String title;
     private String content;
     private AuthorDTO author;
+    private CommunityPreviewDTO community;
     private int commentCount;
     private int likeCount;
     private LocalDateTime createdAt;

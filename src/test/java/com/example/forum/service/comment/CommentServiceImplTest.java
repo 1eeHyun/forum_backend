@@ -72,7 +72,7 @@ class CommentServiceImplTest {
         CommentResponseDTO response = commentService.createComment("tester", dto);
 
         assertEquals("Sample comment", response.getContent());
-        assertEquals("tester-nickname", response.getAuthorNickname());
+        assertEquals("tester-nickname", response.getAuthor().getNickname());
     }
 
     @Test
@@ -88,7 +88,7 @@ class CommentServiceImplTest {
         CommentResponseDTO response = commentService.createReply("tester", dto);
 
         assertEquals("Sample comment", response.getContent());
-        assertEquals("tester-nickname", response.getAuthorNickname());
+        assertEquals("tester-nickname", response.getAuthor().getNickname());
     }
 
     @Test
