@@ -20,7 +20,7 @@ public class ProfileMapper {
                         .imagePositionY(targetUser.getProfile().getImagePositionY())
                         .build())
                 .isMe(isMe)
-                .posts(posts.stream().map(PostMapper::toDTO).toList())
+                .posts(posts.stream().map(PostMapper::toPostResponseDTO).toList())
                 .build();
     }
 }

@@ -15,5 +15,6 @@ public class CommentResponseDTO {
     private String content;
     private AuthorDTO author;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private List<CommentResponseDTO> replies;
 }

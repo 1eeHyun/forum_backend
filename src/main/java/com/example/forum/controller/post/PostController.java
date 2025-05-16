@@ -1,6 +1,7 @@
 package com.example.forum.controller.post;
 
 import com.example.forum.dto.CommonResponse;
+import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.service.post.PostService;
@@ -47,6 +48,16 @@ public class PostController implements PostApiDocs {
 
 //        List<PostResponseDTO> posts = postService.getAccessiblePostsByDESC(userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success(posts));
+    }
+
+    @Override
+    @GetMapping("/{id}")
+    public ResponseEntity<CommonResponse<PostDetailDTO>> getPostDetail(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        PostDetailDTO response = postService.getPostDetail(id, userDetails.getUsername());
+        return ResponseEntity.ok(CommonResponse.success(response));
     }
 
     @Override

@@ -1,8 +1,14 @@
 package com.example.forum.dto.post;
 
+import com.example.forum.dto.comment.CommentResponseDTO;
+import com.example.forum.dto.community.CommunityPreviewDTO;
+import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.util.ImageDTO;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -12,5 +18,14 @@ public class PostDetailDTO {
     private String title;
     private String content;
     private AuthorDTO author;
-    private ImageDTO imageDTO;
+    private CommunityPreviewDTO community;
+    private String visibility;
+    private ImageDTO contentImageDTO;
+    private int likeCount;
+    private int commentCount;
+    private Boolean likedByMe;
+    private List<LikeUserDTO> likeUsers;
+    private List<CommentResponseDTO> comments;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

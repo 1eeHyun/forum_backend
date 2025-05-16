@@ -26,4 +26,9 @@ public class PostValidator {
 
         return post;
     }
+
+    public Post validateDetailPostId(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.forum.service.post;
 
+import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.PostMapper;
@@ -54,7 +55,7 @@ public class PostServiceImpl implements PostService {
         }
 
         return posts.stream()
-                .map(PostMapper::toDTO)
+                .map(PostMapper::toPostResponseDTO)
                 .toList();
     }
 
@@ -85,8 +86,19 @@ public class PostServiceImpl implements PostService {
         }
 
         return posts.stream()
-                .map(PostMapper::toDTO)
+                .map(PostMapper::toPostResponseDTO)
                 .toList();
+    }
+
+    @Override
+    public PostDetailDTO getPostDetail(Long postId, String username) {
+
+        User viewer = null;
+        if (username != null)
+            viewer = authValidator.validateUserByUsername(username);
+
+        Post post = postValidator.validateDetailPostId(postId);
+        return PostMapper.toPostDetailDTO(post, viewer);
     }
 
     @Override
@@ -108,7 +120,7 @@ public class PostServiceImpl implements PostService {
 
         postRepository.save(post);
 
-        return PostMapper.toDTO(post);
+        return PostMapper.toPostResponseDTO(post);
     }
 
     @Override
@@ -120,7 +132,7 @@ public class PostServiceImpl implements PostService {
         post.setContent(dto.getContent());
 
         Post savedPost = postRepository.save(post);
-        return PostMapper.toDTO(savedPost);
+        return PostMapper.toPostResponseDTO(savedPost);
     }
 
     @Override
@@ -129,4 +141,6 @@ public class PostServiceImpl implements PostService {
         Post post = postValidator.validatePostAuthor(postId, username);
         postRepository.delete(post);
     }
+
+
 }

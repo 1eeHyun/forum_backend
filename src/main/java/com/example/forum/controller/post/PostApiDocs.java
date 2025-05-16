@@ -1,6 +1,7 @@
 package com.example.forum.controller.post;
 
 import com.example.forum.dto.CommonResponse;
+import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +25,12 @@ public interface PostApiDocs {
             description = "Retrieve every post with descending order."
     )
     ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc(UserDetails userDetails);
+
+    @Operation(
+            summary = "Retrieve a post",
+            description = "Retrieves an existing post detail information"
+    )
+    ResponseEntity<CommonResponse<PostDetailDTO>> getPostDetail(Long postId, UserDetails userDetails);
 
     @Operation(
             summary = "Create a new post",
