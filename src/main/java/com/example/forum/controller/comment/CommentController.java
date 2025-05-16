@@ -3,6 +3,7 @@ package com.example.forum.controller.comment;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.comment.CommentRequestDTO;
 import com.example.forum.dto.comment.CommentResponseDTO;
+import com.example.forum.exception.auth.NotAuthorizedException;
 import com.example.forum.service.comment.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,10 @@ public class CommentController implements CommentApiDocs {
     public ResponseEntity<CommonResponse<CommentResponseDTO>> create(
             @RequestBody CommentRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            throw new NotAuthorizedException();
+        }
 
         CommentResponseDTO response = commentService.createComment(userDetails.getUsername(), dto);
         return ResponseEntity.ok(CommonResponse.success(response));

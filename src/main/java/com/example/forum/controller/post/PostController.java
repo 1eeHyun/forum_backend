@@ -56,7 +56,9 @@ public class PostController implements PostApiDocs {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        PostDetailDTO response = postService.getPostDetail(id, userDetails.getUsername());
+        String username = userDetails != null ? userDetails.getUsername() : null;
+
+        PostDetailDTO response = postService.getPostDetail(id, username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -76,7 +78,6 @@ public class PostController implements PostApiDocs {
             @PathVariable Long id,
             @RequestBody PostRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
-
 
         PostResponseDTO post = postService.updatePost(id, dto, userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success(post));

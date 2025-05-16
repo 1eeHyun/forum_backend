@@ -22,6 +22,8 @@ public class NotificationServiceImpl implements NotificationService {
         User receiver = userValidator.validateUserByUsername(receiverUsername);
         User sender = userValidator.validateUserByUsername(senderUsername);
 
+        if (receiver == sender) return;
+
         Notification notification = Notification.builder()
                 .receiver(receiver)
                 .sender(sender)

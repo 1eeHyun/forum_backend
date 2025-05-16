@@ -50,6 +50,7 @@ public class Notification {
         REPLY,
         POST_LIKE,
         COMMENT_LIKE,
-        FOLLOW
+        FOLLOW,
+        JOINED_COMMUNITY
     }
 }

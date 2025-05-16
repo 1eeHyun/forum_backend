@@ -4,9 +4,11 @@ import com.example.forum.dto.comment.CommentRequestDTO;
 import com.example.forum.dto.comment.CommentResponseDTO;
 import com.example.forum.mapper.comment.CommentMapper;
 import com.example.forum.model.comment.Comment;
+import com.example.forum.model.notification.Notification;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.comment.CommentRepository;
+import com.example.forum.service.notification.NotificationService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.comment.CommentValidator;
 import com.example.forum.validator.post.PostValidator;
@@ -14,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static com.example.forum.model.notification.Notification.NotificationType.COMMENT;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +27,8 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostValidator postValidator;
     private final AuthValidator userValidator;
+
+    private final NotificationService notificationService;
 
     @Override
     public CommentResponseDTO createComment(String username, CommentRequestDTO dto) {
@@ -42,6 +48,16 @@ public class CommentServiceImpl implements CommentService {
                 .build();
 
         Comment saved = commentRepository.save(comment);
+
+        User postAuthor = post.getAuthor();
+        notificationService.sendNotification(
+                user.getUsername(),
+                postAuthor.getUsername(),
+                COMMENT,
+                post.getId(),
+                user.getProfile().getNickname() + " commented on your post."
+        );
+
         return CommentMapper.toDTO(saved);
     }
 
@@ -57,6 +73,16 @@ public class CommentServiceImpl implements CommentService {
                 .parentComment(parent)
                 .content(dto.getContent())
                 .build();
+
+        User parentAuthor = parent.getAuthor();
+
+        notificationService.sendNotification(
+                parentAuthor.getUsername(),
+                user.getUsername(),
+                Notification.NotificationType.REPLY,
+                parent.getPost().getId(),
+                user.getProfile().getNickname() + " replied to your comment."
+        );
 
         return CommentMapper.toDTO(commentRepository.save(reply));
     }
