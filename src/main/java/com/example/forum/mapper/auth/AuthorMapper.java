@@ -1,7 +1,7 @@
 package com.example.forum.mapper.auth;
 
 import com.example.forum.dto.auth.MeResponseDTO;
-import com.example.forum.dto.post.AuthorDTO;
+import com.example.forum.dto.util.AuthorDTO;
 import com.example.forum.dto.util.ImageDTO;
 import com.example.forum.model.user.User;
 import lombok.Getter;

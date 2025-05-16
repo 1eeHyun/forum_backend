@@ -1,6 +1,6 @@
 package com.example.forum.dto.comment;
 
-import com.example.forum.dto.post.AuthorDTO;
+import com.example.forum.dto.util.AuthorDTO;
 import lombok.Builder;
 import lombok.Getter;
 

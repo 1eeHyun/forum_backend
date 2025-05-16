@@ -1,6 +1,5 @@
-package com.example.forum.dto.post;
+package com.example.forum.dto.util;
 
-import com.example.forum.dto.util.ImageDTO;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -31,4 +31,9 @@ public class CommunityValidator {
         if (communityRepository.existsByName(name))
             throw new CommunityExistsNameException();
     }
+
+    public Community validateExistingCommunity(Long id) {
+        return communityRepository.findById(id)
+                .orElseThrow(CommunityNotFoundException::new);
+    }
 }

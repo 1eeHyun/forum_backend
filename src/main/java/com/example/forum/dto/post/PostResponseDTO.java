@@ -1,6 +1,7 @@
 package com.example.forum.dto.post;
 
 import com.example.forum.dto.community.CommunityPreviewDTO;
+import com.example.forum.dto.util.AuthorDTO;
 import lombok.Builder;
 import lombok.Getter;
 

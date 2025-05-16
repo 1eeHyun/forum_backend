@@ -1,6 +1,6 @@
 package com.example.forum.dto.notification;
 
-import com.example.forum.dto.post.AuthorDTO;
+import com.example.forum.dto.util.AuthorDTO;
 import com.example.forum.model.notification.Notification.NotificationType;
 import lombok.Builder;
 import lombok.Getter;

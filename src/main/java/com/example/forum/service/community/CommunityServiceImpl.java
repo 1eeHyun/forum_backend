@@ -59,6 +59,9 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public CommunityResponseDTO getCommunity(Long id) {
-        return null;
+
+        Community community = communityValidator.validateExistingCommunity(id);
+
+        return CommunityMapper.toDTO(community);
     }
 }

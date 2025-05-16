@@ -3,6 +3,7 @@ package com.example.forum.dto.post;
 import com.example.forum.dto.comment.CommentResponseDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.like.LikeUserDTO;
+import com.example.forum.dto.util.AuthorDTO;
 import com.example.forum.dto.util.ImageDTO;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.example.forum.mapper.post;
 
 import com.example.forum.dto.like.LikeUserDTO;
-import com.example.forum.dto.post.AuthorDTO;
+import com.example.forum.dto.util.AuthorDTO;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.auth.AuthorMapper;
