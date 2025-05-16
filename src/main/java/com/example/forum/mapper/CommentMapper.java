@@ -16,9 +16,11 @@ public class CommentMapper {
                 .content(comment.getContent())
                 .author(AuthorMapper.toDto(comment.getAuthor()))
                 .createdAt(comment.getCreatedAt())
-                .replies(comment.getReplies().stream()
-                        .map(CommentMapper::toDTO)
-                        .toList())
+                .replies(comment.getReplies() != null
+                        ? comment.getReplies().stream().map(CommentMapper::toDTO).toList()
+                        : new ArrayList<>())
+                .likeCount(comment.getLikeCount())
+                .dislikeCount(comment.getDislikeCount())
                 .build();
     }
 

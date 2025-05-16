@@ -39,6 +39,9 @@ public class Comment {
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> replies = new ArrayList<>();
 
+    private int likeCount;
+    private int dislikeCount;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
