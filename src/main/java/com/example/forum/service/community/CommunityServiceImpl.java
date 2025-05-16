@@ -2,7 +2,7 @@ package com.example.forum.service.community;
 
 import com.example.forum.dto.community.CommunityRequestDTO;
 import com.example.forum.dto.community.CommunityResponseDTO;
-import com.example.forum.mapper.CommunityMapper;
+import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityRepository;

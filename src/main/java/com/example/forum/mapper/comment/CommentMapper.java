@@ -1,6 +1,7 @@
-package com.example.forum.mapper;
+package com.example.forum.mapper.comment;
 
 import com.example.forum.dto.comment.CommentResponseDTO;
+import com.example.forum.mapper.auth.AuthorMapper;
 import com.example.forum.model.comment.Comment;
 
 import java.util.ArrayList;

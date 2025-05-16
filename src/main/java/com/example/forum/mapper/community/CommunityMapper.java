@@ -1,8 +1,9 @@
-package com.example.forum.mapper;
+package com.example.forum.mapper.community;
 
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityResponseDTO;
 import com.example.forum.dto.util.ImageDTO;
+import com.example.forum.mapper.auth.AuthorMapper;
 import com.example.forum.model.community.Community;
 
 public class CommunityMapper {

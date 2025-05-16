@@ -1,4 +1,4 @@
-package com.example.forum.mapper;
+package com.example.forum.mapper.util;
 
 import com.example.forum.dto.util.ImageDTO;
 import lombok.Getter;

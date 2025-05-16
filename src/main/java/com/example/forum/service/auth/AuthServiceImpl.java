@@ -4,7 +4,7 @@ import com.example.forum.dto.auth.LoginRequestDTO;
 import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.auth.MeResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
-import com.example.forum.mapper.AuthorMapper;
+import com.example.forum.mapper.auth.AuthorMapper;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.profile.ProfileRepository;

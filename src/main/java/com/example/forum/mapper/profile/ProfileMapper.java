@@ -1,7 +1,8 @@
-package com.example.forum.mapper;
+package com.example.forum.mapper.profile;
 
 import com.example.forum.dto.profile.ProfileResponseDTO;
 import com.example.forum.dto.util.ImageDTO;
+import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 

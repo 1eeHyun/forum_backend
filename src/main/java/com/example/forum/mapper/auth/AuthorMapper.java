@@ -1,4 +1,4 @@
-package com.example.forum.mapper;
+package com.example.forum.mapper.auth;
 
 import com.example.forum.dto.auth.MeResponseDTO;
 import com.example.forum.dto.post.AuthorDTO;

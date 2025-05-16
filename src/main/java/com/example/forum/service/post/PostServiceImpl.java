@@ -3,7 +3,7 @@ package com.example.forum.service.post;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
-import com.example.forum.mapper.PostMapper;
+import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.Visibility;

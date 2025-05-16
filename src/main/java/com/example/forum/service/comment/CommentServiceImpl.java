@@ -2,7 +2,7 @@ package com.example.forum.service.comment;
 
 import com.example.forum.dto.comment.CommentRequestDTO;
 import com.example.forum.dto.comment.CommentResponseDTO;
-import com.example.forum.mapper.CommentMapper;
+import com.example.forum.mapper.comment.CommentMapper;
 import com.example.forum.model.comment.Comment;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;

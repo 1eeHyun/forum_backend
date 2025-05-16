@@ -1,9 +1,13 @@
-package com.example.forum.mapper;
+package com.example.forum.mapper.post;
 
 import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.AuthorDTO;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostResponseDTO;
+import com.example.forum.mapper.auth.AuthorMapper;
+import com.example.forum.mapper.comment.CommentMapper;
+import com.example.forum.mapper.community.CommunityMapper;
+import com.example.forum.mapper.util.ImageMapper;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 

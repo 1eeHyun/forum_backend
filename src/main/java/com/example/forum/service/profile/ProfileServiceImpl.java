@@ -2,7 +2,7 @@ package com.example.forum.service.profile;
 
 import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.profile.*;
-import com.example.forum.mapper.ProfileMapper;
+import com.example.forum.mapper.profile.ProfileMapper;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.profile.Profile;
