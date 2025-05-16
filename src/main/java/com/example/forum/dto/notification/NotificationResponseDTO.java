@@ -15,6 +15,7 @@ public class NotificationResponseDTO {
     private AuthorDTO sender;
     private NotificationType type;
     private Long targetId;
+    private Long commentId;
     private String message;
     private Boolean isRead;
     private LocalDateTime createdAt;

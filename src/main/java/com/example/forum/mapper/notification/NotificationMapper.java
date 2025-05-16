@@ -14,6 +14,7 @@ public class NotificationMapper {
                 .isRead(notification.isRead())
                 .sender(AuthorMapper.toDto(notification.getSender()))
                 .targetId(notification.getTargetId())
+                .commentId(notification.getComment() != null ? notification.getComment().getId() : null)
                 .createdAt(notification.getCreatedAt())
                 .build();
     }

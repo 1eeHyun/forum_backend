@@ -4,7 +4,6 @@ import com.example.forum.dto.comment.CommentRequestDTO;
 import com.example.forum.dto.comment.CommentResponseDTO;
 import com.example.forum.mapper.comment.CommentMapper;
 import com.example.forum.model.comment.Comment;
-import com.example.forum.model.notification.Notification;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.comment.CommentRepository;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.example.forum.model.notification.Notification.NotificationType.COMMENT;
+import static com.example.forum.model.notification.Notification.NotificationType.REPLY;
 
 @Service
 @RequiredArgsConstructor
@@ -51,10 +51,11 @@ public class CommentServiceImpl implements CommentService {
 
         User postAuthor = post.getAuthor();
         notificationService.sendNotification(
-                user.getUsername(),
                 postAuthor.getUsername(),
+                user.getUsername(),
                 COMMENT,
                 post.getId(),
+                comment,
                 user.getProfile().getNickname() + " commented on your post."
         );
 
@@ -74,17 +75,20 @@ public class CommentServiceImpl implements CommentService {
                 .content(dto.getContent())
                 .build();
 
+        Comment saved = commentRepository.save(reply);
+
         User parentAuthor = parent.getAuthor();
 
         notificationService.sendNotification(
                 parentAuthor.getUsername(),
                 user.getUsername(),
-                Notification.NotificationType.REPLY,
+                REPLY,
                 parent.getPost().getId(),
+                saved,
                 user.getProfile().getNickname() + " replied to your comment."
         );
 
-        return CommentMapper.toDTO(commentRepository.save(reply));
+        return CommentMapper.toDTO(saved);
     }
 
     @Override

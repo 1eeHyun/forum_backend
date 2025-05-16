@@ -1,6 +1,7 @@
 package com.example.forum.controller.notification;
 
 import com.example.forum.dto.CommonResponse;
+import com.example.forum.dto.notification.LinkResponseDTO;
 import com.example.forum.dto.notification.NotificationResponseDTO;
 import com.example.forum.mapper.notification.NotificationMapper;
 import com.example.forum.model.notification.Notification;
@@ -9,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -41,5 +39,16 @@ public class NotificationController implements NotificationApiDocs {
 
         notificationService.markAllAsRead(userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success());
+    }
+
+    @Override
+    @GetMapping("/{notificationId}/resolve")
+    public ResponseEntity<CommonResponse<LinkResponseDTO>> resolveLink(
+            @PathVariable Long notificationId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = userDetails.getUsername();
+        LinkResponseDTO response = notificationService.resolveAndMarkAsRead(notificationId, username);
+        return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

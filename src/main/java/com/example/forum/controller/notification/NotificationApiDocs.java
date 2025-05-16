@@ -1,6 +1,7 @@
 package com.example.forum.controller.notification;
 
 import com.example.forum.dto.CommonResponse;
+import com.example.forum.dto.notification.LinkResponseDTO;
 import com.example.forum.dto.notification.NotificationResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,4 +25,10 @@ public interface NotificationApiDocs {
             description = "Marks every notification that a user received as read."
     )
     ResponseEntity<CommonResponse<Void>> markAllAsRead(UserDetails userDetails);
+
+    @Operation(
+            summary = "Send a notification's link for a user to see",
+            description = "Sends a notification's link for a user to see and marks the notification as read."
+    )
+    ResponseEntity<CommonResponse<LinkResponseDTO>> resolveLink(Long notificationId, UserDetails userDetails);
 }

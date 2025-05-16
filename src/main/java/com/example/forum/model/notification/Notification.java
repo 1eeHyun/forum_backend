@@ -1,5 +1,6 @@
 package com.example.forum.model.notification;
 
+import com.example.forum.model.comment.Comment;
 import com.example.forum.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,6 +31,10 @@ public class Notification {
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
 
     private Long targetId;
 
