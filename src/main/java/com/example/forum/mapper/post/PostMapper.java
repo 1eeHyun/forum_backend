@@ -1,14 +1,15 @@
 package com.example.forum.mapper.post;
 
 import com.example.forum.dto.like.LikeUserDTO;
-import com.example.forum.dto.util.AuthorDTO;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.auth.AuthorMapper;
 import com.example.forum.mapper.comment.CommentMapper;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.util.ImageMapper;
+import com.example.forum.model.like.PostLike;
 import com.example.forum.model.post.Post;
+import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 
 public class PostMapper {
@@ -26,36 +27,14 @@ public class PostMapper {
                 .build();
     }
 
-//    private Long id;
-//    private String title;
-//    private String content;
-//    private AuthorDTO author;
-//    private CommunityPreviewDTO community;
-//    private String visibility;
-//    private ImageDTO contentImageDTO;
-//    private int likeCount;
-//    private int commentCount;
-//    private List<LikeUserDTO> likeUsers;
-//    private List<CommentResponseDTO> comments;
-//    private LocalDateTime createdAt;
-//    private LocalDateTime updatedAt;
-
     public static PostDetailDTO toPostDetailDTO(Post post, User viewer) {
         return PostDetailDTO.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 // Author of the post
-                .author(AuthorDTO.builder()
-                        .username(post.getAuthor().getUsername())
-                        .nickname(post.getAuthor().getProfile().getNickname())
+                .author(AuthorMapper.toDto(post.getAuthor()))
 
-                        // Author profile image
-                        .imageDTO(ImageMapper.toDto(
-                                post.getAuthor().getProfile().getImageUrl(),
-                                post.getAuthor().getProfile().getImagePositionX(),
-                                post.getAuthor().getProfile().getImagePositionY()))
-                        .build())
                 .community(post.getCommunity() != null
                         ? CommunityMapper.toPreviewDTO(post.getCommunity())
                         : null)
@@ -84,6 +63,18 @@ public class PostMapper {
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
+
+    public static LikeUserDTO toLikeUserDTO(PostLike postLike) {
+        User user = postLike.getUser();
+        Profile profile = user.getProfile();
+
+        return LikeUserDTO.builder()
+                .username(user.getUsername())
+                .nickname(profile.getNickname())
+                .imageDTO(ImageMapper.profileToImageDto(profile))
+                .build();
+    }
+
 
 
 }

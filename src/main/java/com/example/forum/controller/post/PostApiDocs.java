@@ -1,6 +1,7 @@
 package com.example.forum.controller.post;
 
 import com.example.forum.dto.CommonResponse;
+import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
@@ -49,4 +50,22 @@ public interface PostApiDocs {
             description = "Delete an existing post only author can do it."
     )
     ResponseEntity<CommonResponse<Void>> delete(Long id, UserDetails userDetails);
+
+    @Operation(
+            summary = "Like button of a post",
+            description = "Handles pressing like button of an existing post, only logged-in user can do it."
+    )
+    ResponseEntity<CommonResponse<Void>> likePost(Long id, UserDetails userDetails);
+
+    @Operation(
+            summary = "Get likes count",
+            description = "Retrieves likes count of an existing post."
+    )
+    ResponseEntity<CommonResponse<Long>> getLikesCount(Long id);
+
+    @Operation(
+            summary = "Get who likes this post",
+            description = "Retrieves all users who like an existing post, showing nickname, profile image."
+    )
+    ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(Long id);
 }

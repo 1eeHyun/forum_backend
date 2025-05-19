@@ -1,9 +1,11 @@
 package com.example.forum.controller.post;
 
 import com.example.forum.dto.CommonResponse;
+import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
+import com.example.forum.service.like.post.PostLikeService;
 import com.example.forum.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import java.util.List;
 public class PostController implements PostApiDocs {
 
     private final PostService postService;
+    private final PostLikeService postLikeService;
 
     @Override
     @GetMapping("/accessible/asc")
@@ -91,5 +94,31 @@ public class PostController implements PostApiDocs {
 
         postService.deletePost(id, userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success(null));
+    }
+
+    @Override
+    @PostMapping("/{id}/likes")
+    public ResponseEntity<CommonResponse<Void>> likePost(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        postLikeService.toggleLike(id, userDetails.getUsername());
+        return ResponseEntity.ok(CommonResponse.success());
+    }
+
+    @Override
+    @GetMapping("/{id}/likes")
+    public ResponseEntity<CommonResponse<Long>> getLikesCount(@PathVariable Long id) {
+
+        long ret = postLikeService.countLikes(id);
+        return ResponseEntity.ok(CommonResponse.success(ret));
+    }
+
+    @Override
+    @GetMapping("/{id}/likes/users")
+    public ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(@PathVariable Long id) {
+
+        List<LikeUserDTO> ret = postLikeService.getLikeUsers(id);
+        return ResponseEntity.ok(CommonResponse.success(ret));
     }
 }
