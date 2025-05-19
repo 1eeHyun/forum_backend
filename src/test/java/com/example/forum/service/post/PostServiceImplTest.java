@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("PostServiceImpl Unit Tests")
 class PostServiceImplTest {
 
     @Mock private AuthValidator authValidator;
