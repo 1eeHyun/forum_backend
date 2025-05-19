@@ -47,4 +47,6 @@ public interface ProfileApiDocs {
                                                             MultipartFile image,
                                                             Double positionX,
                                                             Double positionY);
+
+    ResponseEntity<CommonResponse<ProfileResponseDTO>> getProfileByPublicId(String publicId);
 }

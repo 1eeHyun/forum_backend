@@ -95,7 +95,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         String newToken = jwtTokenProvider.generateToken(user.getUsername());
 
-        return new LoginResponseDTO(newToken);
+        return new LoginResponseDTO(newToken, user.getUsername());
     }
 
     // Bio
@@ -125,5 +125,15 @@ public class ProfileServiceImpl implements ProfileService {
         profile.setImagePositionX(dto.getPositionX());
         profile.setImagePositionY(dto.getPositionY());
         profileRepository.save(profile);
+    }
+
+    @Override
+    public ProfileResponseDTO getProfileByPublicId(String publicId) {
+
+//        Profile profile = profileRepository.findByPublicId(publicId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
+//
+//        return ProfileMapper.toDto(profile);
+        return null;
     }
 }

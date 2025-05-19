@@ -11,4 +11,6 @@ public interface ProfileService {
     LoginResponseDTO updateUsername(String currUsername, UsernameUpdateDTO dto);
     void updateBio(String username, BioUpdateDTO dto);
     void updateProfileImage(String username, ProfileImageUpdateDTO dto);
+
+    ProfileResponseDTO getProfileByPublicId(String publicId);
 }

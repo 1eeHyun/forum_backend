@@ -2,10 +2,13 @@ package com.example.forum.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
-@Getter
+@Getter @Setter
 @AllArgsConstructor
 public class LoginResponseDTO {
 
-    String token;
+    private String token;
+    private String username;
+
 }

@@ -92,4 +92,11 @@ public class ProfileController implements ProfileApiDocs {
         profileService.updateProfileImage(userDetails.getUsername(), dto);
         return ResponseEntity.ok(CommonResponse.success());
     }
+
+    @Override
+    public ResponseEntity<CommonResponse<ProfileResponseDTO>> getProfileByPublicId(@PathVariable String publicId) {
+
+
+        return null;
+    }
 }
