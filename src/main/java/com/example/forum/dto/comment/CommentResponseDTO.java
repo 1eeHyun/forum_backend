@@ -18,6 +18,6 @@ public class CommentResponseDTO {
     private LocalDateTime updatedAt;
     private List<CommentResponseDTO> replies;
 
-    private int likeCount;
-    private int dislikeCount;
+    private long likeCount;
+    private long dislikeCount;
 }
