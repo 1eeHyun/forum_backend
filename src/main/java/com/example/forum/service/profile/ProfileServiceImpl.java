@@ -1,6 +1,7 @@
 package com.example.forum.service.profile;
 
 import com.example.forum.dto.auth.LoginResponseDTO;
+import com.example.forum.dto.follow.FollowUserDTO;
 import com.example.forum.dto.profile.*;
 import com.example.forum.mapper.profile.ProfileMapper;
 import com.example.forum.model.community.Community;
@@ -8,6 +9,7 @@ import com.example.forum.model.post.Post;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityRepository;
+import com.example.forum.repository.follow.FollowRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.repository.profile.ProfileRepository;
 import com.example.forum.repository.user.UserRepository;
@@ -31,6 +33,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final PostRepository postRepository;
     private final ProfileValidator profileValidator;
     private final ProfileRepository profileRepository;
+    private final FollowRepository followRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     private final S3Service s3Service;
@@ -42,7 +45,6 @@ public class ProfileServiceImpl implements ProfileService {
     public ProfileResponseDTO getProfile(String targetUsername, String loginUsername) {
 
         User user = userValidator.validateUserByUsername(targetUsername);
-
         boolean isMe = loginUsername != null && loginUsername.equals(targetUsername);
 
         List<Post> posts;
@@ -64,7 +66,19 @@ public class ProfileServiceImpl implements ProfileService {
             posts = postRepository.findVisiblePostsForViewer(user, sharedCommunities);
         }
 
-        ProfileResponseDTO dto = ProfileMapper.toDTO(user, isMe, posts);
+        // Followers
+        List<FollowUserDTO> followers = followRepository.findAllByFollowing(user)
+                .stream()
+                .map(f -> new FollowUserDTO(f.getFollower()))
+                .toList();
+
+        // Followings
+        List<FollowUserDTO> followings = followRepository.findAllByFollower(user)
+                .stream()
+                .map(f -> new FollowUserDTO(f.getFollowing()))
+                .toList();
+
+        ProfileResponseDTO dto = ProfileMapper.toDTO(user, isMe, posts, followers, followings);
         return dto;
     }
 
