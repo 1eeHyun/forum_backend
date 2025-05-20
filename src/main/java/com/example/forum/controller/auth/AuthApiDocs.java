@@ -25,6 +25,12 @@ public interface AuthApiDocs {
     ResponseEntity<CommonResponse<LoginResponseDTO>> login(LoginRequestDTO dto);
 
     @Operation(
+            summary = "Logout",
+            description = "Handles logging out."
+    )
+    ResponseEntity<CommonResponse<Void>> logout(UserDetails userDetails);
+
+    @Operation(
             summary = "Get current user's info",
             description = "Retrieves current logged-in user's information."
     )

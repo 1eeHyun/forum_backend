@@ -59,8 +59,16 @@ public class AuthServiceImpl implements AuthService{
         User user = authValidator.validateLogin(dto.getUsernameOrEmail(), dto.getPassword());
 
         String token = jwtTokenProvider.generateToken(user.getUsername());
+        markUserOnline(user);
 
         return new LoginResponseDTO(token, user.getUsername());
+    }
+
+    @Override
+    public void logout(String username) {
+
+        User user = authValidator.validateUserByUsername(username);
+        markUserOffline(user);
     }
 
     @Override
@@ -68,5 +76,15 @@ public class AuthServiceImpl implements AuthService{
 
         User user = authValidator.validateUserByUsername(username);
         return AuthorMapper.toMeDto(user);
+    }
+
+    private void markUserOnline(User user) {
+        user.setOnline(true);
+        userRepository.save(user);
+    }
+
+    private void markUserOffline(User user) {
+        user.setOnline(false);
+        userRepository.save(user);
     }
 }

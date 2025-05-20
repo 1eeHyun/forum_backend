@@ -11,16 +11,10 @@ public interface FollowApiDocs {
 
 
     @Operation(
-            summary = "Follow a user",
-            description = "Authenticated user follows the target user."
+            summary = "Follow or unfollow a user",
+            description = "Authenticated user follows or user unfollows the target user."
     )
-    ResponseEntity<CommonResponse<Void>> follow(String targetUsername, UserDetails userDetails);
-
-    @Operation(
-            summary = "Unfollow a user",
-            description = "Authenticated user unfollows the target user."
-    )
-    ResponseEntity<CommonResponse<Void>> unfollow(String targetUsername, UserDetails userDetails);
+    ResponseEntity<CommonResponse<Void>> followToggle(String targetUsername, UserDetails userDetails);
 
     @Operation(
             summary = "Check follow status",

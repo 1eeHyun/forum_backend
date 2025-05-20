@@ -1,31 +1,45 @@
 package com.example.forum.mapper.community;
 
+import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
-import com.example.forum.dto.community.CommunityResponseDTO;
 import com.example.forum.dto.util.ImageDTO;
-import com.example.forum.mapper.auth.AuthorMapper;
+import com.example.forum.dto.util.OnlineUserDTO;
 import com.example.forum.mapper.util.ImageMapper;
 import com.example.forum.model.community.Community;
+import com.example.forum.model.community.CommunityMember;
+import com.example.forum.model.community.CommunityRole;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
 public class CommunityMapper {
 
-    public static CommunityResponseDTO toDTO(Community community) {
-        return CommunityResponseDTO.builder()
+    public static CommunityDetailDTO toDetailDTO(Community community, List<CommunityMember> allMembers, List<CommunityMember> onlineMembers, CommunityRole role) {
+        return CommunityDetailDTO.builder()
                 .id(community.getId())
                 .name(community.getName())
                 .description(community.getDescription())
-                .imageDTO(ImageMapper.toDto(
-                        community.getImageUrl(),
-                        community.getImagePositionX(),
-                        community.getImagePositionY()
-                ))
+                .profileImageDto(ImageMapper.toDto(
+                        community.getProfileImageUrl(),
+                        community.getProfileImagePositionX(),
+                        community.getProfileImagePositionY()))
+                .bannerImageUrl(community.getBannerImageUrl())
                 .createdAt(community.getCreatedAt())
-                .author(AuthorMapper.toDto(community.getCreator()))
-                .members(community.getMembers().stream()
-                        .map(AuthorMapper::toDto)
-                        .collect(Collectors.toSet()))
+                .rules(community.getRules().stream().toList())
+                .categories(community.getCategories().stream().toList())
+                .onlineCount(onlineMembers.size())
+                .memberCount(allMembers.size())
+                .role(role)
+                .onlineUsers(onlineMembers.stream()
+                        .map(cm -> new OnlineUserDTO(
+                                cm.getUser().getId(),
+                                cm.getUser().getProfile().getNickname(),
+                                ImageMapper.toDto(
+                                        cm.getUser().getProfile().getImageUrl(),
+                                        cm.getUser().getProfile().getImagePositionX(),
+                                        cm.getUser().getProfile().getImagePositionY())
+                        ))
+                        .toList()
+                )
                 .build();
     }
 
@@ -37,9 +51,9 @@ public class CommunityMapper {
                 .id(community.getId())
                 .name(community.getName())
                 .imageDTO(ImageDTO.builder()
-                        .imageUrl(community.getImageUrl())
-                        .imagePositionX(community.getImagePositionX())
-                        .imagePositionY(community.getImagePositionY())
+                        .imageUrl(community.getProfileImageUrl())
+                        .imagePositionX(community.getProfileImagePositionX())
+                        .imagePositionY(community.getProfileImagePositionY())
                         .build())
                 .build();
 

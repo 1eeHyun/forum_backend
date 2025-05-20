@@ -17,6 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static com.example.forum.common.SortOrder.ASCENDING;
+import static com.example.forum.common.SortOrder.DESCENDING;
+
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
@@ -32,11 +35,10 @@ public class PostController implements PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         List<PostResponseDTO> posts;
-        if (userDetails == null) {
-            posts = postService.getAccessiblePostsByASC(null);
-        } else {
+        if (userDetails == null) posts = postService.getAccessiblePosts(null, ASCENDING);
+        else {
             String username = authValidator.extractUsername(userDetails);
-            posts = postService.getAccessiblePostsByASC(username);
+            posts = postService.getAccessiblePosts(username, ASCENDING);
         }
 
         return ResponseEntity.ok(CommonResponse.success(posts));
@@ -48,11 +50,10 @@ public class PostController implements PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         List<PostResponseDTO> posts;
-        if (userDetails == null) {
-            posts = postService.getAccessiblePostsByDESC(null);
-        } else {
+        if (userDetails == null) posts = postService.getAccessiblePosts(null, DESCENDING);
+        else {
             String username = authValidator.extractUsername(userDetails);
-            posts = postService.getAccessiblePostsByDESC(username);
+            posts = postService.getAccessiblePosts(username, DESCENDING);
         }
 
         return ResponseEntity.ok(CommonResponse.success(posts));

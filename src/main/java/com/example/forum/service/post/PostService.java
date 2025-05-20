@@ -1,5 +1,6 @@
 package com.example.forum.service.post;
 
+import com.example.forum.common.SortOrder;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
@@ -10,8 +11,7 @@ import java.util.List;
 public interface PostService {
 
     // Retrieve posts - GET
-    List<PostResponseDTO> getAccessiblePostsByASC(String username);
-    List<PostResponseDTO> getAccessiblePostsByDESC(String username);
+    List<PostResponseDTO> getAccessiblePosts(String username, SortOrder sortOrder);
     PostDetailDTO getPostDetail(Long postId, String username);
 
     // Post posts - POST

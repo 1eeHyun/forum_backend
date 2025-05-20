@@ -28,8 +28,8 @@ public class Profile {
     @Column(nullable = true)
     private Double imagePositionY;
 
-    @Column(nullable = false, unique = true, updatable = false)
-    private String publicId;
+//    @Column(nullable = false, unique = true, updatable = false)
+//    private String publicId;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)

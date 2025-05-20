@@ -1,5 +1,5 @@
 package com.example.forum.model.user;
 
-public enum Role {
+public enum UserRole {
     ADMIN, USER
 }

@@ -8,7 +8,7 @@ import com.example.forum.model.community.Community;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
-import com.example.forum.repository.community.CommunityRepository;
+import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.follow.FollowRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.repository.profile.ProfileRepository;
@@ -29,7 +29,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     private final AuthValidator userValidator;
     private final UserRepository userRepository;
-    private final CommunityRepository communityRepository;
+    private final CommunityMemberRepository communityMemberRepository;
     private final PostRepository postRepository;
     private final ProfileValidator profileValidator;
     private final ProfileRepository profileRepository;
@@ -60,8 +60,12 @@ public class ProfileServiceImpl implements ProfileService {
                     : null;
 
             List<Community> sharedCommunities = currentUser != null
-                    ? communityRepository.findAllByMembersContaining(currentUser)
+                    ? communityMemberRepository.findByUser(currentUser)
+                    .stream()
+                    .map(cm -> cm.getCommunity())
+                    .toList()
                     : List.of();
+
 
             posts = postRepository.findVisiblePostsForViewer(user, sharedCommunities);
         }
@@ -141,13 +145,13 @@ public class ProfileServiceImpl implements ProfileService {
         profileRepository.save(profile);
     }
 
-    @Override
-    public ProfileResponseDTO getProfileByPublicId(String publicId) {
-
-//        Profile profile = profileRepository.findByPublicId(publicId)
-//                .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
+//    @Override
+//    public ProfileResponseDTO getProfileByPublicId(String publicId) {
 //
-//        return ProfileMapper.toDto(profile);
-        return null;
-    }
+////        Profile profile = profileRepository.findByPublicId(publicId)
+////                .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
+////
+////        return ProfileMapper.toDto(profile);
+//        return null;
+//    }
 }

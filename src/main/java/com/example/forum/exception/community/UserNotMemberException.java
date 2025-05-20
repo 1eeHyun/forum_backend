@@ -7,6 +7,6 @@ import lombok.Getter;
 public class UserNotMemberException extends CustomException {
 
     public UserNotMemberException() {
-        super("User is not a member of this community", 400);
+        super("You are not a member of this community", 400);
     }
 }

@@ -18,31 +18,19 @@ public class FollowController implements FollowApiDocs{
     private final AuthValidator authValidator;
 
     @Override
-    @PostMapping("/{userId}")
-    public ResponseEntity<CommonResponse<Void>> follow(
+    @PostMapping("/{targetUsername}")
+    public ResponseEntity<CommonResponse<Void>> followToggle(
             @PathVariable String targetUsername,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        followService.follow(targetUsername, username);
+        followService.followToggle(targetUsername, username);
 
         return ResponseEntity.ok(CommonResponse.success());
     }
 
     @Override
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<CommonResponse<Void>> unfollow(
-            @PathVariable String targetUsername,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        String username = authValidator.extractUsername(userDetails);
-        followService.unfollow(targetUsername, username);
-
-        return ResponseEntity.ok(CommonResponse.success());
-    }
-
-    @Override
-    @GetMapping("/{userId}/is-following")
+    @GetMapping("/{targetUsername}/is-following")
     public ResponseEntity<CommonResponse<Boolean>> isFollowing(
             @PathVariable String targetUsername,
             @AuthenticationPrincipal UserDetails userDetails) {

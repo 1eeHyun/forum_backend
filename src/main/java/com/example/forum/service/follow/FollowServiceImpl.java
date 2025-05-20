@@ -6,6 +6,7 @@ import com.example.forum.repository.follow.FollowRepository;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,27 +16,21 @@ public class FollowServiceImpl implements FollowService{
     private final FollowRepository followRepository;
 
     @Override
-    public void follow(String targetUsername, String currentUsername) {
+    @Transactional
+    public void followToggle(String targetUsername, String currentUsername) {
 
         User target = userValidator.validateUserByUsername(targetUsername);
         User user = userValidator.validateUserByUsername(currentUsername);
 
-        if (followRepository.existsByFollowerAndFollowing(target, user))
+        if (followRepository.existsByFollowerAndFollowing(user, target)) {
+            followRepository.deleteByFollowerAndFollowing(user, target);
             return;
+        }
 
         Follow follow = new Follow();
-        follow.setFollower(target);
-        follow.setFollowing(user);
+        follow.setFollower(user);
+        follow.setFollowing(target);
         followRepository.save(follow);
-    }
-
-    @Override
-    public void unfollow(String targetUsername, String currentUsername) {
-
-        User target = userValidator.validateUserByUsername(targetUsername);
-        User user = userValidator.validateUserByUsername(currentUsername);
-
-        followRepository.deleteByFollowerAndFollowing(target, user);
     }
 
     @Override
@@ -44,6 +39,6 @@ public class FollowServiceImpl implements FollowService{
         User target = userValidator.validateUserByUsername(targetUsername);
         User user = userValidator.validateUserByUsername(currentUsername);
 
-        return followRepository.existsByFollowerAndFollowing(target, user);
+        return followRepository.existsByFollowerAndFollowing(user, target);
     }
 }

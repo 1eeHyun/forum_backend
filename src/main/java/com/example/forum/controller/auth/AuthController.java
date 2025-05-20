@@ -38,6 +38,15 @@ public class AuthController implements AuthApiDocs {
     }
 
     @Override
+    @PostMapping("/logout")
+    public ResponseEntity<CommonResponse<Void>> logout(@AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = authValidator.extractUsername(userDetails);
+        authService.logout(username);
+        return ResponseEntity.ok(CommonResponse.success());
+    }
+
+    @Override
     @GetMapping("/me")
     public ResponseEntity<CommonResponse<?>> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
 

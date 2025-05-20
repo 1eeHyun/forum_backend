@@ -1,8 +1,9 @@
 package com.example.forum.controller.community;
 
 import com.example.forum.dto.CommonResponse;
+import com.example.forum.dto.community.CommunityDetailDTO;
+import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
-import com.example.forum.dto.community.CommunityResponseDTO;
 import com.example.forum.service.community.CommunityService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
@@ -23,32 +24,39 @@ public class CommunityController implements CommunityApiDocs {
 
     @Override
     @PostMapping
-    public ResponseEntity<CommonResponse<CommunityResponseDTO>> create(
+    public ResponseEntity<CommonResponse<Long>> create(
             @RequestBody CommunityRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        CommunityResponseDTO response = communityService.create(dto, username);
+        Long response = communityService.create(dto, username);
 
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
     @Override
     @GetMapping("/my")
-    public ResponseEntity<CommonResponse<List<CommunityResponseDTO>>> getMyCommunities(
+    public ResponseEntity<CommonResponse<List<CommunityPreviewDTO>>> getMyCommunities(
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        List<CommunityResponseDTO> response = communityService.getMyCommunities(username);
+        List<CommunityPreviewDTO> response = communityService.getMyCommunities(username);
 
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
     @Override
     @GetMapping("/{id}")
-    public ResponseEntity<CommonResponse<CommunityResponseDTO>> getCommunity(@PathVariable Long id) {
+    public ResponseEntity<CommonResponse<CommunityDetailDTO>> getCommunity(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        CommunityResponseDTO response = communityService.getCommunity(id);
+        String username = "";
+        if (userDetails != null) {
+            username = authValidator.extractUsername(userDetails);
+        }
+
+        CommunityDetailDTO response = communityService.getCommunityDetail(id, username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

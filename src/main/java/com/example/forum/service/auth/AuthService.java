@@ -9,5 +9,6 @@ public interface AuthService {
 
     void signup(SignupRequestDTO dto);
     LoginResponseDTO login(LoginRequestDTO dto);
+    void logout(String username);
     MeResponseDTO getCurrUser(String username);
 }

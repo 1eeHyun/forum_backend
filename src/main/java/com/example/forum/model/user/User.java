@@ -34,6 +34,9 @@ public class User {
     @Setter
     private Profile profile;
 
+    @Setter
+    private boolean isOnline;
+
     private LocalDateTime createdAt;
 
     @PrePersist

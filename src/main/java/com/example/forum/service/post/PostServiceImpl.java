@@ -1,15 +1,17 @@
 package com.example.forum.service.post;
 
+import com.example.forum.common.SortOrder;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Community;
+import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostImage;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
-import com.example.forum.repository.community.CommunityRepository;
+import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.post.PostImageRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.S3Service;
@@ -30,35 +32,36 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final PostValidator postValidator;
     private final CommunityValidator communityValidator;
-    private final CommunityRepository communityRepository;
+    private final CommunityMemberRepository communityMemberRepository;
     private final PostImageRepository postImageRepository;
 
     private final S3Service s3Service;
 
-    /**
-     * This method returns every possible post (list form) that a user can see
-     * in ascending order
-     * @param username from UserDetails
-     */
-    @Override
-    public List<PostResponseDTO> getAccessiblePostsByASC(String username) {
 
+    @Override
+    public List<PostResponseDTO> getAccessiblePosts(String username, SortOrder sortOrder) {
         List<Post> posts;
 
-        // Check if the user logged-in
         if (username != null) {
+            User user = authValidator.validateUserByUsername(username);
 
-            User user;
+            List<Community> communities = communityMemberRepository.findByUser(user)
+                    .stream()
+                    .map(CommunityMember::getCommunity)
+                    .toList();
 
-            // Validate user
-            user = authValidator.validateUserByUsername(username);
-            // Find every community of the user
-            List<Community> communities = communityRepository.findAllByMembersContaining(user);
-            // Add every post to a list that the user can see
             posts = postRepository.findAccessiblePosts(communities);
+
+            posts.sort((p1, p2) -> {
+                return sortOrder == SortOrder.ASCENDING
+                        ? p1.getCreatedAt().compareTo(p2.getCreatedAt())
+                        : p2.getCreatedAt().compareTo(p1.getCreatedAt());
+            });
+
         } else {
-            // Add every `Public` post to a list
-            posts = postRepository.findAllByVisibilityOrderByCreatedAtAsc(Visibility.PUBLIC);
+
+            if (sortOrder == SortOrder.ASCENDING) posts = postRepository.findAllByVisibilityOrderByCreatedAtAsc(Visibility.PUBLIC);
+            else posts = postRepository.findAllByVisibilityOrderByCreatedAtDesc(Visibility.PUBLIC);
         }
 
         return posts.stream()
@@ -66,36 +69,6 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
-    /**
-     * This method returns every possible post (list form) that a user can see
-     * in descending order
-     * @param username from UserDetails
-     */
-    @Override
-    public List<PostResponseDTO> getAccessiblePostsByDESC(String username) {
-
-        List<Post> posts;
-
-        // Check if the user logged-in
-        if (username != null) {
-            User user;
-
-            // Validate the user
-            user = authValidator.validateUserByUsername(username);
-            // Get the user's every community
-            List<Community> communities = communityRepository.findAllByMembersContaining(user);
-            // Add every post to a list that the user can see
-            posts = postRepository.findAccessiblePosts(communities);
-
-        } else {
-            // Add every `Public` post to a list
-            posts = postRepository.findAllByVisibilityOrderByCreatedAtDesc(Visibility.PUBLIC);
-        }
-
-        return posts.stream()
-                .map(PostMapper::toPostResponseDTO)
-                .toList();
-    }
 
     @Override
     public PostDetailDTO getPostDetail(Long postId, String username) {
