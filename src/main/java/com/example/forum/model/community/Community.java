@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -43,7 +42,7 @@ public class Community {
             joinColumns = @JoinColumn(name = "community_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<User> members = new HashSet<>();
+    private Set<User> members;
 
     @PrePersist
     protected void onCreate() {

@@ -6,6 +6,7 @@ import com.example.forum.dto.notification.NotificationResponseDTO;
 import com.example.forum.mapper.notification.NotificationMapper;
 import com.example.forum.model.notification.Notification;
 import com.example.forum.service.notification.NotificationService;
+import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,12 +21,14 @@ import java.util.List;
 public class NotificationController implements NotificationApiDocs {
 
     private final NotificationService notificationService;
+    private final AuthValidator authValidator;
 
     @Override
     @GetMapping
     public ResponseEntity<CommonResponse<List<NotificationResponseDTO>>> getMyNotifications(@AuthenticationPrincipal UserDetails userDetails) {
 
-        List<Notification> notifications = notificationService.getMyNotification(userDetails.getUsername());
+        String username = authValidator.extractUsername(userDetails);
+        List<Notification> notifications = notificationService.getMyNotification(username);
         List<NotificationResponseDTO> response = notifications.stream()
                 .map(NotificationMapper::toDto)
                 .toList();
@@ -37,7 +40,9 @@ public class NotificationController implements NotificationApiDocs {
     @PostMapping("/read-all")
     public ResponseEntity<CommonResponse<Void>> markAllAsRead(@AuthenticationPrincipal UserDetails userDetails) {
 
-        notificationService.markAllAsRead(userDetails.getUsername());
+        String username = authValidator.extractUsername(userDetails);
+        notificationService.markAllAsRead(username);
+
         return ResponseEntity.ok(CommonResponse.success());
     }
 
@@ -47,8 +52,9 @@ public class NotificationController implements NotificationApiDocs {
             @PathVariable Long notificationId,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        String username = userDetails.getUsername();
+        String username = authValidator.extractUsername(userDetails);
         LinkResponseDTO response = notificationService.resolveAndMarkAsRead(notificationId, username);
+
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

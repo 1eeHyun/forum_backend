@@ -4,6 +4,7 @@ import com.example.forum.exception.auth.*;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,17 @@ public class AuthValidator {
         return user;
     }
 
+    public void validateLoggedIn(UserDetails userDetails) {
+        if (userDetails == null)
+            throw new UnauthorizedException();
+    }
+
+    public String extractUsername(UserDetails userDetails) {
+        validateLoggedIn(userDetails);
+        return userDetails.getUsername();
+    }
+
+
     public User validateUserByUsername(String username) {
 
         return userRepository.findByUsername(username)
@@ -46,8 +58,8 @@ public class AuthValidator {
     }
 
     public void validateSameUsername(String targetUsername, String username) {
-        if (userRepository.findByUsername(targetUsername) != userRepository.findByUsername(username))
-            throw new NotAuthorizedException();
+        if (!targetUsername.equals(username))
+            throw new ForbiddenException();
     }
 
 }

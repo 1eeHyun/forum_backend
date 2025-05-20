@@ -4,6 +4,7 @@ import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.CommunityRequestDTO;
 import com.example.forum.dto.community.CommunityResponseDTO;
 import com.example.forum.service.community.CommunityService;
+import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +19,7 @@ import java.util.List;
 public class CommunityController implements CommunityApiDocs {
 
     private final CommunityService communityService;
+    private final AuthValidator authValidator;
 
     @Override
     @PostMapping
@@ -25,7 +27,9 @@ public class CommunityController implements CommunityApiDocs {
             @RequestBody CommunityRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        CommunityResponseDTO response = communityService.create(dto, userDetails.getUsername());
+        String username = authValidator.extractUsername(userDetails);
+        CommunityResponseDTO response = communityService.create(dto, username);
+
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -34,7 +38,9 @@ public class CommunityController implements CommunityApiDocs {
     public ResponseEntity<CommonResponse<List<CommunityResponseDTO>>> getMyCommunities(
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        List<CommunityResponseDTO> response = communityService.getMyCommunities(userDetails.getUsername());
+        String username = authValidator.extractUsername(userDetails);
+        List<CommunityResponseDTO> response = communityService.getMyCommunities(username);
+
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 

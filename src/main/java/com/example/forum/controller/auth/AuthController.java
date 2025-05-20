@@ -6,8 +6,8 @@ import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.auth.MeResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
 import com.example.forum.service.auth.AuthService;
+import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController implements AuthApiDocs {
 
     private final AuthService authService;
+    private final AuthValidator authValidator;
 
     @Override
     @PostMapping("/signup")
@@ -40,11 +41,9 @@ public class AuthController implements AuthApiDocs {
     @GetMapping("/me")
     public ResponseEntity<CommonResponse<?>> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
 
-        if (userDetails == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(CommonResponse.fail(401, "Unauthorized"));
+        String username = authValidator.extractUsername(userDetails);
+        MeResponseDTO response = authService.getCurrUser(username);
 
-        MeResponseDTO response = authService.getCurrUser(userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

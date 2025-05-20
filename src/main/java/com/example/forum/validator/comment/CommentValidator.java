@@ -1,6 +1,6 @@
 package com.example.forum.validator.comment;
 
-import com.example.forum.exception.comment.CommentNotAuthorException;
+import com.example.forum.exception.auth.UnauthorizedException;
 import com.example.forum.exception.comment.CommentNotFoundException;
 import com.example.forum.model.comment.Comment;
 import com.example.forum.repository.comment.CommentRepository;
@@ -20,6 +20,6 @@ public class CommentValidator {
 
     public void validateCommentAuthor(String expected, String result) {
         if (!expected.equals(result))
-            throw new CommentNotAuthorException();
+            throw new UnauthorizedException();
     }
 }

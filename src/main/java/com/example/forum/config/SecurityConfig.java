@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/communities/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/communities/**", "/api/comments/**").permitAll()
                         .requestMatchers("/api/posts/**").authenticated()
                         .requestMatchers("/api/communities/**").authenticated()
                         .requestMatchers("/api/profiles/**").authenticated()

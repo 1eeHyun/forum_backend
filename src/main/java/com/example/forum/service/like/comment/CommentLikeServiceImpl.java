@@ -27,6 +27,8 @@ public class CommentLikeServiceImpl implements CommentLikeService {
     @Transactional
     public void toggleLike(Long commentId, String username) {
 
+        if (username == null) return;
+
         Comment comment = commentValidator.validateCommentId(commentId);
         User user = userValidator.validateUserByUsername(username);
 
@@ -48,6 +50,8 @@ public class CommentLikeServiceImpl implements CommentLikeService {
     @Override
     @Transactional
     public void toggleDislike(Long commentId, String username) {
+
+        if (username == null) return;
 
         Comment comment = commentValidator.validateCommentId(commentId);
         User user = userValidator.validateUserByUsername(username);
@@ -76,6 +80,8 @@ public class CommentLikeServiceImpl implements CommentLikeService {
     @Override
     public boolean hasUserLiked(Long commentId, String username) {
 
+        if (username == null) return false;
+
         User user = userValidator.validateUserByUsername(username);
         Comment comment = commentValidator.validateCommentId(commentId);
 
@@ -91,6 +97,8 @@ public class CommentLikeServiceImpl implements CommentLikeService {
 
     @Override
     public boolean hasUserDisliked(Long commentId, String username) {
+
+        if (username == null) return false;
 
         User user = userValidator.validateUserByUsername(username);
         Comment comment = commentValidator.validateCommentId(commentId);

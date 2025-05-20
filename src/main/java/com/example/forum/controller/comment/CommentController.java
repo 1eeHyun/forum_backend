@@ -3,8 +3,8 @@ package com.example.forum.controller.comment;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.comment.CommentRequestDTO;
 import com.example.forum.dto.comment.CommentResponseDTO;
-import com.example.forum.exception.auth.NotAuthorizedException;
 import com.example.forum.service.comment.CommentService;
+import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +19,7 @@ import java.util.List;
 public class CommentController implements CommentApiDocs {
 
     private final CommentService commentService;
+    private final AuthValidator authValidator;
 
     @Override
     @PostMapping
@@ -26,11 +27,9 @@ public class CommentController implements CommentApiDocs {
             @RequestBody CommentRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        if (userDetails == null) {
-            throw new NotAuthorizedException();
-        }
+        String username = authValidator.extractUsername(userDetails);
+        CommentResponseDTO response = commentService.createComment(username, dto);
 
-        CommentResponseDTO response = commentService.createComment(userDetails.getUsername(), dto);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -49,7 +48,9 @@ public class CommentController implements CommentApiDocs {
             @RequestBody CommentRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        CommentResponseDTO response = commentService.createReply(userDetails.getUsername(), dto);
+        String username = authValidator.extractUsername(userDetails);
+        CommentResponseDTO response = commentService.createReply(username, dto);
+
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -59,7 +60,9 @@ public class CommentController implements CommentApiDocs {
             @PathVariable Long commentId,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        commentService.deleteComment(commentId, userDetails.getUsername());
+        String username = authValidator.extractUsername(userDetails);
+        commentService.deleteComment(commentId, username);
+
         return ResponseEntity.ok(CommonResponse.success());
     }
 }

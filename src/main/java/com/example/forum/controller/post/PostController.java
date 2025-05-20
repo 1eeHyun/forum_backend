@@ -7,6 +7,7 @@ import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.service.like.post.PostLikeService;
 import com.example.forum.service.post.PostService;
+import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,6 +24,7 @@ public class PostController implements PostApiDocs {
 
     private final PostService postService;
     private final PostLikeService postLikeService;
+    private final AuthValidator authValidator;
 
     @Override
     @GetMapping("/accessible/asc")
@@ -30,10 +32,12 @@ public class PostController implements PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         List<PostResponseDTO> posts;
-        if (userDetails == null)
+        if (userDetails == null) {
             posts = postService.getAccessiblePostsByASC(null);
-        else
-            posts = postService.getAccessiblePostsByASC(userDetails.getUsername());
+        } else {
+            String username = authValidator.extractUsername(userDetails);
+            posts = postService.getAccessiblePostsByASC(username);
+        }
 
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
@@ -44,10 +48,12 @@ public class PostController implements PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         List<PostResponseDTO> posts;
-        if (userDetails == null)
+        if (userDetails == null) {
             posts = postService.getAccessiblePostsByDESC(null);
-        else
-            posts = postService.getAccessiblePostsByDESC(userDetails.getUsername());
+        } else {
+            String username = authValidator.extractUsername(userDetails);
+            posts = postService.getAccessiblePostsByDESC(username);
+        }
 
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
@@ -58,7 +64,8 @@ public class PostController implements PostApiDocs {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        String username = userDetails != null ? userDetails.getUsername() : null;
+
+        String username = userDetails == null ? null : authValidator.extractUsername(userDetails);
 
         PostDetailDTO response = postService.getPostDetail(id, username);
         return ResponseEntity.ok(CommonResponse.success(response));
@@ -70,7 +77,9 @@ public class PostController implements PostApiDocs {
             @RequestBody PostRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        PostResponseDTO post = postService.createPost(dto, userDetails.getUsername());
+        String username = authValidator.extractUsername(userDetails);
+
+        PostResponseDTO post = postService.createPost(dto, username);
         return ResponseEntity.ok(CommonResponse.success(post));
     }
 
@@ -81,7 +90,9 @@ public class PostController implements PostApiDocs {
             @RequestBody PostRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        PostResponseDTO post = postService.updatePost(id, dto, userDetails.getUsername());
+        String username = authValidator.extractUsername(userDetails);
+
+        PostResponseDTO post = postService.updatePost(id, dto, username);
         return ResponseEntity.ok(CommonResponse.success(post));
     }
 
@@ -91,7 +102,9 @@ public class PostController implements PostApiDocs {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        postService.deletePost(id, userDetails.getUsername());
+        String username = authValidator.extractUsername(userDetails);
+        postService.deletePost(id, username);
+
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -101,7 +114,9 @@ public class PostController implements PostApiDocs {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        postLikeService.toggleLike(id, userDetails.getUsername());
+        String username = authValidator.extractUsername(userDetails);
+
+        postLikeService.toggleLike(id, username);
         return ResponseEntity.ok(CommonResponse.success());
     }
 

@@ -3,8 +3,8 @@ package com.example.forum.controller.profile;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.profile.*;
-import com.example.forum.exception.auth.ForbiddenException;
 import com.example.forum.service.profile.ProfileService;
+import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProfileController implements ProfileApiDocs {
 
     private final ProfileService profileService;
+    private final AuthValidator authValidator;
 
     @Override
     @GetMapping("/{username}")
@@ -37,10 +38,11 @@ public class ProfileController implements ProfileApiDocs {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody NicknameUpdateDTO dto) {
 
-        if (!targetUsername.equals(userDetails.getUsername()))
-            throw new ForbiddenException();
 
-        profileService.updateNickname(userDetails.getUsername(), dto);
+        String username = authValidator.extractUsername(userDetails);
+        authValidator.validateSameUsername(targetUsername, username);
+
+        profileService.updateNickname(username, dto);
         return ResponseEntity.ok(CommonResponse.success());
     }
 
@@ -51,10 +53,10 @@ public class ProfileController implements ProfileApiDocs {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody UsernameUpdateDTO dto) {
 
-        if (!targetUsername.equals(userDetails.getUsername()))
-            throw new ForbiddenException();
+        String username = authValidator.extractUsername(userDetails);
+        authValidator.validateSameUsername(targetUsername, username);
 
-        LoginResponseDTO result = profileService.updateUsername(userDetails.getUsername(), dto);
+        LoginResponseDTO result = profileService.updateUsername(username, dto);
         return ResponseEntity.ok(CommonResponse.success(result));
     }
 
@@ -65,10 +67,10 @@ public class ProfileController implements ProfileApiDocs {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody BioUpdateDTO dto) {
 
-        if (!targetUsername.equals(userDetails.getUsername()))
-            throw new ForbiddenException();
+        String username = authValidator.extractUsername(userDetails);
+        authValidator.validateSameUsername(targetUsername, username);
 
-        profileService.updateBio(userDetails.getUsername(), dto);
+        profileService.updateBio(username, dto);
         return ResponseEntity.ok(CommonResponse.success());
     }
 
@@ -81,15 +83,15 @@ public class ProfileController implements ProfileApiDocs {
             @RequestParam Double positionX,
             @RequestParam Double positionY) {
 
-        if (!targetUsername.equals(userDetails.getUsername()))
-            throw new ForbiddenException();
+        String username = authValidator.extractUsername(userDetails);
+        authValidator.validateSameUsername(targetUsername, username);
 
         ProfileImageUpdateDTO dto = new ProfileImageUpdateDTO();
         dto.setImage(image);
         dto.setPositionX(positionX);
         dto.setPositionY(positionY);
 
-        profileService.updateProfileImage(userDetails.getUsername(), dto);
+        profileService.updateProfileImage(username, dto);
         return ResponseEntity.ok(CommonResponse.success());
     }
 
