@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,7 +35,6 @@ public class PostController implements PostApiDocs {
         else
             posts = postService.getAccessiblePostsByASC(userDetails.getUsername());
 
-//        List<PostResponseDTO> posts = postService.getAccessiblePostsByASC(userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 
@@ -49,7 +49,6 @@ public class PostController implements PostApiDocs {
         else
             posts = postService.getAccessiblePostsByDESC(userDetails.getUsername());
 
-//        List<PostResponseDTO> posts = postService.getAccessiblePostsByDESC(userDetails.getUsername());
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 
@@ -119,6 +118,14 @@ public class PostController implements PostApiDocs {
     public ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(@PathVariable Long id) {
 
         List<LikeUserDTO> ret = postLikeService.getLikeUsers(id);
+        return ResponseEntity.ok(CommonResponse.success(ret));
+    }
+
+    @Override
+    @PostMapping("/images")
+    public ResponseEntity<CommonResponse<String>> uploadPostImage(@RequestParam("file") MultipartFile file) {
+
+        String ret = postService.uploadImage(file);
         return ResponseEntity.ok(CommonResponse.success(ret));
     }
 }

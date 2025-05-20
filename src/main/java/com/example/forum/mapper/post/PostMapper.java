@@ -9,8 +9,11 @@ import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.util.ImageMapper;
 import com.example.forum.model.like.PostLike;
 import com.example.forum.model.post.Post;
+import com.example.forum.model.post.PostImage;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
+
+import java.util.List;
 
 public class PostMapper {
     public static PostResponseDTO toPostResponseDTO(Post post) {
@@ -20,6 +23,9 @@ public class PostMapper {
                 .content(post.getContent())
                 .author(AuthorMapper.toDto(post.getAuthor()))
                 .community(CommunityMapper.toPreviewDTO(post.getCommunity()))
+                .imageUrls(post.getImages() != null
+                            ? convertImageUrls(post.getImages())
+                            : null)
                 .commentCount(post.getComments() != null ? post.getComments().size() : 0)
                 .likeCount(post.getLikes() != null ? post.getLikes().size() : 0)
                 .createdAt(post.getCreatedAt())
@@ -39,9 +45,12 @@ public class PostMapper {
                         ? CommunityMapper.toPreviewDTO(post.getCommunity())
                         : null)
                 .visibility(post.getVisibility().toString())
-                .contentImageDTO(ImageMapper.toDto(post.getImageUrl(), null, null))
+
                 .likedByMe(post.getLikes().stream().anyMatch(like -> like.getUser().equals(viewer)))
                 .likeCount(post.getLikes().size())
+                .imageUrls(post.getImages() != null
+                        ? convertImageUrls(post.getImages())
+                        : null)
 
                 // Like users
                 .likeUsers(post.getLikes().stream()
@@ -75,6 +84,10 @@ public class PostMapper {
                 .build();
     }
 
+    private static List<String> convertImageUrls(List<PostImage> images) {
 
-
+        return images.stream()
+                .map(PostImage::getImageUrl)
+                .toList();
+    }
 }

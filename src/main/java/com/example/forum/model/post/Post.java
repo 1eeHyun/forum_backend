@@ -27,8 +27,8 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = true)
-    private String imageUrl;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImage> images;
 
     @Enumerated(EnumType.STRING)
     private Visibility visibility;

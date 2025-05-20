@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -68,4 +69,11 @@ public interface PostApiDocs {
             description = "Retrieves all users who like an existing post, showing nickname, profile image."
     )
     ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(Long id);
+
+    @Operation(
+            summary = "Upload a post image",
+            description = "Uploads a single image for a post and returns the image URL."
+    )
+    ResponseEntity<CommonResponse<String>> uploadPostImage(MultipartFile file);
+
 }

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,8 +17,7 @@ public class PostRequestDTO {
     private String title;
 
     private String content;
-
     private Visibility visibility;
-
+    private List<String> imageUrls;
     private Long communityId; // Optional: community selection
 }

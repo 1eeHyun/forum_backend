@@ -3,6 +3,7 @@ package com.example.forum.service.post;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,4 +21,5 @@ public interface PostService {
     // Delete a post - DELETE
     void deletePost(Long postId, String username);
 
+    String uploadImage(MultipartFile file);
 }

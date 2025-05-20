@@ -4,7 +4,6 @@ import com.example.forum.dto.comment.CommentResponseDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.util.AuthorDTO;
-import com.example.forum.dto.util.ImageDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -21,7 +20,7 @@ public class PostDetailDTO {
     private AuthorDTO author;
     private CommunityPreviewDTO community;
     private String visibility;
-    private ImageDTO contentImageDTO;
+    private List<String> imageUrls;
     private int likeCount;
     private int commentCount;
     private Boolean likedByMe;

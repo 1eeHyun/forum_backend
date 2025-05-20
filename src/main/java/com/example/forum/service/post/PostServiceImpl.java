@@ -6,15 +6,19 @@ import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.post.Post;
+import com.example.forum.model.post.PostImage;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityRepository;
+import com.example.forum.repository.post.PostImageRepository;
 import com.example.forum.repository.post.PostRepository;
+import com.example.forum.service.S3Service;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import com.example.forum.validator.post.PostValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,6 +31,9 @@ public class PostServiceImpl implements PostService {
     private final PostValidator postValidator;
     private final CommunityValidator communityValidator;
     private final CommunityRepository communityRepository;
+    private final PostImageRepository postImageRepository;
+
+    private final S3Service s3Service;
 
     /**
      * This method returns every possible post (list form) that a user can see
@@ -110,6 +117,8 @@ public class PostServiceImpl implements PostService {
         if (dto.getVisibility() == Visibility.COMMUNITY)
             community = communityValidator.validateMemberCommunity(dto.getCommunityId(), user);
 
+        postValidator.validatePostCount(dto.getImageUrls());
+
         Post post = Post.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
@@ -119,6 +128,19 @@ public class PostServiceImpl implements PostService {
                 .build();
 
         postRepository.save(post);
+
+
+        if (dto.getImageUrls() != null) {
+            List<PostImage> images = dto.getImageUrls().stream()
+                            .map(url -> PostImage.builder()
+                                    .imageUrl(url)
+                                    .post(post)
+                                    .build())
+                            .toList();
+
+            post.setImages(images);
+            postImageRepository.saveAll(images);
+        }
 
         return PostMapper.toPostResponseDTO(post);
     }
@@ -142,5 +164,8 @@ public class PostServiceImpl implements PostService {
         postRepository.delete(post);
     }
 
-
+    @Override
+    public String uploadImage(MultipartFile file) {
+        return s3Service.upload(file);
+    }
 }
