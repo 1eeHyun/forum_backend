@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 public class CommentNotFoundException extends CustomException {
     public CommentNotFoundException() {
-        super("Comment not found.", 400);
+        super("Comment not found.", 404);
     }
 }

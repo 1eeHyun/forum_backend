@@ -1,5 +1,6 @@
-package com.example.forum.controller.follow;
+package com.example.forum.controller.follow.api;
 
+import com.example.forum.controller.follow.docs.FollowApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.service.follow.FollowService;
 import com.example.forum.validator.auth.AuthValidator;
@@ -12,13 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/follows")
-public class FollowController implements FollowApiDocs{
+public class FollowController implements FollowApiDocs {
 
     private final FollowService followService;
     private final AuthValidator authValidator;
 
     @Override
-    @PostMapping("/{targetUsername}")
     public ResponseEntity<CommonResponse<Void>> followToggle(
             @PathVariable String targetUsername,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -30,7 +30,6 @@ public class FollowController implements FollowApiDocs{
     }
 
     @Override
-    @GetMapping("/{targetUsername}/is-following")
     public ResponseEntity<CommonResponse<Boolean>> isFollowing(
             @PathVariable String targetUsername,
             @AuthenticationPrincipal UserDetails userDetails) {

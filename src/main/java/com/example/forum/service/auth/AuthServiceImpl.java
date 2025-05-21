@@ -30,6 +30,7 @@ public class AuthServiceImpl implements AuthService{
     @Value("${app.default-profile-image}")
     private String defaultProfileImageUrl;
 
+    @Override
     @Transactional
     public void signup(SignupRequestDTO dto) {
 

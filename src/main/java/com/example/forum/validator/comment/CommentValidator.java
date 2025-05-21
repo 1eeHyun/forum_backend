@@ -3,6 +3,7 @@ package com.example.forum.validator.comment;
 import com.example.forum.exception.auth.UnauthorizedException;
 import com.example.forum.exception.comment.CommentNotFoundException;
 import com.example.forum.model.comment.Comment;
+import com.example.forum.model.user.User;
 import com.example.forum.repository.comment.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ public class CommentValidator {
                 .orElseThrow(CommentNotFoundException::new);
     }
 
-    public void validateCommentAuthor(String expected, String result) {
+    public void validateCommentAuthor(User expected, User result) {
         if (!expected.equals(result))
             throw new UnauthorizedException();
     }

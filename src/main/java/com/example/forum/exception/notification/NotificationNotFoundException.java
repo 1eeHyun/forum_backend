@@ -7,6 +7,6 @@ import lombok.Getter;
 public class NotificationNotFoundException extends CustomException {
 
     public NotificationNotFoundException() {
-        super("Notification not found", 400);
+        super("Notification not found", 404);
     }
 }

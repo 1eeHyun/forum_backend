@@ -7,6 +7,6 @@ import lombok.Getter;
 public class UnauthorizedException extends CustomException {
 
     public UnauthorizedException() {
-        super("You need to log in first.", 401);
+        super("You are not authorized to do this action.", 401);
     }
 }

@@ -1,5 +1,6 @@
-package com.example.forum.controller.notification;
+package com.example.forum.controller.notification.api;
 
+import com.example.forum.controller.notification.docs.NotificationApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.notification.LinkResponseDTO;
 import com.example.forum.dto.notification.NotificationResponseDTO;
@@ -24,7 +25,6 @@ public class NotificationController implements NotificationApiDocs {
     private final AuthValidator authValidator;
 
     @Override
-    @GetMapping
     public ResponseEntity<CommonResponse<List<NotificationResponseDTO>>> getMyNotifications(@AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
@@ -37,7 +37,6 @@ public class NotificationController implements NotificationApiDocs {
     }
 
     @Override
-    @PostMapping("/read-all")
     public ResponseEntity<CommonResponse<Void>> markAllAsRead(@AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
@@ -47,7 +46,6 @@ public class NotificationController implements NotificationApiDocs {
     }
 
     @Override
-    @GetMapping("/{notificationId}/resolve")
     public ResponseEntity<CommonResponse<LinkResponseDTO>> resolveLink(
             @PathVariable Long notificationId,
             @AuthenticationPrincipal UserDetails userDetails) {

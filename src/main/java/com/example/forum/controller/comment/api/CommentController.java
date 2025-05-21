@@ -1,5 +1,6 @@
-package com.example.forum.controller.comment;
+package com.example.forum.controller.comment.api;
 
+import com.example.forum.controller.comment.docs.CommentApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.comment.CommentRequestDTO;
 import com.example.forum.dto.comment.CommentResponseDTO;
@@ -22,7 +23,6 @@ public class CommentController implements CommentApiDocs {
     private final AuthValidator authValidator;
 
     @Override
-    @PostMapping
     public ResponseEntity<CommonResponse<CommentResponseDTO>> create(
             @RequestBody CommentRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -34,7 +34,6 @@ public class CommentController implements CommentApiDocs {
     }
 
     @Override
-    @GetMapping("/{postId}")
     public ResponseEntity<CommonResponse<List<CommentResponseDTO>>> getAllComments(
             @PathVariable Long postId) {
 
@@ -43,7 +42,6 @@ public class CommentController implements CommentApiDocs {
     }
 
     @Override
-    @PostMapping("/reply")
     public ResponseEntity<CommonResponse<CommentResponseDTO>> reply(
             @RequestBody CommentRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -55,7 +53,6 @@ public class CommentController implements CommentApiDocs {
     }
 
     @Override
-    @DeleteMapping("/{commentId}")
     public ResponseEntity<CommonResponse<Void>> delete(
             @PathVariable Long commentId,
             @AuthenticationPrincipal UserDetails userDetails) {

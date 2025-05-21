@@ -1,6 +1,7 @@
-package com.example.forum.controller.post;
+package com.example.forum.controller.post.api;
 
 import com.example.forum.common.SortOrder;
+import com.example.forum.controller.post.docs.PostApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.PostDetailDTO;
@@ -9,6 +10,7 @@ import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.service.like.post.PostLikeService;
 import com.example.forum.service.post.PostService;
 import com.example.forum.validator.auth.AuthValidator;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,7 +29,7 @@ public class PostController implements PostApiDocs {
     private final PostLikeService postLikeService;
     private final AuthValidator authValidator;
 
-    @GetMapping
+    @Override
     public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getPosts(
             @RequestParam(defaultValue = "newest") String sort,
             @RequestParam(defaultValue = "0") int page,
@@ -39,7 +41,6 @@ public class PostController implements PostApiDocs {
     }
 
     @Override
-    @GetMapping("/{id}")
     public ResponseEntity<CommonResponse<PostDetailDTO>> getPostDetail(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -51,7 +52,6 @@ public class PostController implements PostApiDocs {
     }
 
     @Override
-    @PostMapping
     public ResponseEntity<CommonResponse<PostResponseDTO>> create(
             @RequestBody PostRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -63,7 +63,6 @@ public class PostController implements PostApiDocs {
     }
 
     @Override
-    @PostMapping("/{id}")
     public ResponseEntity<CommonResponse<PostResponseDTO>> update(
             @PathVariable Long id,
             @RequestBody PostRequestDTO dto,
@@ -76,7 +75,6 @@ public class PostController implements PostApiDocs {
     }
 
     @Override
-    @DeleteMapping("/{id}")
     public ResponseEntity<CommonResponse<Void>> delete(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -88,7 +86,6 @@ public class PostController implements PostApiDocs {
     }
 
     @Override
-    @PostMapping("/{id}/likes")
     public ResponseEntity<CommonResponse<Void>> likePost(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -100,24 +97,24 @@ public class PostController implements PostApiDocs {
     }
 
     @Override
-    @GetMapping("/{id}/likes")
-    public ResponseEntity<CommonResponse<Long>> getLikesCount(@PathVariable Long id) {
+    public ResponseEntity<CommonResponse<Long>> getLikesCount(
+            @PathVariable Long id) {
 
         long ret = postLikeService.countLikes(id);
         return ResponseEntity.ok(CommonResponse.success(ret));
     }
 
     @Override
-    @GetMapping("/{id}/likes/users")
-    public ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(@PathVariable Long id) {
+    public ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(
+            @PathVariable Long id) {
 
         List<LikeUserDTO> ret = postLikeService.getLikeUsers(id);
         return ResponseEntity.ok(CommonResponse.success(ret));
     }
 
     @Override
-    @PostMapping("/images")
-    public ResponseEntity<CommonResponse<String>> uploadPostImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<CommonResponse<String>> uploadPostImage(
+            @RequestParam("file") MultipartFile file) {
 
         String ret = postService.uploadImage(file);
         return ResponseEntity.ok(CommonResponse.success(ret));

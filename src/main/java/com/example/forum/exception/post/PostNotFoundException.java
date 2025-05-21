@@ -7,6 +7,6 @@ import lombok.Getter;
 public class PostNotFoundException extends CustomException {
 
     public PostNotFoundException() {
-        super("Post not found", 400);
+        super("Post not found", 404);
     }
 }

@@ -7,6 +7,6 @@ import lombok.Getter;
 public class UserNotFoundException extends CustomException {
 
     public UserNotFoundException() {
-        super("User not found", 400);
+        super("User not found", 404);
     }
 }

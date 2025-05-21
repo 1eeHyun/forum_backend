@@ -64,7 +64,10 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification notification = notificationValidator.validateExistingNotification(notificationId);
 
-        notificationValidator.validateSameUser(notification.getReceiver().getUsername(), username);
+        User receiver = userValidator.validateUserByUsername(notification.getReceiver().getUsername());
+        User user = userValidator.validateUserByUsername(username);
+
+        notificationValidator.validateSameUser(receiver, user);
 
         notification.setRead(true);
         notificationRepository.save(notification);

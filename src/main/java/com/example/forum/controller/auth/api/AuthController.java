@@ -1,5 +1,6 @@
-package com.example.forum.controller.auth;
+package com.example.forum.controller.auth.api;
 
+import com.example.forum.controller.auth.docs.AuthApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginRequestDTO;
 import com.example.forum.dto.auth.LoginResponseDTO;
@@ -22,7 +23,6 @@ public class AuthController implements AuthApiDocs {
     private final AuthValidator authValidator;
 
     @Override
-    @PostMapping("/signup")
     public ResponseEntity<CommonResponse<Void>> signup(@RequestBody SignupRequestDTO dto) {
 
         authService.signup(dto);
@@ -30,7 +30,6 @@ public class AuthController implements AuthApiDocs {
     }
 
     @Override
-    @PostMapping("/login")
     public ResponseEntity<CommonResponse<LoginResponseDTO>> login(@RequestBody LoginRequestDTO dto) {
 
         LoginResponseDTO responseToken = authService.login(dto);
@@ -38,7 +37,6 @@ public class AuthController implements AuthApiDocs {
     }
 
     @Override
-    @PostMapping("/logout")
     public ResponseEntity<CommonResponse<Void>> logout(@AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
@@ -47,7 +45,6 @@ public class AuthController implements AuthApiDocs {
     }
 
     @Override
-    @GetMapping("/me")
     public ResponseEntity<CommonResponse<?>> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);

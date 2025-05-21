@@ -1,6 +1,7 @@
-package com.example.forum.controller.profile;
+package com.example.forum.controller.profile.api;
 
 import com.example.forum.common.SortOrder;
+import com.example.forum.controller.profile.docs.ProfileApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.post.PostResponseDTO;
@@ -28,7 +29,6 @@ public class ProfileController implements ProfileApiDocs {
     private final AuthValidator authValidator;
 
     @Override
-    @GetMapping("/{username}")
     public ResponseEntity<CommonResponse<ProfileResponseDTO>> getProfile(
             @PathVariable String username,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -40,7 +40,6 @@ public class ProfileController implements ProfileApiDocs {
     }
 
     @Override
-    @GetMapping("/{username}/posts")
     public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getProfilePosts(
             @PathVariable String username,
             @RequestParam String sort,
@@ -56,7 +55,6 @@ public class ProfileController implements ProfileApiDocs {
     }
 
     @Override
-    @PostMapping("/{targetUsername}/nickname")
     public ResponseEntity<CommonResponse<Void>> updateNickname(
             @PathVariable String targetUsername,
             @AuthenticationPrincipal UserDetails userDetails,
@@ -71,7 +69,6 @@ public class ProfileController implements ProfileApiDocs {
     }
 
     @Override
-    @PostMapping("/{targetUsername}/username")
     public ResponseEntity<CommonResponse<LoginResponseDTO>> updateUsername(
             @PathVariable String targetUsername,
             @AuthenticationPrincipal UserDetails userDetails,
@@ -85,7 +82,6 @@ public class ProfileController implements ProfileApiDocs {
     }
 
     @Override
-    @PostMapping("/{targetUsername}/bio")
     public ResponseEntity<CommonResponse<Void>> updateBio(
             @PathVariable String targetUsername,
             @AuthenticationPrincipal UserDetails userDetails,

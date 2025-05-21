@@ -94,6 +94,8 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentResponseDTO> getCommentsByPostId(Long postId) {
 
+        postValidator.validatePost(postId);
+
         List<Comment> topLevelComments = commentRepository.findTopLevelCommentsWithReplies(postId);
         return topLevelComments.stream()
                 .map(CommentMapper::toDTO)
@@ -103,8 +105,12 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(Long commentId, String username) {
 
+        User user = userValidator.validateUserByUsername(username);
+
         Comment comment = commentValidator.validateCommentId(commentId);
-        commentValidator.validateCommentAuthor(comment.getAuthor().getUsername(), username);
+        User author = comment.getAuthor();
+
+        commentValidator.validateCommentAuthor(author, user);
 
         comment.getReplies().size();
         commentRepository.delete(comment);

@@ -1,5 +1,6 @@
-package com.example.forum.controller.community;
+package com.example.forum.controller.community.docs;
 
+import com.example.forum.controller.community.api.CommunityApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
@@ -23,7 +24,6 @@ public class CommunityController implements CommunityApiDocs {
     private final AuthValidator authValidator;
 
     @Override
-    @PostMapping
     public ResponseEntity<CommonResponse<Long>> create(
             @RequestBody CommunityRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -35,7 +35,6 @@ public class CommunityController implements CommunityApiDocs {
     }
 
     @Override
-    @GetMapping("/my")
     public ResponseEntity<CommonResponse<List<CommunityPreviewDTO>>> getMyCommunities(
             @AuthenticationPrincipal UserDetails userDetails) {
 
@@ -46,7 +45,6 @@ public class CommunityController implements CommunityApiDocs {
     }
 
     @Override
-    @GetMapping("/{id}")
     public ResponseEntity<CommonResponse<CommunityDetailDTO>> getCommunity(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {

@@ -1,5 +1,6 @@
-package com.example.forum.controller.comment;
+package com.example.forum.controller.comment.api;
 
+import com.example.forum.controller.comment.docs.CommentLikeAPIDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.service.like.comment.CommentLikeService;
 import com.example.forum.validator.auth.AuthValidator;
@@ -18,7 +19,6 @@ public class CommentLikeController implements CommentLikeAPIDocs {
     private final AuthValidator authValidator;
 
     @Override
-    @PostMapping("/likes")
     public ResponseEntity<CommonResponse<Void>> likeComment(
             @PathVariable Long commentId,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -30,7 +30,6 @@ public class CommentLikeController implements CommentLikeAPIDocs {
     }
 
     @Override
-    @PostMapping("/dislikes")
     public ResponseEntity<CommonResponse<Void>> dislikeComment(
             @PathVariable Long commentId,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -42,7 +41,6 @@ public class CommentLikeController implements CommentLikeAPIDocs {
     }
 
     @Override
-    @GetMapping("/likes/count")
     public ResponseEntity<CommonResponse<Long>> countLikes(
             @PathVariable Long commentId) {
 
@@ -51,7 +49,6 @@ public class CommentLikeController implements CommentLikeAPIDocs {
     }
 
     @Override
-    @GetMapping("/dislikes/count")
     public ResponseEntity<CommonResponse<Long>> countDislikes(
             @PathVariable Long commentId) {
 
@@ -60,7 +57,6 @@ public class CommentLikeController implements CommentLikeAPIDocs {
     }
 
     @Override
-    @GetMapping("/likes/me")
     public ResponseEntity<CommonResponse<Boolean>> hasUserLiked(
             @PathVariable Long commentId,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -72,7 +68,6 @@ public class CommentLikeController implements CommentLikeAPIDocs {
     }
 
     @Override
-    @GetMapping("/dislikes/me")
     public ResponseEntity<CommonResponse<Boolean>> hasUserDisliked(
             @PathVariable Long commentId,
             @AuthenticationPrincipal UserDetails userDetails) {
