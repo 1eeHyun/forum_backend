@@ -82,7 +82,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .map(f -> new FollowUserDTO(f.getFollowing()))
                 .toList();
 
-        ProfileResponseDTO dto = ProfileMapper.toDTO(user, isMe, posts, followers, followings);
+        ProfileResponseDTO dto = ProfileMapper.toDTO(user, isMe, followers, followings);
         return dto;
     }
 

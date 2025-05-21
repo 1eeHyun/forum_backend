@@ -10,6 +10,7 @@ import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostImage;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
+import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.post.PostImageRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.S3Service;
@@ -34,6 +35,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final PostValidator postValidator;
     private final CommunityValidator communityValidator;
+    private final CommunityMemberRepository communityMemberRepository;
     private final PostImageRepository postImageRepository;
 
     private final S3Service s3Service;
@@ -50,19 +52,47 @@ public class PostServiceImpl implements PostService {
                     .toList();
         }
 
-        Pageable pageable = switch (sort) {
-            case OLDEST -> PageRequest.of(page, size, Sort.by("createdAt").ascending());
-            case NEWEST -> PageRequest.of(page, size, Sort.by("createdAt").descending());
-            case TOP_LIKED -> throw new IllegalStateException("Should be dead code");
+        int offset = page == 0 ? 0 : 3 + (page - 1) * 10;
+        int limit = page == 0 ? 3 : 10;
+
+        List<Post> posts = postRepository.findPagedPosts(limit, offset);
+
+        return posts.stream()
+                .map(PostMapper::toPostResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<PostResponseDTO> getProfilePosts(String targetUsername, String currentUsername, SortOrder sort, int page, int size) {
+
+        User target = authValidator.validateUserByUsername(targetUsername);
+        User user = authValidator.validateUserByUsername(currentUsername);
+
+        boolean includePrivate = target.getId().equals(user.getId());
+
+        if (sort == SortOrder.TOP_LIKED) {
+            List<Post> posts = postRepository.findPostsByAuthorOrderByLikeCount(target, includePrivate);
+            return posts.stream()
+                    .skip((long) page * size)
+                    .limit(size)
+                    .map(PostMapper::toPostResponseDTO)
+                    .toList();
+        }
+
+        Sort sortObj = switch (sort) {
+            case NEWEST -> Sort.by("createdAt").descending().and(Sort.by("id").descending());
+            case OLDEST -> Sort.by("createdAt").ascending().and(Sort.by("id").ascending());
+            default -> throw new IllegalStateException("Unhandled sort type: " + sort);
         };
 
-        Page<Post> postPage = postRepository.findAllNonPrivate(pageable);
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        Page<Post> postPage = postRepository.findPostsByAuthor(target, includePrivate, pageable);
 
         return postPage.stream()
                 .map(PostMapper::toPostResponseDTO)
                 .toList();
     }
-
 
     @Override
     public PostDetailDTO getPostDetail(Long postId, String username) {

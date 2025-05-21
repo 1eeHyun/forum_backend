@@ -45,7 +45,6 @@ public class AuthValidator {
         return userDetails.getUsername();
     }
 
-
     public User validateUserByUsername(String username) {
 
         return userRepository.findByUsername(username)

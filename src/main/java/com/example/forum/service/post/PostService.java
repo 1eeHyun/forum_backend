@@ -11,6 +11,7 @@ import java.util.List;
 public interface PostService {
 
     List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size);
+    List<PostResponseDTO> getProfilePosts(String targetUsername, String currentUsername, SortOrder sort, int page, int size);
     PostDetailDTO getPostDetail(Long postId, String username);
 
     // Post posts - POST

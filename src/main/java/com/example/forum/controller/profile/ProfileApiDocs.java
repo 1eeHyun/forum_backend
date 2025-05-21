@@ -2,6 +2,7 @@ package com.example.forum.controller.profile;
 
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginResponseDTO;
+import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.dto.profile.BioUpdateDTO;
 import com.example.forum.dto.profile.NicknameUpdateDTO;
 import com.example.forum.dto.profile.ProfileResponseDTO;
@@ -12,14 +13,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Tag(name = "Profile", description = "Profile related API")
 public interface ProfileApiDocs {
 
     @Operation(
-            summary = "Get my profile",
-            description = "Retrieve a users profile, it detects if the profile is my profile."
+            summary = "Retrieve a user's profile",
+            description = "Retrieves a users profile, it detects if the profile is my profile."
     )
     ResponseEntity<CommonResponse<ProfileResponseDTO>> getProfile(String username, UserDetails userDetails);
+
+    @Operation(
+            summary = "Retrieve a user's posts",
+            description = "Retrieves a users posts to show on their profile."
+    )
+    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getProfilePosts(String username, String sort, int page, int size, UserDetails userDetails);
 
     @Operation(
             summary = "Update user's nickname",

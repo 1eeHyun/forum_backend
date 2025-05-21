@@ -1,8 +1,11 @@
 package com.example.forum.controller.profile;
 
+import com.example.forum.common.SortOrder;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginResponseDTO;
+import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.dto.profile.*;
+import com.example.forum.service.post.PostService;
 import com.example.forum.service.profile.ProfileService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +16,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/profiles")
 @RequiredArgsConstructor
 public class ProfileController implements ProfileApiDocs {
 
     private final ProfileService profileService;
+    private final PostService postService;
     private final AuthValidator authValidator;
 
     @Override
@@ -27,8 +33,26 @@ public class ProfileController implements ProfileApiDocs {
             @PathVariable String username,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        ProfileResponseDTO profile = profileService.getProfile(username, userDetails.getUsername());
+        String myUsername = authValidator.extractUsername(userDetails);
+
+        ProfileResponseDTO profile = profileService.getProfile(username, myUsername);
         return ResponseEntity.ok(CommonResponse.success(profile));
+    }
+
+    @Override
+    @GetMapping("/{username}/posts")
+    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getProfilePosts(
+            @PathVariable String username,
+            @RequestParam String sort,
+            @RequestParam int page,
+            @RequestParam int size,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        SortOrder sortOrder = SortOrder.from(sort);
+        String myUsername = authValidator.extractUsername(userDetails);
+        List<PostResponseDTO> posts = postService.getProfilePosts(username, myUsername, sortOrder, page, size);
+
+        return ResponseEntity.ok(CommonResponse.success(posts));
     }
 
     @Override

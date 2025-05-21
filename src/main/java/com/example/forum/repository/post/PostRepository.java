@@ -15,16 +15,51 @@ import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
+    @EntityGraph(attributePaths = { "author", "author.profile", "community" })
     @Query(
         """
             SELECT p FROM Post p
-            JOIN FETCH p.author a
-            JOIN FETCH a.profile
-            LEFT JOIN FETCH p.community c
             WHERE p.visibility = 'PUBLIC' OR p.visibility = 'COMMUNITY'
         """
     )
     Page<Post> findAllNonPrivate(Pageable pageable);
+
+    @Query(value =
+        """
+            SELECT * FROM post
+            WHERE visibility = 'PUBLIC' OR visibility = 'COMMUNITY'
+            ORDER BY created_at DESC, id DESC
+            LIMIT :limit OFFSET :offset
+        """,
+            nativeQuery = true
+    )
+    List<Post> findPagedPosts(@Param("limit") int limit, @Param("offset") int offset);
+
+    @Query("""
+    SELECT p FROM Post p
+    WHERE p.author = :author
+      AND (:includePrivate = true OR p.visibility <> 'PRIVATE')
+""")
+    Page<Post> findPostsByAuthor(
+            @Param("author") User author,
+            @Param("includePrivate") boolean includePrivate,
+            Pageable pageable
+    );
+
+    @Query(
+        """
+            SELECT p FROM Post p
+            LEFT JOIN p.likes l
+            WHERE p.author = :author
+              AND (:includePrivate = true OR p.visibility <> 'PRIVATE')
+            GROUP BY p
+            ORDER BY COUNT(l) DESC, p.createdAt DESC
+        """
+    )
+    List<Post> findPostsByAuthorOrderByLikeCount(
+            @Param("author") User author,
+            @Param("includePrivate") boolean includePrivate
+    );
 
 
     List<Post> findAllByAuthorOrderByCreatedAtDesc(User author);
@@ -68,6 +103,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         """
     )
     List<Post> findAllNonPrivatePostsWithLikeCountDesc();
-
 
 }
