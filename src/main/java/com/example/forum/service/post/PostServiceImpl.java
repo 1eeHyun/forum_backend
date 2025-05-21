@@ -17,6 +17,10 @@ import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import com.example.forum.validator.post.PostValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,20 +38,27 @@ public class PostServiceImpl implements PostService {
 
     private final S3Service s3Service;
 
-
     @Override
-    public List<PostResponseDTO> getAccessiblePosts(SortOrder sortOrder) {
-        List<Post> posts;
+    public List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size) {
 
-        if (sortOrder == SortOrder.ASCENDING) {
-            posts = postRepository.findAllNonPrivatePostsAsc();
-        } else if (sortOrder == SortOrder.TOP_LIKED) {
-            posts = postRepository.findAllNonPrivatePostsWithLikeCountDesc();
-        } else {
-            posts = postRepository.findAllNonPrivatePostsDesc();
+        if (sort == SortOrder.TOP_LIKED) {
+            List<Post> posts = postRepository.findAllNonPrivatePostsWithLikeCountDesc();
+            return posts.stream()
+                    .skip((long) page * size)
+                    .limit(size)
+                    .map(PostMapper::toPostResponseDTO)
+                    .toList();
         }
 
-        return posts.stream()
+        Pageable pageable = switch (sort) {
+            case OLDEST -> PageRequest.of(page, size, Sort.by("createdAt").ascending());
+            case NEWEST -> PageRequest.of(page, size, Sort.by("createdAt").descending());
+            case TOP_LIKED -> throw new IllegalStateException("Should be dead code");
+        };
+
+        Page<Post> postPage = postRepository.findAllNonPrivate(pageable);
+
+        return postPage.stream()
                 .map(PostMapper::toPostResponseDTO)
                 .toList();
     }

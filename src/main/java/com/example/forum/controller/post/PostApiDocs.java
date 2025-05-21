@@ -17,16 +17,10 @@ import java.util.List;
 public interface PostApiDocs {
 
     @Operation(
-            summary = "Retrieve every post",
-            description = "Retrieve every post with ascending order."
+            summary = "Retrieve post",
+            description = "Retrieves certain pages of post based on request order."
     )
-    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostAsc();
-
-    @Operation(
-            summary = "Retrieve every post",
-            description = "Retrieve every post with descending order."
-    )
-    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc();
+    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getPosts(String order, int page, int size);
 
     @Operation(
             summary = "Retrieve a post",

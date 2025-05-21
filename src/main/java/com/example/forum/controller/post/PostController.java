@@ -1,5 +1,6 @@
 package com.example.forum.controller.post;
 
+import com.example.forum.common.SortOrder;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.PostDetailDTO;
@@ -17,9 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import static com.example.forum.common.SortOrder.ASCENDING;
-import static com.example.forum.common.SortOrder.DESCENDING;
-
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
@@ -29,19 +27,14 @@ public class PostController implements PostApiDocs {
     private final PostLikeService postLikeService;
     private final AuthValidator authValidator;
 
-    @Override
-    @GetMapping("/accessible/asc")
-    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostAsc() {
+    @GetMapping
+    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getPosts(
+            @RequestParam(defaultValue = "newest") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<PostResponseDTO> posts = postService.getAccessiblePosts(ASCENDING);
-        return ResponseEntity.ok(CommonResponse.success(posts));
-    }
-
-    @Override
-    @GetMapping("/accessible/desc")
-    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc() {
-
-        List<PostResponseDTO> posts = postService.getAccessiblePosts(DESCENDING);
+        SortOrder sortOrder = SortOrder.from(sort);
+        List<PostResponseDTO> posts = postService.getPagedPosts(sortOrder, page, size);
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 

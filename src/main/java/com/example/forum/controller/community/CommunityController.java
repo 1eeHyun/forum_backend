@@ -51,10 +51,7 @@ public class CommunityController implements CommunityApiDocs {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        String username = null;
-        if (userDetails != null) {
-            username = authValidator.extractUsername(userDetails);
-        }
+        String username = authValidator.extractUsername(userDetails);
 
         CommunityDetailDTO response = communityService.getCommunityDetail(id, username);
         return ResponseEntity.ok(CommonResponse.success(response));

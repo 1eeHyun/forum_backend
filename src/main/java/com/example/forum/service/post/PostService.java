@@ -10,8 +10,7 @@ import java.util.List;
 
 public interface PostService {
 
-    // Retrieve posts - GET
-    List<PostResponseDTO> getAccessiblePosts(SortOrder sortOrder);
+    List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size);
     PostDetailDTO getPostDetail(Long postId, String username);
 
     // Post posts - POST
