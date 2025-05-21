@@ -20,13 +20,13 @@ public interface PostApiDocs {
             summary = "Retrieve every post",
             description = "Retrieve every post with ascending order."
     )
-    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostAsc(UserDetails userDetails);
+    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostAsc();
 
     @Operation(
             summary = "Retrieve every post",
             description = "Retrieve every post with descending order."
     )
-    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc(UserDetails userDetails);
+    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc();
 
     @Operation(
             summary = "Retrieve a post",

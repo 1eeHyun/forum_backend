@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 import static com.example.forum.common.SortOrder.ASCENDING;
-import static com.example.forum.common.SortOrder.DESCENDING;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -31,31 +30,17 @@ public class PostController implements PostApiDocs {
 
     @Override
     @GetMapping("/accessible/asc")
-    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostAsc(
-            @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostAsc() {
 
-        List<PostResponseDTO> posts;
-        if (userDetails == null) posts = postService.getAccessiblePosts(null, ASCENDING);
-        else {
-            String username = authValidator.extractUsername(userDetails);
-            posts = postService.getAccessiblePosts(username, ASCENDING);
-        }
-
+        List<PostResponseDTO> posts = postService.getAccessiblePosts(ASCENDING);
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 
     @Override
     @GetMapping("/accessible/desc")
-    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc(
-            @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc() {
 
-        List<PostResponseDTO> posts;
-        if (userDetails == null) posts = postService.getAccessiblePosts(null, DESCENDING);
-        else {
-            String username = authValidator.extractUsername(userDetails);
-            posts = postService.getAccessiblePosts(username, DESCENDING);
-        }
-
+        List<PostResponseDTO> posts = postService.getAccessiblePosts(ASCENDING);
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 

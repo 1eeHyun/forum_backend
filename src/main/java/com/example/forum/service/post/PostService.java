@@ -11,7 +11,7 @@ import java.util.List;
 public interface PostService {
 
     // Retrieve posts - GET
-    List<PostResponseDTO> getAccessiblePosts(String username, SortOrder sortOrder);
+    List<PostResponseDTO> getAccessiblePosts(SortOrder sortOrder);
     PostDetailDTO getPostDetail(Long postId, String username);
 
     // Post posts - POST

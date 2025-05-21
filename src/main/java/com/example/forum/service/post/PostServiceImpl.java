@@ -39,30 +39,10 @@ public class PostServiceImpl implements PostService {
 
 
     @Override
-    public List<PostResponseDTO> getAccessiblePosts(String username, SortOrder sortOrder) {
-        List<Post> posts;
-
-        if (username != null) {
-            User user = authValidator.validateUserByUsername(username);
-
-            List<Community> communities = communityMemberRepository.findByUser(user)
-                    .stream()
-                    .map(CommunityMember::getCommunity)
-                    .toList();
-
-            posts = postRepository.findAccessiblePosts(communities);
-
-            posts.sort((p1, p2) -> {
-                return sortOrder == SortOrder.ASCENDING
-                        ? p1.getCreatedAt().compareTo(p2.getCreatedAt())
-                        : p2.getCreatedAt().compareTo(p1.getCreatedAt());
-            });
-
-        } else {
-
-            if (sortOrder == SortOrder.ASCENDING) posts = postRepository.findAllByVisibilityOrderByCreatedAtAsc(Visibility.PUBLIC);
-            else posts = postRepository.findAllByVisibilityOrderByCreatedAtDesc(Visibility.PUBLIC);
-        }
+    public List<PostResponseDTO> getAccessiblePosts(SortOrder sortOrder) {
+        List<Post> posts = sortOrder == SortOrder.ASCENDING
+                ? postRepository.findAllNonPrivatePostsAsc()
+                : postRepository.findAllNonPrivatePostsDesc();
 
         return posts.stream()
                 .map(PostMapper::toPostResponseDTO)

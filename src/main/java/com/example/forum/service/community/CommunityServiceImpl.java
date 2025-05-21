@@ -32,6 +32,9 @@ public class CommunityServiceImpl implements CommunityService {
     @Value("${app.default-community-image}")
     private String defaultCommunityImageUrl;
 
+    @Value("${app.default-banner-image}")
+    private String defaultBannerImage;
+
     @Override
     @Transactional
     public Long create(CommunityRequestDTO dto, String username) {
@@ -43,6 +46,7 @@ public class CommunityServiceImpl implements CommunityService {
                 .description(dto.getDescription())
                 .creator(user)
                 .profileImageUrl(defaultCommunityImageUrl)
+                .bannerImageUrl(defaultBannerImage)
                 .build();
 
         communityRepository.save(community);
