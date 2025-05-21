@@ -2,5 +2,6 @@ package com.example.forum.common;
 
 public enum SortOrder {
     ASCENDING,
-    DESCENDING
+    DESCENDING,
+    TOP_LIKED
 }

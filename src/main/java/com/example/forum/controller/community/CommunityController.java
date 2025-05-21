@@ -51,7 +51,7 @@ public class CommunityController implements CommunityApiDocs {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        String username = "";
+        String username = null;
         if (userDetails != null) {
             username = authValidator.extractUsername(userDetails);
         }

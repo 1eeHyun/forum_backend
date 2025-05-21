@@ -6,12 +6,10 @@ import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Community;
-import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostImage;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
-import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.post.PostImageRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.S3Service;
@@ -32,7 +30,6 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final PostValidator postValidator;
     private final CommunityValidator communityValidator;
-    private final CommunityMemberRepository communityMemberRepository;
     private final PostImageRepository postImageRepository;
 
     private final S3Service s3Service;
@@ -40,9 +37,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostResponseDTO> getAccessiblePosts(SortOrder sortOrder) {
-        List<Post> posts = sortOrder == SortOrder.ASCENDING
-                ? postRepository.findAllNonPrivatePostsAsc()
-                : postRepository.findAllNonPrivatePostsDesc();
+        List<Post> posts;
+
+        if (sortOrder == SortOrder.ASCENDING) {
+            posts = postRepository.findAllNonPrivatePostsAsc();
+        } else if (sortOrder == SortOrder.TOP_LIKED) {
+            posts = postRepository.findAllNonPrivatePostsWithLikeCountDesc();
+        } else {
+            posts = postRepository.findAllNonPrivatePostsDesc();
+        }
 
         return posts.stream()
                 .map(PostMapper::toPostResponseDTO)

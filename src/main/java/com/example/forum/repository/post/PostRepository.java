@@ -62,4 +62,19 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "comments", "comments.author", "comments.author.profile"
     })
     Optional<Post> findById(Long postId);
+
+    @Query(
+    """
+        SELECT p FROM Post p
+        JOIN FETCH p.author a
+        JOIN FETCH a.profile
+        LEFT JOIN FETCH p.community c
+        LEFT JOIN p.likes l
+        WHERE p.visibility = 'PUBLIC' OR p.visibility = 'COMMUNITY'
+        GROUP BY p
+        ORDER BY COUNT(l) DESC, p.createdAt DESC
+    """
+    )
+    List<Post> findAllNonPrivatePostsWithLikeCountDesc();
+
 }

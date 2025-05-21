@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 import static com.example.forum.common.SortOrder.ASCENDING;
+import static com.example.forum.common.SortOrder.DESCENDING;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -40,7 +41,7 @@ public class PostController implements PostApiDocs {
     @GetMapping("/accessible/desc")
     public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getAllPublicPostDesc() {
 
-        List<PostResponseDTO> posts = postService.getAccessiblePosts(ASCENDING);
+        List<PostResponseDTO> posts = postService.getAccessiblePosts(DESCENDING);
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 
