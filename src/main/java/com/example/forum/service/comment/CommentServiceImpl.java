@@ -23,23 +23,35 @@ import static com.example.forum.model.notification.Notification.NotificationType
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
+    // Validators
     private final CommentValidator commentValidator;
-    private final CommentRepository commentRepository;
     private final PostValidator postValidator;
     private final AuthValidator userValidator;
 
+    // Repositories
+    private final CommentRepository commentRepository;
+
+    // Services
     private final NotificationService notificationService;
 
+    /**
+     * This method handles creating a new comment
+     * @param username
+     * @param dto
+     */
     @Override
     public CommentResponseDTO createComment(String username, CommentRequestDTO dto) {
 
+        // Retrieves post from dto and current user after validations succeed
         Post post = postValidator.validatePost(dto.getPostId());
         User user = userValidator.validateUserByUsername(username);
 
+        // New Comment, will be a parent of replies
         Comment parent = null;
         if (dto.getParentCommentId() != null)
             parent = commentValidator.validateCommentId(dto.getParentCommentId());
 
+        // Creates a new comment and sets its parent
         Comment comment = Comment.builder()
                 .post(post)
                 .author(user)
@@ -49,6 +61,7 @@ public class CommentServiceImpl implements CommentService {
 
         Comment saved = commentRepository.save(comment);
 
+        // Sends notifications to the post author
         User postAuthor = post.getAuthor();
         notificationService.sendNotification(
                 postAuthor.getUsername(),
@@ -62,6 +75,12 @@ public class CommentServiceImpl implements CommentService {
         return CommentMapper.toDTO(saved);
     }
 
+    /**
+     *
+     * @param username
+     * @param dto
+     * @return
+     */
     @Override
     public CommentResponseDTO createReply(String username, CommentRequestDTO dto) {
 

@@ -4,6 +4,7 @@ import com.example.forum.exception.post.PostNotAuthorException;
 import com.example.forum.exception.post.PostNotFoundException;
 import com.example.forum.exception.post.TooManyPostImagesException;
 import com.example.forum.model.post.Post;
+import com.example.forum.model.user.User;
 import com.example.forum.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,13 +22,10 @@ public class PostValidator {
                 .orElseThrow(PostNotFoundException::new);
     }
 
-    public Post validatePostAuthor(Long id, String username) {
-        Post post = validatePost(id);
+    public void validatePostAuthor(Post post, User user) {
 
-        if (!post.getAuthor().getUsername().equals(username))
+        if (!post.getAuthor().equals(user))
             throw new PostNotAuthorException();
-
-        return post;
     }
 
     public Post validateDetailPostId(Long postId) {

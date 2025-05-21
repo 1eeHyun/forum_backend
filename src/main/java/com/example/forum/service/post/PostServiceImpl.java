@@ -145,7 +145,10 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostResponseDTO updatePost(Long postId, PostRequestDTO dto, String username) {
 
-        Post post = postValidator.validatePostAuthor(postId, username);
+        User user = authValidator.validateUserByUsername(username);
+        Post post = postValidator.validatePost(postId);
+
+        postValidator.validatePostAuthor(post, user);
 
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
@@ -157,7 +160,11 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deletePost(Long postId, String username) {
 
-        Post post = postValidator.validatePostAuthor(postId, username);
+        User user = authValidator.validateUserByUsername(username);
+        Post post = postValidator.validatePost(postId);
+
+        postValidator.validatePostAuthor(post, user);
+
         postRepository.delete(post);
     }
 

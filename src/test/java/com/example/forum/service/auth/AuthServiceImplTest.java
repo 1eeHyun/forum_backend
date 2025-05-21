@@ -2,7 +2,9 @@ package com.example.forum.service.auth;
 
 import com.example.forum.dto.auth.LoginRequestDTO;
 import com.example.forum.dto.auth.LoginResponseDTO;
+import com.example.forum.dto.auth.MeResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
+import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.profile.ProfileRepository;
 import com.example.forum.repository.user.UserRepository;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -40,14 +43,18 @@ class AuthServiceImplTest {
     @Mock
     private AuthValidator authValidator;
 
+    @Mock
+    private JwtTokenProvider jwtTokenProvider;
+
     @BeforeEach
-    void setup() {
-        // You can use this if necessary
+    void setUp() {
+        // Set default profile image URL for testing
         ReflectionTestUtils.setField(authService, "defaultProfileImageUrl", "default.png");
     }
 
     @Test
-    void signup_withValidData_shouldSaveUser() {
+    @DisplayName("Should save user and profile when signup is successful")
+    void signup_withValidData_shouldSaveUserAndProfile() {
         // given
         SignupRequestDTO dto = new SignupRequestDTO();
         dto.setUsername("testuser");
@@ -63,6 +70,7 @@ class AuthServiceImplTest {
         authService.signup(dto);
 
         // then
+        // Capture saved user
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
@@ -72,10 +80,19 @@ class AuthServiceImplTest {
         assertNotNull(savedUser.getProfile());
         assertEquals("Tester", savedUser.getProfile().getNickname());
         assertEquals("default.png", savedUser.getProfile().getImageUrl());
+
+        // Capture saved profile
+        ArgumentCaptor<Profile> profileCaptor = ArgumentCaptor.forClass(Profile.class);
+        verify(profileRepository).save(profileCaptor.capture());
+        Profile savedProfile = profileCaptor.getValue();
+
+        assertEquals("Tester", savedProfile.getNickname());
+        assertEquals(savedUser, savedProfile.getUser());
     }
 
     @Test
-    void signup_withDuplicateUsername_shouldThrowException() {
+    @DisplayName("Should throw exception when signup with duplicate username or email")
+    void signup_withDuplicateUsernameOrEmail_shouldThrowException() {
         // given
         SignupRequestDTO dto = new SignupRequestDTO();
         dto.setUsername("duplicate");
@@ -93,9 +110,11 @@ class AuthServiceImplTest {
 
         assertEquals("Username exists", ex.getMessage());
         verify(userRepository, never()).save(any());
+        verify(profileRepository, never()).save(any());
     }
 
     @Test
+    @DisplayName("Should return JWT token when login is successful")
     void login_withValidCredentials_shouldReturnToken() {
         // given
         LoginRequestDTO dto = new LoginRequestDTO();
@@ -109,18 +128,119 @@ class AuthServiceImplTest {
         when(authValidator.validateLogin(dto.getUsernameOrEmail(), dto.getPassword()))
                 .thenReturn(mockUser);
 
-        JwtTokenProvider mockJwtProvider = mock(JwtTokenProvider.class);
-        String mockToken = "mock.jwt.token";
-
-        // inject mocked jwtTokenProvider
-        ReflectionTestUtils.setField(authService, "jwtTokenProvider", mockJwtProvider);
-        when(mockJwtProvider.generateToken(mockUser.getUsername())).thenReturn(mockToken);
+        when(jwtTokenProvider.generateToken(mockUser.getUsername())).thenReturn("mock.jwt.token");
 
         // when
         LoginResponseDTO response = authService.login(dto);
 
         // then
         assertNotNull(response);
-        assertEquals(mockToken, response.getToken());
+        assertEquals("mock.jwt.token", response.getToken());
+        assertEquals("testuser", response.getUsername());
+        verify(userRepository).save(mockUser); // user marked as online
+        assertTrue(mockUser.isOnline());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when login fails due to invalid credentials")
+    void login_withInvalidCredentials_shouldThrowException() {
+        // given
+        LoginRequestDTO dto = new LoginRequestDTO();
+        dto.setUsernameOrEmail("wronguser");
+        dto.setPassword("wrongpw");
+
+        doThrow(new IllegalArgumentException("Invalid credentials"))
+                .when(authValidator).validateLogin(dto.getUsernameOrEmail(), dto.getPassword());
+
+        // when & then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+            authService.login(dto);
+        });
+
+        assertEquals("Invalid credentials", ex.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should mark user offline when logout is called")
+    void logout_withValidUsername_shouldMarkUserOffline() {
+        // given
+        String username = "testuser";
+        User mockUser = User.builder().username(username).build();
+        mockUser.setOnline(true);
+
+        when(authValidator.validateUserByUsername(username)).thenReturn(mockUser);
+
+        // when
+        authService.logout(username);
+
+        // then
+        assertFalse(mockUser.isOnline());
+        verify(userRepository).save(mockUser);
+    }
+
+    @Test
+    @DisplayName("Should throw exception if logout called with invalid username")
+    void logout_withInvalidUsername_shouldThrowException() {
+        // given
+        String username = "notfound";
+        doThrow(new IllegalArgumentException("User not found"))
+                .when(authValidator).validateUserByUsername(username);
+
+        // when & then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+            authService.logout(username);
+        });
+
+        assertEquals("User not found", ex.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should return MeResponseDTO for valid user")
+    void getCurrUser_withValidUsername_shouldReturnMeResponseDTO() {
+        // given
+        String username = "testuser";
+        User mockUser = User.builder().username(username).build();
+        MeResponseDTO meResponseDTO = MeResponseDTO.builder()
+                .username(username)
+                .email("test@example.com")
+                .nickname("Tester")
+                .imageDTO(null)
+                .build();
+
+        when(authValidator.validateUserByUsername(username)).thenReturn(mockUser);
+
+        // Static mocking for AuthorMapper.toMeDto
+        try (MockedStatic<com.example.forum.mapper.auth.AuthorMapper> mapper =
+                     mockStatic(com.example.forum.mapper.auth.AuthorMapper.class)) {
+            mapper.when(() -> com.example.forum.mapper.auth.AuthorMapper.toMeDto(mockUser))
+                    .thenReturn(meResponseDTO);
+
+            // when
+            MeResponseDTO result = authService.getCurrUser(username);
+
+            // then
+            assertNotNull(result);
+            assertEquals(username, result.getUsername());
+            assertEquals("Tester", result.getNickname());
+            verify(authValidator).validateUserByUsername(username);
+        }
+    }
+
+    @Test
+    @DisplayName("Should throw exception if getCurrUser called with invalid username")
+    void getCurrUser_withInvalidUsername_shouldThrowException() {
+        // given
+        String username = "notfound";
+        doThrow(new IllegalArgumentException("User not found"))
+                .when(authValidator).validateUserByUsername(username);
+
+        // when & then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+            authService.getCurrUser(username);
+        });
+
+        assertEquals("User not found", ex.getMessage());
     }
 }

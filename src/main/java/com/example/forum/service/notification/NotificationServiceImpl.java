@@ -24,6 +24,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void sendNotification(String receiverUsername, String senderUsername, NotificationType type, Long targetId, Comment comment, String message) {
+
         User receiver = userValidator.validateUserByUsername(receiverUsername);
         User sender = userValidator.validateUserByUsername(senderUsername);
 

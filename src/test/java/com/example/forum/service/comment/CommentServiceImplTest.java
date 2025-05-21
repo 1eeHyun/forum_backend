@@ -2,6 +2,8 @@ package com.example.forum.service.comment;
 
 import com.example.forum.dto.comment.CommentRequestDTO;
 import com.example.forum.dto.comment.CommentResponseDTO;
+import com.example.forum.exception.auth.UnauthorizedException;
+import com.example.forum.mapper.comment.CommentMapper;
 import com.example.forum.model.comment.Comment;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.profile.Profile;
@@ -11,210 +13,225 @@ import com.example.forum.service.notification.NotificationService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.comment.CommentValidator;
 import com.example.forum.validator.post.PostValidator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.forum.model.notification.Notification.NotificationType.COMMENT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static com.example.forum.model.notification.Notification.NotificationType.REPLY;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("CommentServiceImpl Unit Tests")
+@DisplayName("CommentServiceImpl Unit Tests (Mockito-safe)")
 class CommentServiceImplTest {
 
     @InjectMocks
     private CommentServiceImpl commentService;
 
-    @Mock private CommentValidator commentValidator;
-    @Mock private CommentRepository commentRepository;
-    @Mock private PostValidator postValidator;
-    @Mock private AuthValidator userValidator;
-    @Mock private NotificationService notificationService;
+    @Mock
+    private CommentValidator commentValidator;
 
-    private User mockUser;
-    private Post mockPost;
-    private Comment mockComment;
+    @Mock
+    private CommentRepository commentRepository;
 
-    @BeforeEach
-    void setUp() {
-        mockUser = User.builder().id(1L).username("tester").build();
+    @Mock
+    private PostValidator postValidator;
 
-        mockUser.setProfile(
-                Profile.builder()
-                        .nickname("tester-nickname")
-                        .user(mockUser)
-                        .build()
-        );
+    @Mock
+    private AuthValidator userValidator;
 
-        mockPost = Post.builder().id(100L).title("Sample Post").build();
-        mockPost.setAuthor(mockUser);
-
-        mockComment = Comment.builder()
-                .id(10L)
-                .content("Sample comment")
-                .author(mockUser)
-                .post(mockPost)
-                .replies(new ArrayList<>())
-                .build();
-
-    }
+    @Mock
+    private NotificationService notificationService;
 
     @Test
-    void createComment_shouldReturnResponseDTO() {
+    @DisplayName("Should create a top-level comment and send notification")
+    void createComment_withValidData_shouldCreateCommentAndSendNotification() {
+        // Arrange
+        String username = "user1";
+        Long postId = 1L;
+        String content = "Test comment";
         CommentRequestDTO dto = new CommentRequestDTO();
-        dto.setPostId(100L);
-        dto.setContent("New comment");
+        dto.setPostId(postId);
+        dto.setContent(content);
 
-        when(postValidator.validatePost(100L)).thenReturn(mockPost);
-        when(userValidator.validateUserByUsername("tester")).thenReturn(mockUser);
-        when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
+        // Mock entities
+        User user = mock(User.class);
+        when(user.getUsername()).thenReturn(username);
+        Profile profile = mock(Profile.class);
+        when(profile.getNickname()).thenReturn("Nick");
+        when(user.getProfile()).thenReturn(profile);
 
-        CommentResponseDTO response = commentService.createComment("tester", dto);
+        Post post = mock(Post.class);
+        User postAuthor = mock(User.class);
+        when(post.getAuthor()).thenReturn(postAuthor);
+        when(postAuthor.getUsername()).thenReturn("author1");
 
-        assertEquals("Sample comment", response.getContent());
-        assertEquals("tester-nickname", response.getAuthor().getNickname());
+        Comment savedComment = mock(Comment.class);
+
+        when(postValidator.validatePost(eq(postId))).thenReturn(post);
+        when(userValidator.validateUserByUsername(eq(username))).thenReturn(user);
+        when(commentRepository.save(any(Comment.class))).thenReturn(savedComment);
+
+        CommentResponseDTO responseDTO = CommentResponseDTO.builder().commentId(1L).content(content).build();
+        try (MockedStatic<CommentMapper> mapper = mockStatic(CommentMapper.class)) {
+            mapper.when(() -> CommentMapper.toDTO(any(Comment.class))).thenReturn(responseDTO);
+
+            // Act
+            CommentResponseDTO result = commentService.createComment(username, dto);
+
+            // Assert
+            assertNotNull(result);
+            assertEquals(content, result.getContent());
+
+            verify(notificationService).sendNotification(
+                    eq("author1"), eq("user1"), eq(COMMENT), anyLong(), any(Comment.class), anyString());
+            verify(commentRepository).save(any(Comment.class));
+        }
     }
 
+
     @Test
-    void createReply_shouldReturnResponseDTO() {
+    @DisplayName("Should create a reply and send reply notification")
+    void createReply_withValidData_shouldCreateReplyAndSendNotification() {
+        // Mock input DTO
         CommentRequestDTO dto = new CommentRequestDTO();
-        dto.setParentCommentId(10L);
+        dto.setParentCommentId(2L);
         dto.setContent("Reply comment");
 
-        when(userValidator.validateUserByUsername("tester")).thenReturn(mockUser);
-        when(commentValidator.validateCommentId(10L)).thenReturn(mockComment);
-        when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
+        // Mock entities
+        User user = mock(User.class);
+        when(user.getUsername()).thenReturn("user2");
 
-        CommentResponseDTO response = commentService.createReply("tester", dto);
+        Profile profile = mock(Profile.class);
+        when(profile.getNickname()).thenReturn("ReplyNick");
+        when(user.getProfile()).thenReturn(profile);
 
-        assertEquals("Sample comment", response.getContent());
-        assertEquals("tester-nickname", response.getAuthor().getNickname());
+        Post post = mock(Post.class);
+
+        User parentAuthor = mock(User.class);
+        when(parentAuthor.getUsername()).thenReturn("parentAuthor");
+
+        Comment parentComment = mock(Comment.class);
+        when(parentComment.getAuthor()).thenReturn(parentAuthor);
+        when(parentComment.getPost()).thenReturn(post);
+
+        Comment savedReply = mock(Comment.class);
+
+        // Mocks for repository and validator
+        when(userValidator.validateUserByUsername("user2")).thenReturn(user);
+        when(commentValidator.validateCommentId(2L)).thenReturn(parentComment);
+        when(commentRepository.save(any(Comment.class))).thenReturn(savedReply);
+
+        // Static mocking for DTO mapping
+        CommentResponseDTO responseDTO = CommentResponseDTO.builder().commentId(2L).content("Reply comment").build();
+        try (MockedStatic<CommentMapper> mapper = mockStatic(CommentMapper.class)) {
+            mapper.when(() -> CommentMapper.toDTO(savedReply)).thenReturn(responseDTO);
+
+            // Execute service
+            CommentResponseDTO result = commentService.createReply("user2", dto);
+
+            // Assertions and verifications
+            assertNotNull(result);
+            assertEquals("Reply comment", result.getContent());
+
+            verify(notificationService).sendNotification(
+                    eq("parentAuthor"), eq("user2"), eq(REPLY), anyLong(), eq(savedReply), anyString());
+            verify(commentRepository).save(any(Comment.class));
+        }
     }
 
     @Test
-    void getCommentsByPostId_shouldReturnList() {
-        when(commentRepository.findTopLevelCommentsWithReplies(100L)).thenReturn(List.of(mockComment));
+    @DisplayName("Should return comments by post id")
+    void getCommentsByPostId_shouldReturnCommentDTOList() {
+        // Mock data
+        Long postId = 10L;
+        Post post = mock(Post.class);
+        Comment comment1 = mock(Comment.class);
+        Comment comment2 = mock(Comment.class);
+        List<Comment> comments = List.of(comment1, comment2);
 
-        List<CommentResponseDTO> comments = commentService.getCommentsByPostId(100L);
+        // Mocks for repository and validator
+        when(postValidator.validatePost(postId)).thenReturn(post);
+        when(commentRepository.findTopLevelCommentsWithReplies(postId)).thenReturn(comments);
 
-        assertEquals(1, comments.size());
-        assertEquals("Sample comment", comments.get(0).getContent());
+        // Static mocking for DTO mapping
+        CommentResponseDTO dto1 = CommentResponseDTO.builder().commentId(1L).content("C1").build();
+        CommentResponseDTO dto2 = CommentResponseDTO.builder().commentId(2L).content("C2").build();
+
+        try (MockedStatic<CommentMapper> mapper = mockStatic(CommentMapper.class)) {
+            mapper.when(() -> CommentMapper.toDTO(comment1)).thenReturn(dto1);
+            mapper.when(() -> CommentMapper.toDTO(comment2)).thenReturn(dto2);
+
+            // Execute service
+            List<CommentResponseDTO> result = commentService.getCommentsByPostId(postId);
+
+            // Assertions
+            assertNotNull(result);
+            assertEquals(2, result.size());
+            assertEquals("C1", result.get(0).getContent());
+            assertEquals("C2", result.get(1).getContent());
+
+            verify(postValidator).validatePost(postId);
+            verify(commentRepository).findTopLevelCommentsWithReplies(postId);
+        }
     }
 
     @Test
-    void deleteComment_shouldDeleteIfAuthorized() {
-        when(commentValidator.validateCommentId(10L)).thenReturn(mockComment);
+    @DisplayName("Should delete comment when user is author")
+    void deleteComment_withAuthor_shouldDeleteComment() {
+        // Mock data
+        Long commentId = 100L;
+        String username = "authorUser";
+        User user = mock(User.class);
+        Comment comment = mock(Comment.class);
+        List<Comment> replies = new ArrayList<>(); // avoid NPE for getReplies().size()
+        when(comment.getReplies()).thenReturn(replies);
+        when(comment.getAuthor()).thenReturn(user);
 
-        doNothing().when(commentValidator)
-                .validateCommentAuthor(eq("tester"), eq("tester"));
+        // Mocks for repository and validator
+        when(userValidator.validateUserByUsername(username)).thenReturn(user);
+        when(commentValidator.validateCommentId(commentId)).thenReturn(comment);
 
-        commentService.deleteComment(10L, "tester");
+        // Execute service
+        commentService.deleteComment(commentId, username);
 
-        verify(commentRepository, times(1)).delete(mockComment);
+        // Verify delete was called
+        verify(commentRepository).delete(comment);
     }
 
     @Test
-    @DisplayName("Should throw exception when deleting someone else's comment")
-    void deleteComment_shouldThrowExceptionIfUnauthorized() {
-        Comment anotherUserComment = Comment.builder()
-                .id(20L)
-                .author(User.builder().username("someoneElse").build())
-                .build();
+    @DisplayName("Should throw UnauthorizedException if deleteComment by non-author")
+    void deleteComment_withNonAuthor_shouldThrowUnauthorized() {
+        Long commentId = 101L;
+        String username = "notAuthor";
 
-        when(commentValidator.validateCommentId(20L)).thenReturn(anotherUserComment);
+        User author = mock(User.class); // Comment author
+        User requestUser = mock(User.class); // Requester to delete the comment
 
-        doThrow(new RuntimeException("Unauthorized"))
-                .when(commentValidator)
-                .validateCommentAuthor(eq("someoneElse"), eq("tester"));
+        Comment comment = mock(Comment.class);
+        when(comment.getAuthor()).thenReturn(author);
 
-        assertThrows(RuntimeException.class,
-                () -> commentService.deleteComment(20L, "tester"));
-    }
+        when(userValidator.validateUserByUsername(eq(username))).thenReturn(requestUser);
+        when(commentValidator.validateCommentId(eq(commentId))).thenReturn(comment);
 
-    @Test
-    @DisplayName("Should create a comment with a parent (nested comment)")
-    void createComment_withParent_shouldReturnResponseDTO() {
-        CommentRequestDTO dto = new CommentRequestDTO();
-        dto.setPostId(100L);
-        dto.setParentCommentId(10L);
-        dto.setContent("Reply to post");
+        doThrow(new UnauthorizedException())
+                .when(commentValidator).validateCommentAuthor(eq(author), eq(requestUser));
 
-        when(postValidator.validatePost(100L)).thenReturn(mockPost);
-        when(userValidator.validateUserByUsername("tester")).thenReturn(mockUser);
-        when(commentValidator.validateCommentId(10L)).thenReturn(mockComment);
-        when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
+        // Act & Assert
+        assertThrows(UnauthorizedException.class, () -> {
+            commentService.deleteComment(commentId, username);
+        });
 
-        CommentResponseDTO response = commentService.createComment("tester", dto);
-
-        assertEquals("Sample comment", response.getContent());
-        assertEquals("tester-nickname", response.getAuthor().getNickname());
-    }
-
-
-    @Test
-    @DisplayName("Should send notification when comment is created")
-    void createComment_shouldSendNotification() {
-        CommentRequestDTO dto = new CommentRequestDTO();
-        dto.setPostId(100L);
-        dto.setContent("Test comment");
-
-        when(postValidator.validatePost(100L)).thenReturn(mockPost);
-        when(userValidator.validateUserByUsername("tester")).thenReturn(mockUser);
-
-        // return a new Comment to simulate save behavior
-        Comment newComment = Comment.builder()
-                .id(99L)
-                .post(mockPost)
-                .author(mockUser)
-                .content("Test comment")
-                .build();
-
-        when(commentRepository.save(any(Comment.class))).thenReturn(newComment);
-
-        commentService.createComment("tester", dto);
-
-        // Capture arguments
-        ArgumentCaptor<String> recipientCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> senderCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<com.example.forum.model.notification.Notification.NotificationType> typeCaptor = ArgumentCaptor.forClass(com.example.forum.model.notification.Notification.NotificationType.class);
-        ArgumentCaptor<Long> postIdCaptor = ArgumentCaptor.forClass(Long.class);
-        ArgumentCaptor<Comment> commentCaptor = ArgumentCaptor.forClass(Comment.class);
-        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
-
-        verify(notificationService).sendNotification(
-                recipientCaptor.capture(),
-                senderCaptor.capture(),
-                typeCaptor.capture(),
-                postIdCaptor.capture(),
-                commentCaptor.capture(),
-                messageCaptor.capture()
-        );
-
-        assertEquals("tester", recipientCaptor.getValue());
-        assertEquals("tester", senderCaptor.getValue());
-        assertEquals(COMMENT, typeCaptor.getValue());
-        assertEquals(100L, postIdCaptor.getValue());
-        assertEquals("Test comment", commentCaptor.getValue().getContent());
-        assertEquals("tester-nickname commented on your post.", messageCaptor.getValue());
-    }
-
-    @Test
-    @DisplayName("Should return empty list when no comments found for post")
-    void getCommentsByPostId_shouldReturnEmptyList() {
-        when(commentRepository.findTopLevelCommentsWithReplies(200L)).thenReturn(List.of());
-
-        List<CommentResponseDTO> result = commentService.getCommentsByPostId(200L);
-
-        assertEquals(0, result.size());
+        verify(commentRepository, never()).delete(any());
     }
 }

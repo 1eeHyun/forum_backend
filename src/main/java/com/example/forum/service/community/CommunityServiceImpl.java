@@ -23,24 +23,37 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommunityServiceImpl implements CommunityService {
 
-
+    // Validators
     private final AuthValidator authValidator;
     private final CommunityValidator communityValidator;
-    private final CommunityMemberRepository communityMemberRepository;
-    private final CommunityRepository communityRepository;
 
+    // Repositories
+    private final CommunityRepository communityRepository;
+    private final CommunityMemberRepository communityMemberRepository;
+
+    // Services
+    ///////
+
+    // Default values
     @Value("${app.default-community-image}")
     private String defaultCommunityImageUrl;
 
     @Value("${app.default-banner-image}")
     private String defaultBannerImage;
 
+    /**
+     * This method handles creating a new community
+     * @param dto
+     * @param username
+     * @return
+     */
     @Override
     @Transactional
     public Long create(CommunityRequestDTO dto, String username) {
 
         User user = authValidator.validateUserByUsername(username);
 
+        //
         Community community = Community.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
