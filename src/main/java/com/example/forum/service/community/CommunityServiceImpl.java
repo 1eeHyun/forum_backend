@@ -43,9 +43,6 @@ public class CommunityServiceImpl implements CommunityService {
 
     /**
      * This method handles creating a new community
-     * @param dto
-     * @param username
-     * @return
      */
     @Override
     @Transactional
@@ -53,7 +50,6 @@ public class CommunityServiceImpl implements CommunityService {
 
         User user = authValidator.validateUserByUsername(username);
 
-        //
         Community community = Community.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
@@ -75,6 +71,9 @@ public class CommunityServiceImpl implements CommunityService {
         return community.getId();
     }
 
+    /**
+     * This method handles community's detail information
+     */
     @Override
     public CommunityDetailDTO getCommunityDetail(Long id, String username) {
 

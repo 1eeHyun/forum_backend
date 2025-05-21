@@ -19,8 +19,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PostLikeServiceImpl implements PostLikeService{
 
+    // Validators
     private final AuthValidator userValidator;
     private final PostValidator postValidator;
+
+    // Repositories
     private final PostLikeRepository postLikeRepository;
 
     @Override
