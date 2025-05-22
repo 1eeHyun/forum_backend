@@ -9,9 +9,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -111,16 +112,17 @@ public interface PostApiDocs {
     )
     @PostMapping
     ResponseEntity<CommonResponse<PostResponseDTO>> create(
-            @RequestBody(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Post request body containing title, content, etc.",
                     required = true
             )
+            @org.springframework.web.bind.annotation.RequestBody
+            @Valid
             PostRequestDTO dto,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
     );
-
 
     @Operation(
             summary = "Update a post",
@@ -156,7 +158,7 @@ public interface PostApiDocs {
                     )
             }
     )
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     ResponseEntity<CommonResponse<PostResponseDTO>> update(
             @Parameter(description = "ID of the post to update", required = true)
             @PathVariable Long id,

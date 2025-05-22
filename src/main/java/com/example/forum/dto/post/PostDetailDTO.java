@@ -24,6 +24,7 @@ public class PostDetailDTO {
     private int likeCount;
     private int commentCount;
     private Boolean likedByMe;
+    private Boolean isAuthor;
     private List<LikeUserDTO> likeUsers;
     private List<CommentResponseDTO> comments;
     private LocalDateTime createdAt;

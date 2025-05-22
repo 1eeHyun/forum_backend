@@ -23,73 +23,65 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
+    // Validators
     private final AuthValidator authValidator;
-    private final PostRepository postRepository;
     private final PostValidator postValidator;
     private final CommunityValidator communityValidator;
+
+    // Repositories
+    private final PostRepository postRepository;
     private final CommunityMemberRepository communityMemberRepository;
     private final PostImageRepository postImageRepository;
 
+    // Services
     private final S3Service s3Service;
 
     @Override
     public List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size) {
 
-        int offset = page == 0 ? 0 : 3 + (page - 1) * 10;
-        int limit = page == 0 ? 3 : 10;
+        int offset = (page == 0) ? 0 : 3 + (page - 1) * 10;
+        int limit = (page == 0) ? 3 : 10;
 
-        List<Post> posts = null;
-
-        if (sort == SortOrder.TOP_LIKED) {
-            posts = postRepository.findTopLikedPaged(limit, offset);
-        } else if (sort == SortOrder.OLDEST) {
-            posts = postRepository.findPagedPostsAsc(limit, offset);
-        } else {
-            posts = postRepository.findPagedPosts(limit, offset);
-        }
-
-        if (posts == null)
-            throw new IllegalArgumentException("Should be dead code");
+        List<Post> posts = switch (sort) {
+            case NEWEST -> postRepository.findPagedPostsNewest(limit, offset);
+            case OLDEST -> postRepository.findPagedPostsOldest(limit, offset);
+            case TOP_LIKED -> postRepository.findPagedPostsTopLiked(limit, offset);
+        };
 
         return posts.stream()
                 .map(PostMapper::toPostResponseDTO)
                 .toList();
     }
 
+
     @Override
     public List<PostResponseDTO> getProfilePosts(String targetUsername, String currentUsername, SortOrder sort, int page, int size) {
 
         User target = authValidator.validateUserByUsername(targetUsername);
-        User user = authValidator.validateUserByUsername(currentUsername);
+        User current = authValidator.validateUserByUsername(currentUsername);
 
-        boolean includePrivate = target.getId().equals(user.getId());
+        boolean includePrivate = target.getId().equals(current.getId());
 
-        if (sort == SortOrder.TOP_LIKED) {
-            List<Post> posts = postRepository.findPostsByAuthorOrderByLikeCount(target, includePrivate);
-            return posts.stream()
-                    .skip((long) page * size)
-                    .limit(size)
-                    .map(PostMapper::toPostResponseDTO)
-                    .toList();
-        }
-
-        Sort sortObj = switch (sort) {
-            case NEWEST -> Sort.by("createdAt").descending().and(Sort.by("id").descending());
-            case OLDEST -> Sort.by("createdAt").ascending().and(Sort.by("id").ascending());
-            default -> throw new IllegalStateException("Unhandled sort type: " + sort);
+        Pageable pageable = switch (sort) {
+            case NEWEST -> PageRequest.of(page, size, Sort.by("createdAt").descending().and(Sort.by("id").descending()));
+            case OLDEST -> PageRequest.of(page, size, Sort.by("createdAt").ascending().and(Sort.by("id").ascending()));
+            case TOP_LIKED -> PageRequest.of(page, size, Sort.by(Sort.Order.desc("likeCount"), Sort.Order.desc("createdAt")));
         };
 
-        Pageable pageable = PageRequest.of(page, size, sortObj);
-
-        Page<Post> postPage = postRepository.findPostsByAuthor(target, includePrivate, pageable);
+        Page<Post> postPage = switch (sort) {
+            case TOP_LIKED -> postRepository.findPostsByAuthorWithLikeCount(target, includePrivate, pageable);
+            default -> postRepository.findPostsByAuthor(target, includePrivate, pageable);
+        };
 
         return postPage.stream()
                 .map(PostMapper::toPostResponseDTO)
@@ -111,55 +103,44 @@ public class PostServiceImpl implements PostService {
     public PostResponseDTO createPost(PostRequestDTO dto, String username) {
 
         User user = authValidator.validateUserByUsername(username);
-
-        Community community = null;
-        if (dto.getVisibility() == Visibility.COMMUNITY)
-            community = communityValidator.validateMemberCommunity(dto.getCommunityId(), user);
-
+        Community community = getValidCommunityIfNeeded(dto, user);
         postValidator.validatePostCount(dto.getImageUrls());
 
-        Post post = Post.builder()
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .visibility(dto.getVisibility())
-                .community(community)
-                .author(user)
-                .build();
-
+        Post post = buildPostFromDto(dto, user, community);
         postRepository.save(post);
 
-
-        if (dto.getImageUrls() != null) {
-            List<PostImage> images = dto.getImageUrls().stream()
-                            .map(url -> PostImage.builder()
-                                    .imageUrl(url)
-                                    .post(post)
-                                    .build())
-                            .toList();
-
-            post.setImages(images);
-            postImageRepository.saveAll(images);
-        }
+        savePostImages(post, dto.getImageUrls());
 
         return PostMapper.toPostResponseDTO(post);
     }
 
     @Override
+    @Transactional
     public PostResponseDTO updatePost(Long postId, PostRequestDTO dto, String username) {
 
         User user = authValidator.validateUserByUsername(username);
         Post post = postValidator.validatePost(postId);
-
         postValidator.validatePostAuthor(post, user);
+
+        Community community = getValidCommunityIfNeeded(dto, user);
+        postValidator.validatePostCount(dto.getImageUrls());
 
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
+        post.setVisibility(dto.getVisibility());
+        post.setCommunity(community);
+
+        postImageRepository.deleteAll(post.getImages());
+        post.getImages().clear();
+
+        savePostImages(post, dto.getImageUrls());
 
         Post savedPost = postRepository.save(post);
         return PostMapper.toPostResponseDTO(savedPost);
     }
 
     @Override
+    @Transactional
     public void deletePost(Long postId, String username) {
 
         User user = authValidator.validateUserByUsername(username);
@@ -173,5 +154,44 @@ public class PostServiceImpl implements PostService {
     @Override
     public String uploadImage(MultipartFile file) {
         return s3Service.upload(file);
+    }
+
+    // ------------------------------ Helper methods -------------------------------------
+
+    private Community getValidCommunityIfNeeded(PostRequestDTO dto, User user) {
+
+        if (dto.getVisibility() == Visibility.COMMUNITY) {
+            return communityValidator.validateMemberCommunity(dto.getCommunityId(), user);
+        }
+
+        return null;
+    }
+
+    private Post buildPostFromDto(PostRequestDTO dto, User user, Community community) {
+        return Post.builder()
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .visibility(dto.getVisibility())
+                .community(community)
+                .author(user)
+                .build();
+    }
+
+    private void savePostImages(Post post, List<String> imageUrls) {
+
+        if (imageUrls == null) {
+            post.setImages(new ArrayList<>());
+            return;
+        }
+
+        List<PostImage> images = imageUrls.stream()
+                .map(url -> PostImage.builder()
+                        .imageUrl(url)
+                        .post(post)
+                        .build())
+                .toList();
+        post.setImages(images);
+
+        postImageRepository.saveAll(images);
     }
 }

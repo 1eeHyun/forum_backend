@@ -40,6 +40,7 @@ public class PostMapper {
                 .content(post.getContent())
                 // Author of the post
                 .author(AuthorMapper.toDto(post.getAuthor()))
+                .isAuthor(post.getAuthor().equals(viewer))
 
                 .community(post.getCommunity() != null
                         ? CommunityMapper.toPreviewDTO(post.getCommunity())
