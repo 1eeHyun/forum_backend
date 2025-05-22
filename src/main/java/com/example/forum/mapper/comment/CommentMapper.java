@@ -25,13 +25,6 @@ public class CommentMapper {
                 .build();
     }
 
-//    private Long commentId;
-//    private String content;
-//    private AuthorDTO author;
-//    private LocalDateTime createdAt;
-//    private LocalDateTime updatedAt;
-//    private List<CommentResponseDTO> replies;
-
     public static List<CommentResponseDTO> toResponseList(List<Comment> allComments) {
 
         Map<Long, List<Comment>> replyMap = new HashMap<>();

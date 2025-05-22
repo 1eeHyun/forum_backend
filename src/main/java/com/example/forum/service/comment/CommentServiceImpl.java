@@ -4,6 +4,7 @@ import com.example.forum.dto.comment.CommentRequestDTO;
 import com.example.forum.dto.comment.CommentResponseDTO;
 import com.example.forum.mapper.comment.CommentMapper;
 import com.example.forum.model.comment.Comment;
+import com.example.forum.model.notification.Notification.NotificationType;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.comment.CommentRepository;
@@ -42,37 +43,21 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentResponseDTO createComment(String username, CommentRequestDTO dto) {
 
-        // Retrieves post from dto and current user after validations succeed
-        Post post = postValidator.validatePost(dto.getPostId());
         User user = userValidator.validateUserByUsername(username);
+        Post post = postValidator.validatePost(dto.getPostId());
 
-        // New Comment, will be a parent of replies
-        Comment parent = null;
-        if (dto.getParentCommentId() != null)
-            parent = commentValidator.validateCommentId(dto.getParentCommentId());
+        Comment savedComment = createAndSaveComment(user, post, dto.getContent(), null);
 
-        // Creates a new comment and sets its parent
-        Comment comment = Comment.builder()
-                .post(post)
-                .author(user)
-                .content(dto.getContent())
-                .parentComment(parent)
-                .build();
-
-        Comment saved = commentRepository.save(comment);
-
-        // Sends notifications to the post author
-        User postAuthor = post.getAuthor();
-        notificationService.sendNotification(
-                postAuthor.getUsername(),
-                user.getUsername(),
+        sendNotificationIfNeeded(
+                post.getAuthor(),
+                user,
+                post,
+                savedComment,
                 COMMENT,
-                post.getId(),
-                comment,
                 user.getProfile().getNickname() + " commented on your post."
         );
 
-        return CommentMapper.toDTO(saved);
+        return CommentMapper.toDTO(savedComment);
     }
 
     /**
@@ -87,27 +72,18 @@ public class CommentServiceImpl implements CommentService {
         User user = userValidator.validateUserByUsername(username);
         Comment parent = commentValidator.validateCommentId(dto.getParentCommentId());
 
-        Comment reply = Comment.builder()
-                .post(parent.getPost())
-                .author(user)
-                .parentComment(parent)
-                .content(dto.getContent())
-                .build();
+        Comment savedReply = createAndSaveComment(user, parent.getPost(), dto.getContent(), parent);
 
-        Comment saved = commentRepository.save(reply);
-
-        User parentAuthor = parent.getAuthor();
-
-        notificationService.sendNotification(
-                parentAuthor.getUsername(),
-                user.getUsername(),
+        sendNotificationIfNeeded(
+                parent.getAuthor(),
+                user,
+                parent.getPost(),
+                savedReply,
                 REPLY,
-                parent.getPost().getId(),
-                saved,
                 user.getProfile().getNickname() + " replied to your comment."
         );
 
-        return CommentMapper.toDTO(saved);
+        return CommentMapper.toDTO(savedReply);
     }
 
     @Override
@@ -133,5 +109,33 @@ public class CommentServiceImpl implements CommentService {
 
         comment.getReplies().size();
         commentRepository.delete(comment);
+    }
+
+    /**
+     * This method helps create and save a comment
+     * @return Comment entity object
+     */
+    private Comment createAndSaveComment(User user, Post post, String content, Comment parent) {
+        return commentRepository.save(
+                Comment.builder()
+                        .post(post)
+                        .author(user)
+                        .content(content)
+                        .parentComment(parent)
+                        .build()
+        );
+    }
+
+    private void sendNotificationIfNeeded(User receiver, User sender, Post post, Comment comment, NotificationType type, String message) {
+        if (!receiver.equals(sender)) {
+            notificationService.sendNotification(
+                    receiver.getUsername(),
+                    sender.getUsername(),
+                    type,
+                    post.getId(),
+                    comment,
+                    message
+            );
+        }
     }
 }
