@@ -98,7 +98,12 @@ public class PostServiceImplTest {
         @DisplayName("Success - Create public post without community")
         void success_create_public_post() {
             when(authValidator.validateUserByUsername(anyString())).thenReturn(user);
-            when(postRepository.save(any(Post.class))).thenReturn(post);
+
+            when(postRepository.save(any(Post.class))).thenAnswer(invocation -> {
+                Post p = invocation.getArgument(0);
+                p.setId(1L); // Optional: ID set
+                return p; // return actual post with updated title
+            });
 
             PostResponseDTO response = postService.createPost(postRequestDTO, "john");
 
@@ -193,7 +198,17 @@ public class PostServiceImplTest {
             when(authValidator.validateUserByUsername(anyString())).thenReturn(user);
             when(postValidator.validatePost(anyLong())).thenReturn(post);
             doNothing().when(postValidator).validatePostAuthor(any(), any());
-            when(postRepository.save(any())).thenReturn(post);
+
+            // Return the updated post argument directly
+            when(postRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // postRequestDTO must have "New Title"
+            PostRequestDTO postRequestDTO = PostRequestDTO.builder()
+                    .title("New Title")
+                    .content("Updated content")
+                    .visibility(Visibility.PUBLIC)
+                    .imageUrls(List.of())
+                    .build();
 
             PostResponseDTO result = postService.updatePost(1L, postRequestDTO, "john");
 

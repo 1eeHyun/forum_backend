@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,8 +28,9 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostImage> images;
+    private List<PostImage> images = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Visibility visibility;

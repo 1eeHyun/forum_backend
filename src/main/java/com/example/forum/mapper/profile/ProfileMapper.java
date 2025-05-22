@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ProfileMapper {
 
-    public static ProfileResponseDTO toDTO(User targetUser, boolean isMe, List<FollowUserDTO> followers, List<FollowUserDTO> followings) {
+    public static ProfileResponseDTO toDTO(User targetUser, boolean isMe, int postCount, List<FollowUserDTO> followers, List<FollowUserDTO> followings) {
         return ProfileResponseDTO.builder()
                 .username(targetUser.getUsername())
                 .nickname(targetUser.getProfile().getNickname())
@@ -20,6 +20,7 @@ public class ProfileMapper {
                         .imagePositionY(targetUser.getProfile().getImagePositionY())
                         .build())
                 .isMe(isMe)
+                .totalPostCount(postCount)
                 .followers(followers)
                 .followings(followings)
                 .build();

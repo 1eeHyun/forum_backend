@@ -17,6 +17,8 @@ public class ProfileResponseDTO {
     private ImageDTO imageDTO;
     private Boolean isMe;
 
+    private Integer totalPostCount;
+
     private List<FollowUserDTO> followers;
     private List<FollowUserDTO> followings;
 }

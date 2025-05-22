@@ -46,6 +46,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         User user = userValidator.validateUserByUsername(targetUsername);
         boolean isMe = loginUsername != null && loginUsername.equals(targetUsername);
+        int postCount = postRepository.countByAuthor(user);
 
         List<Post> posts;
 
@@ -82,7 +83,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .map(f -> new FollowUserDTO(f.getFollowing()))
                 .toList();
 
-        ProfileResponseDTO dto = ProfileMapper.toDTO(user, isMe, followers, followings);
+        ProfileResponseDTO dto = ProfileMapper.toDTO(user, isMe, postCount, followers, followings);
         return dto;
     }
 

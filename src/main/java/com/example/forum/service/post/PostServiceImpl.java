@@ -2,10 +2,12 @@ package com.example.forum.service.post;
 
 import com.example.forum.common.SortOrder;
 import com.example.forum.dto.post.PostDetailDTO;
+import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Community;
+import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostImage;
 import com.example.forum.model.post.Visibility;
@@ -18,6 +20,7 @@ import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import com.example.forum.validator.post.PostValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +34,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PostServiceImpl implements PostService {
 
     // Validators
@@ -62,7 +66,6 @@ public class PostServiceImpl implements PostService {
                 .map(PostMapper::toPostResponseDTO)
                 .toList();
     }
-
 
     @Override
     public List<PostResponseDTO> getProfilePosts(String targetUsername, String currentUsername, SortOrder sort, int page, int size) {
@@ -100,6 +103,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public PostResponseDTO createPost(PostRequestDTO dto, String username) {
 
         User user = authValidator.validateUserByUsername(username);
@@ -107,36 +111,54 @@ public class PostServiceImpl implements PostService {
         postValidator.validatePostCount(dto.getImageUrls());
 
         Post post = buildPostFromDto(dto, user, community);
-        postRepository.save(post);
-
         savePostImages(post, dto.getImageUrls());
 
-        return PostMapper.toPostResponseDTO(post);
+        Post savedPost = postRepository.save(post);
+        return PostMapper.toPostResponseDTO(savedPost);
     }
 
     @Override
     @Transactional
     public PostResponseDTO updatePost(Long postId, PostRequestDTO dto, String username) {
 
+        // 1. Get user and post
         User user = authValidator.validateUserByUsername(username);
         Post post = postValidator.validatePost(postId);
+
         postValidator.validatePostAuthor(post, user);
 
-        Community community = getValidCommunityIfNeeded(dto, user);
+        // 2. Validate image count and community (optional)
         postValidator.validatePostCount(dto.getImageUrls());
+        Community community = getValidCommunityIfNeeded(dto, user);
 
+        // 3. Delete old images from S3
+        List<String> oldImageUrls = post.getImages() == null ? List.of()
+                : post.getImages().stream().map(PostImage::getImageUrl).toList();
+        s3Service.deleteFiles(oldImageUrls);
+
+        // 4. Update fields
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
         post.setVisibility(dto.getVisibility());
         post.setCommunity(community);
 
-        postImageRepository.deleteAll(post.getImages());
-        post.getImages().clear();
+        // 5. Update images safely
+        if (post.getImages() != null) post.getImages().clear();
+        if (dto.getImageUrls() != null) {
+            for (String url : dto.getImageUrls()) {
+                PostImage image = PostImage.builder()
+                        .imageUrl(url)
+                        .post(post)
+                        .build();
+                post.getImages().add(image);
+            }
+        }
 
-        savePostImages(post, dto.getImageUrls());
+        // 6. Optional: explicit save (if needed by repository listeners)
+        Post saved = postRepository.save(post); // make sure Hibernate flushes
 
-        Post savedPost = postRepository.save(post);
-        return PostMapper.toPostResponseDTO(savedPost);
+        // 7. Return response
+        return PostMapper.toPostResponseDTO(saved); // or just `post`
     }
 
     @Override
@@ -154,6 +176,27 @@ public class PostServiceImpl implements PostService {
     @Override
     public String uploadImage(MultipartFile file) {
         return s3Service.upload(file);
+    }
+
+    @Override
+    public List<PostPreviewDTO> getRecentPostsFromJoinedCommunities(String username) {
+
+        if (username == null)
+            return null;
+
+        User user = authValidator.validateUserByUsername(username);
+        List<CommunityMember> memberShips = communityMemberRepository.findByUser(user);
+        List<Community> joinedCommunities = memberShips.stream()
+                .map(CommunityMember::getCommunity)
+                .toList();
+
+        if (joinedCommunities.isEmpty()) return List.of();
+
+        List<Post> posts = postRepository.findTop5ByCommunityInOrderByCreatedAtDesc(joinedCommunities);
+
+        return posts.stream()
+                .map(PostMapper::toPreviewDTO)
+                .toList();
     }
 
     // ------------------------------ Helper methods -------------------------------------
@@ -179,19 +222,23 @@ public class PostServiceImpl implements PostService {
 
     private void savePostImages(Post post, List<String> imageUrls) {
 
-        if (imageUrls == null) {
+        // Ensure list is initialized (in case builder left it null)
+        if (post.getImages() == null) {
             post.setImages(new ArrayList<>());
-            return;
         }
 
-        List<PostImage> images = imageUrls.stream()
-                .map(url -> PostImage.builder()
-                        .imageUrl(url)
-                        .post(post)
-                        .build())
-                .toList();
-        post.setImages(images);
+        // Clear old references (orphanRemoval = true will delete them from DB)
+        post.getImages().clear();
 
-        postImageRepository.saveAll(images);
+        if (imageUrls == null || imageUrls.isEmpty()) return;
+
+        for (String url : imageUrls) {
+            PostImage image = PostImage.builder()
+                    .imageUrl(url)
+                    .post(post)
+                    .build();
+            post.getImages().add(image);
+        }
     }
+
 }

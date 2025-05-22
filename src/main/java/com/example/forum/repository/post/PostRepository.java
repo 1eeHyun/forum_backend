@@ -78,6 +78,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             Pageable pageable
     );
 
+    List<Post> findTop5ByCommunityInOrderByCreatedAtDesc(List<Community> communities);
+
+    int countByAuthor(User author);
+
     // -------------------------------------------------------------------
     // Simple List: Latest posts by author (used for fallback, etc.)
     // -------------------------------------------------------------------

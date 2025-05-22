@@ -2,6 +2,7 @@ package com.example.forum.mapper.post;
 
 import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.PostDetailDTO;
+import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.auth.AuthorMapper;
 import com.example.forum.mapper.comment.CommentMapper;
@@ -14,6 +15,8 @@ import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 
 import java.util.List;
+
+import static com.example.forum.common.TimeUtils.formatTimeAgo;
 
 public class PostMapper {
     public static PostResponseDTO toPostResponseDTO(Post post) {
@@ -82,6 +85,45 @@ public class PostMapper {
                 .username(user.getUsername())
                 .nickname(profile.getNickname())
                 .imageDTO(ImageMapper.profileToImageDto(profile))
+                .build();
+    }
+
+//    private Long id;
+//    private String title;
+//    private List<String> thumbnailUrls;
+//    private int likeCount;
+//    private int commentCount;
+//    private String createdAtFormatted;
+//
+//    private String communityName;
+//    private Long communityId;
+//    private ImageDTO communityProfilePicture;
+//
+//    private String authorNickname;
+//    private AuthorDTO author;
+
+    public static PostPreviewDTO toPreviewDTO(Post post) {
+
+        return PostPreviewDTO.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .thumbnailUrls(
+                        post.getImages().stream().map(PostImage::getImageUrl).toList()
+                )
+                .likeCount(post.getLikes().size())
+                .commentCount(post.getComments().size())
+                .createdAtFormatted(formatTimeAgo(post.getCreatedAt()))
+
+                .communityName(post.getCommunity().getName())
+                .communityId(post.getCommunity().getId())
+                .communityProfilePicture(
+                        ImageMapper.toDto(
+                                post.getCommunity().getProfileImageUrl(),
+                                post.getCommunity().getProfileImagePositionX(),
+                                post.getCommunity().getProfileImagePositionY()))
+
+                .authorNickname(post.getAuthor().getProfile().getNickname())
+                .author(AuthorMapper.toDto(post.getAuthor()))
                 .build();
     }
 

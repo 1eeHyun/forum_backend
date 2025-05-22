@@ -5,6 +5,7 @@ import com.example.forum.controller.post.docs.PostApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.PostDetailDTO;
+import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.service.like.post.PostLikeService;
@@ -72,7 +73,7 @@ public class PostController implements PostApiDocs {
     @Override
     public ResponseEntity<CommonResponse<PostResponseDTO>> update(
             @PathVariable Long id,
-            @RequestBody PostRequestDTO dto,
+            @Valid @RequestBody PostRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
@@ -107,23 +108,35 @@ public class PostController implements PostApiDocs {
     public ResponseEntity<CommonResponse<Long>> getLikesCount(
             @PathVariable Long id) {
 
-        long ret = postLikeService.countLikes(id);
-        return ResponseEntity.ok(CommonResponse.success(ret));
+        long response = postLikeService.countLikes(id);
+        return ResponseEntity.ok(CommonResponse.success(response));
     }
 
     @Override
     public ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(
             @PathVariable Long id) {
 
-        List<LikeUserDTO> ret = postLikeService.getLikeUsers(id);
-        return ResponseEntity.ok(CommonResponse.success(ret));
+        List<LikeUserDTO> response = postLikeService.getLikeUsers(id);
+        return ResponseEntity.ok(CommonResponse.success(response));
     }
 
     @Override
     public ResponseEntity<CommonResponse<String>> uploadPostImage(
             @RequestParam("file") MultipartFile file) {
 
-        String ret = postService.uploadImage(file);
-        return ResponseEntity.ok(CommonResponse.success(ret));
+        String response = postService.uploadImage(file);
+        return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentPostsFromMyCommunities(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = null;
+        if (userDetails != null)
+             username = authValidator.extractUsername(userDetails);
+
+        List<PostPreviewDTO> response = postService.getRecentPostsFromJoinedCommunities(username);
+        return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

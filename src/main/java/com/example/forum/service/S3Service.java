@@ -1,6 +1,7 @@
 package com.example.forum.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.forum.exception.s3.UploadFailedException;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -44,7 +46,27 @@ public class S3Service {
     }
 
     private String extractKeyFromUrl(String url) {
-        return url.substring(url.indexOf(".com/") + 5);
+
+        int idx = url.indexOf(".com/");
+        if (idx == -1 || idx + 5 >= url.length()) return null;
+        return url.substring(idx + 5);
     }
+
+
+    public void deleteFiles(List<String> urls) {
+        List<String> keys = urls.stream()
+                .map(this::extractKeyFromUrl)
+                .filter(key -> key != null && !key.isBlank())
+                .toList();
+
+        if (keys.isEmpty())
+            return;
+
+        DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucket)
+                .withKeys(keys.toArray(new String[0]));
+
+        amazonS3.deleteObjects(deleteRequest);
+    }
+
 
 }
