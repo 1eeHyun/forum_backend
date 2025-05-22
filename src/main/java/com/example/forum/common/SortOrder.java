@@ -6,6 +6,7 @@ public enum SortOrder {
     NEWEST;
 
     public static SortOrder from(String value) {
+
         return switch (value.toLowerCase()) {
             case "newest" -> NEWEST;
             case "oldest" -> OLDEST;

@@ -35,11 +35,36 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     )
     List<Post> findPagedPosts(@Param("limit") int limit, @Param("offset") int offset);
 
-    @Query("""
-    SELECT p FROM Post p
-    WHERE p.author = :author
-      AND (:includePrivate = true OR p.visibility <> 'PRIVATE')
-""")
+    @Query(value =
+            """
+                SELECT * FROM post
+                WHERE visibility = 'PUBLIC' OR visibility = 'COMMUNITY'
+                ORDER BY created_at ASC, id ASC
+                LIMIT :limit OFFSET :offset
+            """,
+            nativeQuery = true
+    )
+    List<Post> findPagedPostsAsc(@Param("limit") int limit, @Param("offset") int offset);
+
+    @Query(value = """
+            SELECT p.* FROM post p
+            LEFT JOIN post_likes l ON p.id = l.post_id
+            WHERE p.visibility = 'PUBLIC' OR p.visibility = 'COMMUNITY'
+            GROUP BY p.id
+            ORDER BY COUNT(l.id) DESC, p.created_at DESC
+            LIMIT :limit OFFSET :offset
+        """,
+            nativeQuery = true)
+    List<Post> findTopLikedPaged(@Param("limit") int limit, @Param("offset") int offset);
+
+
+    @Query(
+        """
+            SELECT p FROM Post p
+            WHERE p.author = :author
+              AND (:includePrivate = true OR p.visibility <> 'PRIVATE')
+        """
+    )
     Page<Post> findPostsByAuthor(
             @Param("author") User author,
             @Param("includePrivate") boolean includePrivate,
@@ -89,19 +114,4 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "comments", "comments.author", "comments.author.profile"
     })
     Optional<Post> findById(Long postId);
-
-    @Query(
-        """
-            SELECT p FROM Post p
-            JOIN FETCH p.author a
-            JOIN FETCH a.profile
-            LEFT JOIN FETCH p.community c
-            LEFT JOIN p.likes l
-            WHERE p.visibility = 'PUBLIC' OR p.visibility = 'COMMUNITY'
-            GROUP BY p
-            ORDER BY COUNT(l) DESC, p.createdAt DESC
-        """
-    )
-    List<Post> findAllNonPrivatePostsWithLikeCountDesc();
-
 }

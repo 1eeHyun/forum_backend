@@ -43,19 +43,21 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size) {
 
-        if (sort == SortOrder.TOP_LIKED) {
-            List<Post> posts = postRepository.findAllNonPrivatePostsWithLikeCountDesc();
-            return posts.stream()
-                    .skip((long) page * size)
-                    .limit(size)
-                    .map(PostMapper::toPostResponseDTO)
-                    .toList();
-        }
-
         int offset = page == 0 ? 0 : 3 + (page - 1) * 10;
         int limit = page == 0 ? 3 : 10;
 
-        List<Post> posts = postRepository.findPagedPosts(limit, offset);
+        List<Post> posts = null;
+
+        if (sort == SortOrder.TOP_LIKED) {
+            posts = postRepository.findTopLikedPaged(limit, offset);
+        } else if (sort == SortOrder.OLDEST) {
+            posts = postRepository.findPagedPostsAsc(limit, offset);
+        } else {
+            posts = postRepository.findPagedPosts(limit, offset);
+        }
+
+        if (posts == null)
+            throw new IllegalArgumentException("Should be dead code");
 
         return posts.stream()
                 .map(PostMapper::toPostResponseDTO)
