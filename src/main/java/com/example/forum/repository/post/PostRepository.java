@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         LIMIT :limit OFFSET :offset
     """, nativeQuery = true)
     List<Post> findPagedPostsTopLiked(@Param("limit") int limit, @Param("offset") int offset);
+
+    @Query("""
+    SELECT p FROM Post p 
+    WHERE p.createdAt >= :from 
+    ORDER BY SIZE(p.likes) DESC
+    """)
+    List<Post> findTopPostsSince(@Param("from") LocalDateTime from, Pageable pageable);
 
 
     // -------------------------------------------------------------------

@@ -107,6 +107,7 @@ public class PostMapper {
         return PostPreviewDTO.builder()
                 .id(post.getId())
                 .title(post.getTitle())
+                .content(post.getContent())
                 .thumbnailUrls(
                         post.getImages().stream().map(PostImage::getImageUrl).toList()
                 )
@@ -114,13 +115,18 @@ public class PostMapper {
                 .commentCount(post.getComments().size())
                 .createdAtFormatted(formatTimeAgo(post.getCreatedAt()))
 
-                .communityName(post.getCommunity().getName())
-                .communityId(post.getCommunity().getId())
-                .communityProfilePicture(
-                        ImageMapper.toDto(
+                .communityName(post.getCommunity() != null
+                        ? post.getCommunity().getName()
+                        : null)
+                .communityId(post.getCommunity() != null
+                        ? post.getCommunity().getId()
+                        : null)
+                .communityProfilePicture(post.getCommunity() != null
+                        ? ImageMapper.toDto(
                                 post.getCommunity().getProfileImageUrl(),
                                 post.getCommunity().getProfileImagePositionX(),
-                                post.getCommunity().getProfileImagePositionY()))
+                                post.getCommunity().getProfileImagePositionY())
+                        : null)
 
                 .authorNickname(post.getAuthor().getProfile().getNickname())
                 .author(AuthorMapper.toDto(post.getAuthor()))

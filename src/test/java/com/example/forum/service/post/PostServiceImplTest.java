@@ -11,7 +11,7 @@ import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.post.PostImageRepository;
 import com.example.forum.repository.post.PostRepository;
-import com.example.forum.service.S3Service;
+import com.example.forum.service.common.S3Service;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import com.example.forum.validator.post.PostValidator;

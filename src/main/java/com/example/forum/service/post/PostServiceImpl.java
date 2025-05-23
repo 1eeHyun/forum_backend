@@ -15,7 +15,8 @@ import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.post.PostImageRepository;
 import com.example.forum.repository.post.PostRepository;
-import com.example.forum.service.S3Service;
+import com.example.forum.service.common.RecentViewService;
+import com.example.forum.service.common.S3Service;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import com.example.forum.validator.post.PostValidator;
@@ -29,8 +30,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +51,7 @@ public class PostServiceImpl implements PostService {
 
     // Services
     private final S3Service s3Service;
+    private final RecentViewService recentViewService;
 
     @Override
     public List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size) {
@@ -99,6 +102,10 @@ public class PostServiceImpl implements PostService {
             viewer = authValidator.validateUserByUsername(username);
 
         Post post = postValidator.validateDetailPostId(postId);
+
+        if (viewer != null)
+            recentViewService.addPostView(viewer.getId(), postId);
+
         return PostMapper.toPostDetailDTO(post, viewer);
     }
 
@@ -195,6 +202,63 @@ public class PostServiceImpl implements PostService {
         List<Post> posts = postRepository.findTop5ByCommunityInOrderByCreatedAtDesc(joinedCommunities);
 
         return posts.stream()
+                .map(PostMapper::toPreviewDTO)
+                .toList();
+    }
+
+    @Override
+    public List<PostPreviewDTO> getTopPostsThisWeek() {
+
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+        List<Post> posts = postRepository.findTopPostsSince(oneWeekAgo, PageRequest.of(0, 5));
+
+        return posts.stream()
+                .map(PostMapper::toPreviewDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostPreviewDTO> getRecentlyViewedPosts(String username) {
+
+        User user = authValidator.validateUserByUsername(username);
+        Long userId = user.getId();
+
+        // Retrieve postId list from Redis post
+        List<Long> ids = recentViewService.getRecentPostIds(userId);
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Retrieve posts from DB
+        List<Post> posts = postRepository.findAllById(ids);
+
+        // postId → Post Mapping
+        Map<Long, Post> postMap = posts.stream()
+                .collect(Collectors.toMap(Post::getId, p -> p));
+
+        // Convert to DTO
+        return ids.stream()
+                .map(postMap::get)
+                .filter(Objects::nonNull)
+                .map(PostMapper::toPreviewDTO)
+                .toList();
+    }
+
+    @Override
+    public List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids) {
+
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Post> posts = postRepository.findAllById(ids);
+
+        Map<Long, Post> map = posts.stream()
+                .collect(Collectors.toMap(Post::getId, p -> p));
+
+        return ids.stream()
+                .map(map::get)
+                .filter(Objects::nonNull)
                 .map(PostMapper::toPreviewDTO)
                 .toList();
     }

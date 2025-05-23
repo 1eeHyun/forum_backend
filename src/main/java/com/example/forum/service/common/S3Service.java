@@ -1,4 +1,4 @@
-package com.example.forum.service;
+package com.example.forum.service.common;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;

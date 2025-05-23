@@ -13,6 +13,7 @@ public class PostPreviewDTO {
 
     private Long id;
     private String title;
+    private String content;
     private List<String> thumbnailUrls;
     private int likeCount;
     private int commentCount;

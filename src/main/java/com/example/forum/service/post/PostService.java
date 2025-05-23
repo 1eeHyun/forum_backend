@@ -16,6 +16,7 @@ public interface PostService {
     PostDetailDTO getPostDetail(Long postId, String username);
 
     List<PostPreviewDTO> getRecentPostsFromJoinedCommunities(String username);
+    List<PostPreviewDTO> getTopPostsThisWeek();
 
     // Post posts - POST
     PostResponseDTO createPost(PostRequestDTO dto, String username);
@@ -25,4 +26,7 @@ public interface PostService {
     void deletePost(Long postId, String username);
 
     String uploadImage(MultipartFile file);
+
+    List<PostPreviewDTO> getRecentlyViewedPosts(String username);
+    List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids);
 }

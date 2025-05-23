@@ -12,7 +12,7 @@ import com.example.forum.repository.post.PostRepository;
 import com.example.forum.repository.profile.ProfileRepository;
 import com.example.forum.repository.user.UserRepository;
 import com.example.forum.security.JwtTokenProvider;
-import com.example.forum.service.S3Service;
+import com.example.forum.service.common.S3Service;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.profile.ProfileValidator;
 import org.junit.jupiter.api.BeforeEach;

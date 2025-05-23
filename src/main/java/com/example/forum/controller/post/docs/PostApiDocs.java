@@ -354,4 +354,30 @@ public interface PostApiDocs {
     ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentPostsFromMyCommunities(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
     );
+
+    @Operation(
+            summary = "Get top posts this week",
+            description = "Retrieves the top 10 posts with the highest number of likes created within the last 7 days.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Top posts fetched successfully"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized")
+            }
+    )
+    @GetMapping("/top-weekly")
+    ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTopPostsThisWeek();
+
+    @Operation(
+            summary = "Get recently viewed posts",
+            description = "Retrieves the list of posts the user has recently viewed. "
+                    + "If logged in, views are fetched from Redis. "
+                    + "If not logged in, postIds must be passed via query parameters.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Recently viewed posts fetched successfully")
+            }
+    )
+    @GetMapping("/recent")
+    ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentlyViewedPosts(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) List<Long> localIds
+    );
 }

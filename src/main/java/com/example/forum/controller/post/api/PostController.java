@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -138,5 +139,34 @@ public class PostController implements PostApiDocs {
 
         List<PostPreviewDTO> response = postService.getRecentPostsFromJoinedCommunities(username);
         return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTopPostsThisWeek() {
+
+        List<PostPreviewDTO> topPosts = postService.getTopPostsThisWeek();
+        return ResponseEntity.ok(CommonResponse.success(topPosts));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentlyViewedPosts(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) List<Long> localIds) {
+
+
+        if (userDetails != null) {
+            String username = authValidator.extractUsername(userDetails);
+            List<PostPreviewDTO> response = postService.getRecentlyViewedPosts(username);
+
+            return ResponseEntity.ok(CommonResponse.success(response));
+        }
+
+        if (localIds != null && !localIds.isEmpty()) {
+            return ResponseEntity.ok(CommonResponse.success(
+                    postService.getPreviewPostsByIds(localIds)
+            ));
+        }
+
+        return ResponseEntity.ok(CommonResponse.success(Collections.emptyList()));
     }
 }
