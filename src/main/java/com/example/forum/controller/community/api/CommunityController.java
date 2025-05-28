@@ -1,6 +1,6 @@
-package com.example.forum.controller.community.docs;
+package com.example.forum.controller.community.api;
 
-import com.example.forum.controller.community.api.CommunityApiDocs;
+import com.example.forum.controller.community.docs.CommunityApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
