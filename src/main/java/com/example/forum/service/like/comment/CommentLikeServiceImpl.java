@@ -6,6 +6,7 @@ import com.example.forum.model.like.CommentLike;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.like.CommentDislikeRepository;
 import com.example.forum.repository.like.CommentLikeRepository;
+import com.example.forum.service.notification.NotificationHelper;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.comment.CommentValidator;
 import lombok.RequiredArgsConstructor;
@@ -14,14 +15,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.example.forum.model.notification.Notification.NotificationType.COMMENT_LIKE;
+import static com.example.forum.service.notification.NotificationMessageBuilder.buildCommentLikeNotification;
+
 @Service
 @RequiredArgsConstructor
 public class CommentLikeServiceImpl implements CommentLikeService {
 
-    private final CommentLikeRepository likeRepo;
-    private final CommentDislikeRepository dislikeRepo;
+    // Validators
     private final CommentValidator commentValidator;
     private final AuthValidator userValidator;
+
+    // Repositories
+    private final CommentDislikeRepository dislikeRepo;
+    private final CommentLikeRepository likeRepo;
+
+    // Services
+    private final NotificationHelper notificationHelper;
 
     @Override
     @Transactional
@@ -45,6 +55,19 @@ public class CommentLikeServiceImpl implements CommentLikeService {
         like.setComment(comment);
         like.setUser(user);
         likeRepo.save(like);
+
+        // Like notification
+        String message = buildCommentLikeNotification(user.getProfile().getNickname(), comment);
+
+        notificationHelper.sendIfNotSelf(
+
+            comment.getAuthor(),
+            user,
+            comment.getPost(),
+            comment,
+            COMMENT_LIKE,
+            message
+        );
     }
 
     @Override

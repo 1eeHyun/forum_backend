@@ -247,9 +247,8 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids) {
 
-        if (ids == null || ids.isEmpty()) {
+        if (ids == null || ids.isEmpty())
             return Collections.emptyList();
-        }
 
         List<Post> posts = postRepository.findAllById(ids);
 

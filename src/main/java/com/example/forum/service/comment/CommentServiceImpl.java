@@ -4,11 +4,10 @@ import com.example.forum.dto.comment.CommentRequestDTO;
 import com.example.forum.dto.comment.CommentResponseDTO;
 import com.example.forum.mapper.comment.CommentMapper;
 import com.example.forum.model.comment.Comment;
-import com.example.forum.model.notification.Notification.NotificationType;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.comment.CommentRepository;
-import com.example.forum.service.notification.NotificationService;
+import com.example.forum.service.notification.NotificationHelper;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.comment.CommentValidator;
 import com.example.forum.validator.post.PostValidator;
@@ -19,6 +18,8 @@ import java.util.List;
 
 import static com.example.forum.model.notification.Notification.NotificationType.COMMENT;
 import static com.example.forum.model.notification.Notification.NotificationType.REPLY;
+import static com.example.forum.service.notification.NotificationMessageBuilder.buildCommentNotification;
+import static com.example.forum.service.notification.NotificationMessageBuilder.buildReplyNotification;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
 
     // Services
-    private final NotificationService notificationService;
+    private final NotificationHelper notificationHelper;
 
     /**
      * This method handles creating a new comment
@@ -48,13 +49,16 @@ public class CommentServiceImpl implements CommentService {
 
         Comment savedComment = createAndSaveComment(user, post, dto.getContent(), null);
 
-        sendNotificationIfNeeded(
+        // Comment notification
+        String message = buildCommentNotification(user.getProfile().getNickname(), post);
+
+        notificationHelper.sendIfNotSelf(
                 post.getAuthor(),
                 user,
                 post,
                 savedComment,
                 COMMENT,
-                user.getProfile().getNickname() + " commented on your post."
+                message
         );
 
         return CommentMapper.toDTO(savedComment);
@@ -74,13 +78,16 @@ public class CommentServiceImpl implements CommentService {
 
         Comment savedReply = createAndSaveComment(user, parent.getPost(), dto.getContent(), parent);
 
-        sendNotificationIfNeeded(
+        // Reply notification
+        String message = buildReplyNotification(user.getProfile().getNickname(), parent);
+
+        notificationHelper.sendIfNotSelf(
                 parent.getAuthor(),
                 user,
                 parent.getPost(),
                 savedReply,
                 REPLY,
-                user.getProfile().getNickname() + " replied to your comment."
+                message
         );
 
         return CommentMapper.toDTO(savedReply);
@@ -124,18 +131,5 @@ public class CommentServiceImpl implements CommentService {
                         .parentComment(parent)
                         .build()
         );
-    }
-
-    private void sendNotificationIfNeeded(User receiver, User sender, Post post, Comment comment, NotificationType type, String message) {
-        if (!receiver.equals(sender)) {
-            notificationService.sendNotification(
-                    receiver.getUsername(),
-                    sender.getUsername(),
-                    type,
-                    post.getId(),
-                    comment,
-                    message
-            );
-        }
     }
 }

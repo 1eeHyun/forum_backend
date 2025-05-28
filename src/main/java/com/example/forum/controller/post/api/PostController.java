@@ -153,6 +153,7 @@ public class PostController implements PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) List<Long> localIds) {
 
+        log.info("localIds = " + localIds);
 
         if (userDetails != null) {
             String username = authValidator.extractUsername(userDetails);
@@ -162,9 +163,9 @@ public class PostController implements PostApiDocs {
         }
 
         if (localIds != null && !localIds.isEmpty()) {
-            return ResponseEntity.ok(CommonResponse.success(
-                    postService.getPreviewPostsByIds(localIds)
-            ));
+            List<PostPreviewDTO> response = postService.getPreviewPostsByIds(localIds);
+
+            return ResponseEntity.ok(CommonResponse.success(response));
         }
 
         return ResponseEntity.ok(CommonResponse.success(Collections.emptyList()));
