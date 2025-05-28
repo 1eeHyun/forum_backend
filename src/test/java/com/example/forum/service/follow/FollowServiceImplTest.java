@@ -2,8 +2,10 @@ package com.example.forum.service.follow;
 
 import com.example.forum.exception.auth.UserNotFoundException;
 import com.example.forum.model.follow.Follow;
+import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.follow.FollowRepository;
+import com.example.forum.service.notification.NotificationHelper;
 import com.example.forum.validator.auth.AuthValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,11 +23,11 @@ class FollowServiceImplTest {
     @InjectMocks
     private FollowServiceImpl followService;
 
-    @Mock
-    private AuthValidator userValidator;
+    @Mock private AuthValidator userValidator;
 
-    @Mock
-    private FollowRepository followRepository;
+    @Mock private FollowRepository followRepository;
+
+    @Mock private NotificationHelper notificationHelper;
 
     @Test
     @DisplayName("Should follow user when not already following")
@@ -35,6 +37,10 @@ class FollowServiceImplTest {
 
         User currentUser = mock(User.class);
         User targetUser = mock(User.class);
+        Profile currentProfile = mock(Profile.class);
+
+        when(currentUser.getProfile()).thenReturn(currentProfile);
+        when(currentProfile.getNickname()).thenReturn("Alice");
 
         when(userValidator.validateUserByUsername(currentUsername)).thenReturn(currentUser);
         when(userValidator.validateUserByUsername(targetUsername)).thenReturn(targetUser);
@@ -44,6 +50,7 @@ class FollowServiceImplTest {
 
         verify(followRepository).save(any(Follow.class));
     }
+
 
     @Test
     @DisplayName("Should unfollow user when already following")

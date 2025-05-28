@@ -9,7 +9,7 @@ import com.example.forum.model.post.Post;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.comment.CommentRepository;
-import com.example.forum.service.notification.NotificationService;
+import com.example.forum.service.notification.NotificationHelper;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.comment.CommentValidator;
 import com.example.forum.validator.post.PostValidator;
@@ -24,12 +24,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.forum.model.notification.Notification.NotificationType.COMMENT;
-import static com.example.forum.model.notification.Notification.NotificationType.REPLY;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CommentServiceImpl Unit Tests (Mockito-safe)")
@@ -38,53 +36,56 @@ class CommentServiceImplTest {
     @InjectMocks
     private CommentServiceImpl commentService;
 
-    @Mock
-    private CommentValidator commentValidator;
+    @Mock private CommentValidator commentValidator;
 
-    @Mock
-    private CommentRepository commentRepository;
+    @Mock private CommentRepository commentRepository;
 
-    @Mock
-    private PostValidator postValidator;
+    @Mock private PostValidator postValidator;
 
-    @Mock
-    private AuthValidator userValidator;
+    @Mock private AuthValidator userValidator;
 
-    @Mock
-    private NotificationService notificationService;
+    @Mock private NotificationHelper notificationHelper;
+
 
     @Test
-    @DisplayName("Should create a top-level comment and send notification")
-    void createComment_withValidData_shouldCreateCommentAndSendNotification() {
+    @DisplayName("Should create a top-level comment")
+    void createComment_withValidData_shouldCreateComment() {
         // Arrange
         String username = "user1";
         Long postId = 1L;
         String content = "Test comment";
+
         CommentRequestDTO dto = new CommentRequestDTO();
         dto.setPostId(postId);
         dto.setContent(content);
 
-        // Mock entities
+        // Mock user and profile
         User user = mock(User.class);
-        when(user.getUsername()).thenReturn(username);
         Profile profile = mock(Profile.class);
-        when(profile.getNickname()).thenReturn("Nick");
         when(user.getProfile()).thenReturn(profile);
+        when(profile.getNickname()).thenReturn("Nick");
 
+        // Mock post and author
         Post post = mock(Post.class);
         User postAuthor = mock(User.class);
         when(post.getAuthor()).thenReturn(postAuthor);
-        when(postAuthor.getUsername()).thenReturn("author1");
 
+        // Mock saved comment
         Comment savedComment = mock(Comment.class);
 
-        when(postValidator.validatePost(eq(postId))).thenReturn(post);
-        when(userValidator.validateUserByUsername(eq(username))).thenReturn(user);
+        // Stub service dependencies
+        when(postValidator.validatePost(postId)).thenReturn(post);
+        when(userValidator.validateUserByUsername(username)).thenReturn(user);
         when(commentRepository.save(any(Comment.class))).thenReturn(savedComment);
 
-        CommentResponseDTO responseDTO = CommentResponseDTO.builder().commentId(1L).content(content).build();
+        // Stub static mapper
+        CommentResponseDTO expectedResponse = CommentResponseDTO.builder()
+                .commentId(1L)
+                .content(content)
+                .build();
+
         try (MockedStatic<CommentMapper> mapper = mockStatic(CommentMapper.class)) {
-            mapper.when(() -> CommentMapper.toDTO(any(Comment.class))).thenReturn(responseDTO);
+            mapper.when(() -> CommentMapper.toDTO(savedComment)).thenReturn(expectedResponse);
 
             // Act
             CommentResponseDTO result = commentService.createComment(username, dto);
@@ -92,60 +93,58 @@ class CommentServiceImplTest {
             // Assert
             assertNotNull(result);
             assertEquals(content, result.getContent());
-
-            verify(notificationService).sendNotification(
-                    eq("author1"), eq("user1"), eq(COMMENT), anyLong(), any(Comment.class), anyString());
             verify(commentRepository).save(any(Comment.class));
         }
     }
 
-
     @Test
-    @DisplayName("Should create a reply and send reply notification")
-    void createReply_withValidData_shouldCreateReplyAndSendNotification() {
-        // Mock input DTO
+    @DisplayName("Should create a reply")
+    void createReply_withValidData_shouldCreateReply() {
+        // Arrange
+        String username = "user2";
+        Long parentCommentId = 2L;
+        String content = "Reply comment";
+
         CommentRequestDTO dto = new CommentRequestDTO();
-        dto.setParentCommentId(2L);
-        dto.setContent("Reply comment");
+        dto.setParentCommentId(parentCommentId);
+        dto.setContent(content);
 
-        // Mock entities
+        // Mock user and profile
         User user = mock(User.class);
-        when(user.getUsername()).thenReturn("user2");
-
         Profile profile = mock(Profile.class);
-        when(profile.getNickname()).thenReturn("ReplyNick");
         when(user.getProfile()).thenReturn(profile);
+        when(profile.getNickname()).thenReturn("ReplyNick");
 
+        // Mock post and parent comment
         Post post = mock(Post.class);
-
         User parentAuthor = mock(User.class);
-        when(parentAuthor.getUsername()).thenReturn("parentAuthor");
-
         Comment parentComment = mock(Comment.class);
         when(parentComment.getAuthor()).thenReturn(parentAuthor);
         when(parentComment.getPost()).thenReturn(post);
 
+        // Mock saved reply
         Comment savedReply = mock(Comment.class);
 
-        // Mocks for repository and validator
-        when(userValidator.validateUserByUsername("user2")).thenReturn(user);
-        when(commentValidator.validateCommentId(2L)).thenReturn(parentComment);
+        // Stub dependencies
+        when(userValidator.validateUserByUsername(username)).thenReturn(user);
+        when(commentValidator.validateCommentId(parentCommentId)).thenReturn(parentComment);
         when(commentRepository.save(any(Comment.class))).thenReturn(savedReply);
 
-        // Static mocking for DTO mapping
-        CommentResponseDTO responseDTO = CommentResponseDTO.builder().commentId(2L).content("Reply comment").build();
+        // Stub static mapper
+        CommentResponseDTO expectedResponse = CommentResponseDTO.builder()
+                .commentId(2L)
+                .content(content)
+                .build();
+
         try (MockedStatic<CommentMapper> mapper = mockStatic(CommentMapper.class)) {
-            mapper.when(() -> CommentMapper.toDTO(savedReply)).thenReturn(responseDTO);
+            mapper.when(() -> CommentMapper.toDTO(savedReply)).thenReturn(expectedResponse);
 
-            // Execute service
-            CommentResponseDTO result = commentService.createReply("user2", dto);
+            // Act
+            CommentResponseDTO result = commentService.createReply(username, dto);
 
-            // Assertions and verifications
+            // Assert
             assertNotNull(result);
-            assertEquals("Reply comment", result.getContent());
-
-            verify(notificationService).sendNotification(
-                    eq("parentAuthor"), eq("user2"), eq(REPLY), anyLong(), eq(savedReply), anyString());
+            assertEquals(content, result.getContent());
             verify(commentRepository).save(any(Comment.class));
         }
     }

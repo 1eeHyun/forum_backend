@@ -37,18 +37,12 @@ public class PostServiceImplTest {
     @InjectMocks
     private PostServiceImpl postService;
 
-    @Mock
-    private AuthValidator authValidator;
-    @Mock
-    private PostRepository postRepository;
-    @Mock
-    private PostValidator postValidator;
-    @Mock
-    private CommunityValidator communityValidator;
-    @Mock
-    private PostImageRepository postImageRepository;
-    @Mock
-    private S3Service s3Service;
+    @Mock private AuthValidator authValidator;
+    @Mock private PostRepository postRepository;
+    @Mock private PostValidator postValidator;
+    @Mock private CommunityValidator communityValidator;
+    @Mock private PostImageRepository postImageRepository;
+    @Mock private S3Service s3Service;
 
     private User user;
     private Post post;

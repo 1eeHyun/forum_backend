@@ -6,8 +6,10 @@ import com.example.forum.model.like.CommentLike;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.like.CommentDislikeRepository;
 import com.example.forum.repository.like.CommentLikeRepository;
+import com.example.forum.service.notification.NotificationHelper;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.comment.CommentValidator;
+import com.example.forum.model.profile.Profile;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,32 +28,36 @@ class CommentLikeServiceImplTest {
     @InjectMocks
     private CommentLikeServiceImpl commentLikeService;
 
-    @Mock
-    private CommentLikeRepository likeRepo;
-
-    @Mock
-    private CommentDislikeRepository dislikeRepo;
-
-    @Mock
-    private CommentValidator commentValidator;
-
-    @Mock
-    private AuthValidator userValidator;
+    @Mock private CommentLikeRepository likeRepo;
+    @Mock private CommentDislikeRepository dislikeRepo;
+    @Mock private CommentValidator commentValidator;
+    @Mock private AuthValidator userValidator;
+    @Mock private NotificationHelper notificationHelper;
 
     @Test
     @DisplayName("Should toggle like - add new like")
     void toggleLike_addNewLike() {
         Long commentId = 1L;
         String username = "john";
+
+        // Mock domain objects
         Comment comment = mock(Comment.class);
         User user = mock(User.class);
+        Profile profile = mock(Profile.class);
 
+        // Stub profile nickname
+        when(profile.getNickname()).thenReturn("JohnNick");
+        when(user.getProfile()).thenReturn(profile);
+
+        // Stub validators and repo
         when(commentValidator.validateCommentId(commentId)).thenReturn(comment);
         when(userValidator.validateUserByUsername(username)).thenReturn(user);
         when(likeRepo.findByCommentAndUser(comment, user)).thenReturn(Optional.empty());
 
+        // Act
         commentLikeService.toggleLike(commentId, username);
 
+        // Assert
         verify(dislikeRepo).deleteByCommentAndUser(comment, user);
         verify(likeRepo).save(any(CommentLike.class));
     }

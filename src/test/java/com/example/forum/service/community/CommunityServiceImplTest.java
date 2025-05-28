@@ -33,17 +33,13 @@ class CommunityServiceImplTest {
     @InjectMocks
     private CommunityServiceImpl communityService;
 
-    @Mock
-    private AuthValidator authValidator;
+    @Mock private AuthValidator authValidator;
 
-    @Mock
-    private CommunityValidator communityValidator;
+    @Mock private CommunityValidator communityValidator;
 
-    @Mock
-    private CommunityMemberRepository communityMemberRepository;
+    @Mock private CommunityMemberRepository communityMemberRepository;
 
-    @Mock
-    private CommunityRepository communityRepository;
+    @Mock private CommunityRepository communityRepository;
 
     @Test
     @DisplayName("Should create community successfully")

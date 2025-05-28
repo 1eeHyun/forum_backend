@@ -7,6 +7,7 @@ import com.example.forum.model.post.Post;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.like.PostLikeRepository;
+import com.example.forum.service.notification.NotificationHelper;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.post.PostValidator;
 import org.junit.jupiter.api.DisplayName;
@@ -29,29 +30,39 @@ class PostLikeServiceImplTest {
     @InjectMocks
     private PostLikeServiceImpl postLikeService;
 
-    @Mock
-    private AuthValidator userValidator;
+    @Mock private AuthValidator userValidator;
 
-    @Mock
-    private PostValidator postValidator;
+    @Mock private PostValidator postValidator;
 
-    @Mock
-    private PostLikeRepository postLikeRepository;
+    @Mock private PostLikeRepository postLikeRepository;
+
+    @Mock private NotificationHelper notificationHelper;
+
 
     @Test
     @DisplayName("Should like a post when not already liked")
     void toggleLike_shouldLike_whenNotLiked() {
         Long postId = 1L;
         String username = "alice";
+
+        // Mocks
         User user = mock(User.class);
+        Profile profile = mock(Profile.class);
         Post post = mock(Post.class);
 
+        // Stubbing profile and nickname
+        when(user.getProfile()).thenReturn(profile);
+        when(profile.getNickname()).thenReturn("Alice");
+
+        // Stubbing validators and repositories
         when(userValidator.validateUserByUsername(username)).thenReturn(user);
         when(postValidator.validatePost(postId)).thenReturn(post);
         when(postLikeRepository.findByPostAndUser(post, user)).thenReturn(Optional.empty());
 
+        // Act
         postLikeService.toggleLike(postId, username);
 
+        // Assert
         verify(postLikeRepository).save(any(PostLike.class));
     }
 
