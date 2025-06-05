@@ -27,5 +27,5 @@ public class PostRequestDTO {
 
     private List<String> imageUrls;
 
-    private Long communityId; // Optional: community selection
+    private Long categoryId; // Optional: community's category selection
 }

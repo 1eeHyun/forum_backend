@@ -86,7 +86,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             Pageable pageable
     );
 
-    List<Post> findTop5ByCommunityInOrderByCreatedAtDesc(List<Community> communities);
+    @Query("""
+        SELECT p FROM Post p
+        WHERE p.category.community IN :communities
+        ORDER BY p.createdAt DESC
+        """
+    )
+    List<Post> findTop5ByCommunityInOrderByCreatedAtDesc(@Param("communities") List<Community> communities);
+
 
     int countByAuthor(User author);
 
@@ -101,16 +108,16 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // -------------------------------------------------------------------
 
     @Query("""
-        SELECT p FROM Post p
-        JOIN FETCH p.author a
-        JOIN FETCH a.profile
-        WHERE p.author = :author
-          AND (
-            p.visibility = 'PUBLIC'
-            OR (p.visibility = 'COMMUNITY' AND p.community IN :sharedCommunities)
-          )
-        ORDER BY p.createdAt DESC
-    """)
+    SELECT p FROM Post p
+    JOIN FETCH p.author a
+    JOIN FETCH a.profile
+    WHERE p.author = :author
+      AND (
+        p.visibility = 'PUBLIC'
+        OR (p.visibility = 'COMMUNITY' AND p.category.community IN :sharedCommunities)
+      )
+    ORDER BY p.createdAt DESC
+""")
     List<Post> findVisiblePostsForViewer(
             @Param("author") User author,
             @Param("sharedCommunities") List<Community> sharedCommunities
@@ -122,9 +129,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @EntityGraph(attributePaths = {
             "author", "author.profile",
-            "community",
+            "category", "category.community",
             "likes", "likes.user", "likes.user.profile",
             "comments", "comments.author", "comments.author.profile"
     })
     Optional<Post> findById(Long postId);
+
+
 }

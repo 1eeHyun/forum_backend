@@ -1,6 +1,8 @@
 package com.example.forum.controller.community.docs;
 
+
 import com.example.forum.dto.CommonResponse;
+import com.example.forum.dto.community.CategoryRequestDTO;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
@@ -12,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -138,5 +141,31 @@ public interface CommunityApiDocs {
     ResponseEntity<CommonResponse<List<OnlineUserDTO>>> getOnlineUsers(
             @Parameter(description = "ID of the community to check online users", required = true)
             @PathVariable("id") Long id
+    );
+
+    @Operation(
+            summary = "Add a new category to a community",
+            description = "Adds a new category to the specified community. Only accessible by community managers.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Category successfully added"),
+                    @ApiResponse(responseCode = "404", description = "Community not found"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data"),
+                    @ApiResponse(responseCode = "403", description = "User is not authorized to manage this community")
+            }
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Category information including name and optional description",
+            required = true,
+            content = @Content(schema = @Schema(implementation = CategoryRequestDTO.class))
+    )
+    @PostMapping("/{id}/categories")
+    ResponseEntity<CommonResponse<Void>> addCategory(
+            @Parameter(description = "ID of the community to which the category will be added", required = true)
+            @PathVariable("id") Long communityId,
+
+            @Valid @RequestBody CategoryRequestDTO dto,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
     );
 }

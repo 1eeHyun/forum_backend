@@ -1,5 +1,6 @@
 package com.example.forum.service.community;
 
+import com.example.forum.dto.community.CategoryRequestDTO;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
@@ -13,4 +14,8 @@ public interface CommunityService {
     Long create(CommunityRequestDTO dto, String username);
     List<CommunityPreviewDTO> getMyCommunities(String username);
     List<OnlineUserDTO> getOnlineUsers(Long id);
+
+    void addMember(String username);
+    void removeMember(String username);
+    void addCategory(Long communityId, CategoryRequestDTO dto, String username);
 }

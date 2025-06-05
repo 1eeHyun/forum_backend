@@ -1,11 +1,13 @@
 package com.example.forum.service.community;
 
+import com.example.forum.dto.community.CategoryRequestDTO;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
 import com.example.forum.dto.util.OnlineUserDTO;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.util.OnlineUserMapper;
+import com.example.forum.model.community.Category;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.community.CommunityRole;
@@ -112,6 +114,33 @@ public class CommunityServiceImpl implements CommunityService {
                 .filter(cm -> cm.getUser().isOnline())
                 .map(OnlineUserMapper::toDTO)
                 .toList();
+    }
+
+    @Override
+    public void addMember(String username) {
+
+    }
+
+    @Override
+    public void removeMember(String username) {
+
+    }
+
+    @Override
+    public void addCategory(Long communityId, CategoryRequestDTO dto, String username) {
+
+        User user = authValidator.validateUserByUsername(username);
+        Community community = communityValidator.validateExistingCommunity(communityId);
+
+        communityValidator.validateManagerPermission(user, community);
+
+        Category category = Category.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .community(community)
+                .build();
+
+        community.getCategories().add(category);
     }
 
     /*****************************************************

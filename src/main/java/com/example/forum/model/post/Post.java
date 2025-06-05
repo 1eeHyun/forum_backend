@@ -1,7 +1,7 @@
 package com.example.forum.model.post;
 
 import com.example.forum.model.comment.Comment;
-import com.example.forum.model.community.Community;
+import com.example.forum.model.community.Category;
 import com.example.forum.model.like.PostLike;
 import com.example.forum.model.user.User;
 import jakarta.persistence.*;
@@ -36,8 +36,8 @@ public class Post {
     private Visibility visibility;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "community_id")
-    private Community community; // nullable
+    @JoinColumn(name = "category_id", nullable = true)
+    private Category category;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

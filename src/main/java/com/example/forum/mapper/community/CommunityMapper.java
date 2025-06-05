@@ -31,15 +31,17 @@ public class CommunityMapper {
                 .bannerImageUrl(community.getBannerImageUrl())
                 .createdAt(community.getCreatedAt())
                 .rules(new ArrayList<>(community.getRules()))
-                .categories(new ArrayList<>(community.getCategories()))
+                .categories(
+                        community.getCategories().stream()
+                                .map(CategoryMapper::toDTO)
+                                .toList()
+                )
                 .onlineCount(onlineMembers.size())
                 .memberCount(allMembers.size())
                 .role(currentUserRole)
                 .onlineUsers(OnlineUserMapper.toDTO(onlineMembers))
                 .build();
     }
-
-
 
     public static CommunityPreviewDTO toPreviewDTO(Community community) {
 

@@ -1,0 +1,24 @@
+package com.example.forum.validator.community;
+
+import com.example.forum.exception.common.BadRequestException;
+import com.example.forum.exception.community.CategoryNotFoundException;
+import com.example.forum.model.community.Category;
+import com.example.forum.repository.community.CategoryRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class CategoryValidator {
+
+    private final CategoryRepository categoryRepository;
+
+    public Category validateCategoryById(Long id) {
+
+        if (id == null)
+            throw new BadRequestException("Category must be provided for community posts.");
+
+        return categoryRepository.findById(id)
+                .orElseThrow(CategoryNotFoundException::new);
+    }
+}

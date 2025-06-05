@@ -48,10 +48,8 @@ public class Community {
     @Column(name = "rule")
     private Set<String> rules = new HashSet<>();
 
-    @ElementCollection
-    @CollectionTable(name = "community_categories", joinColumns = @JoinColumn(name = "community_id"))
-    @Column(name = "category")
-    private Set<String> categories = new HashSet<>();
+    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Category> categories = new HashSet<>();
 
     private LocalDateTime createdAt;
 
@@ -73,4 +71,11 @@ public class Community {
         this.members.removeIf(cm -> cm.getUser().equals(user));
     }
 
+    public void addCategory(String categoryName) {
+        Category category = Category.builder()
+                .name(categoryName)
+                .community(this)
+                .build();
+        this.categories.add(category);
+    }
 }

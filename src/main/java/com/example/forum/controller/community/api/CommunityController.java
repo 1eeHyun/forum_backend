@@ -2,6 +2,7 @@ package com.example.forum.controller.community.api;
 
 import com.example.forum.controller.community.docs.CommunityApiDocs;
 import com.example.forum.dto.CommonResponse;
+import com.example.forum.dto.community.CategoryRequestDTO;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
@@ -62,5 +63,17 @@ public class CommunityController implements CommunityApiDocs {
 
         List<OnlineUserDTO> response = communityService.getOnlineUsers(id);
         return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<Void>> addCategory(
+            @PathVariable Long communityId,
+            @RequestBody CategoryRequestDTO dto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = authValidator.extractUsername(userDetails);
+        communityService.addCategory(communityId, dto, username);
+
+        return ResponseEntity.ok(CommonResponse.success());
     }
 }

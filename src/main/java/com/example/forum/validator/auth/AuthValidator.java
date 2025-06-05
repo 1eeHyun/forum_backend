@@ -60,5 +60,4 @@ public class AuthValidator {
         if (!targetUsername.equals(username))
             throw new ForbiddenException();
     }
-
 }

@@ -6,6 +6,7 @@ import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.post.PostMapper;
+import com.example.forum.model.community.Category;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.post.Post;
@@ -13,12 +14,11 @@ import com.example.forum.model.post.PostImage;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityMemberRepository;
-import com.example.forum.repository.post.PostImageRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.common.RecentViewService;
 import com.example.forum.service.common.S3Service;
 import com.example.forum.validator.auth.AuthValidator;
-import com.example.forum.validator.community.CommunityValidator;
+import com.example.forum.validator.community.CategoryValidator;
 import com.example.forum.validator.post.PostValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,12 +42,11 @@ public class PostServiceImpl implements PostService {
     // Validators
     private final AuthValidator authValidator;
     private final PostValidator postValidator;
-    private final CommunityValidator communityValidator;
+    private final CategoryValidator categoryValidator;
 
     // Repositories
     private final PostRepository postRepository;
     private final CommunityMemberRepository communityMemberRepository;
-    private final PostImageRepository postImageRepository;
 
     // Services
     private final S3Service s3Service;
@@ -114,10 +113,10 @@ public class PostServiceImpl implements PostService {
     public PostResponseDTO createPost(PostRequestDTO dto, String username) {
 
         User user = authValidator.validateUserByUsername(username);
-        Community community = getValidCommunityIfNeeded(dto, user);
+        Category category = getValidCategoryIfNeeded(dto);
         postValidator.validatePostCount(dto.getImageUrls());
 
-        Post post = buildPostFromDto(dto, user, community);
+        Post post = buildPostFromDto(dto, user, category);
         savePostImages(post, dto.getImageUrls());
 
         Post savedPost = postRepository.save(post);
@@ -136,7 +135,7 @@ public class PostServiceImpl implements PostService {
 
         // 2. Validate image count and community (optional)
         postValidator.validatePostCount(dto.getImageUrls());
-        Community community = getValidCommunityIfNeeded(dto, user);
+        Category category = getValidCategoryIfNeeded(dto);
 
         // 3. Delete old images from S3
         List<String> oldImageUrls = post.getImages() == null ? List.of()
@@ -147,7 +146,7 @@ public class PostServiceImpl implements PostService {
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
         post.setVisibility(dto.getVisibility());
-        post.setCommunity(community);
+        post.setCategory(category);
 
         // 5. Update images safely
         if (post.getImages() != null) post.getImages().clear();
@@ -264,21 +263,21 @@ public class PostServiceImpl implements PostService {
 
     // ------------------------------ Helper methods -------------------------------------
 
-    private Community getValidCommunityIfNeeded(PostRequestDTO dto, User user) {
+    private Category getValidCategoryIfNeeded(PostRequestDTO dto) {
 
         if (dto.getVisibility() == Visibility.COMMUNITY) {
-            return communityValidator.validateMemberCommunity(dto.getCommunityId(), user);
+            return categoryValidator.validateCategoryById(dto.getCategoryId());
         }
 
         return null;
     }
 
-    private Post buildPostFromDto(PostRequestDTO dto, User user, Community community) {
+    private Post buildPostFromDto(PostRequestDTO dto, User user, Category category) {
         return Post.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .visibility(dto.getVisibility())
-                .community(community)
+                .category(category)
                 .author(user)
                 .build();
     }
@@ -303,5 +302,4 @@ public class PostServiceImpl implements PostService {
             post.getImages().add(image);
         }
     }
-
 }

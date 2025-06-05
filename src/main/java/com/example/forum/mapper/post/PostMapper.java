@@ -25,7 +25,11 @@ public class PostMapper {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .author(AuthorMapper.toDto(post.getAuthor()))
-                .community(CommunityMapper.toPreviewDTO(post.getCommunity()))
+                .community(
+                        post.getCategory() != null
+                                ? CommunityMapper.toPreviewDTO(post.getCategory().getCommunity())
+                                : null
+                )
                 .imageUrls(post.getImages() != null
                             ? convertImageUrls(post.getImages())
                             : null)
@@ -45,9 +49,12 @@ public class PostMapper {
                 .author(AuthorMapper.toDto(post.getAuthor()))
                 .isAuthor(post.getAuthor().equals(viewer))
 
-                .community(post.getCommunity() != null
-                        ? CommunityMapper.toPreviewDTO(post.getCommunity())
-                        : null)
+                .community(
+                        post.getCategory() != null
+                                ? CommunityMapper.toPreviewDTO(post.getCategory().getCommunity())
+                                : null
+                )
+
                 .visibility(post.getVisibility().toString())
 
                 .likedByMe(post.getLikes().stream().anyMatch(like -> like.getUser().equals(viewer)))
@@ -115,18 +122,25 @@ public class PostMapper {
                 .commentCount(post.getComments().size())
                 .createdAtFormatted(formatTimeAgo(post.getCreatedAt()))
 
-                .communityName(post.getCommunity() != null
-                        ? post.getCommunity().getName()
-                        : null)
-                .communityId(post.getCommunity() != null
-                        ? post.getCommunity().getId()
-                        : null)
-                .communityProfilePicture(post.getCommunity() != null
-                        ? ImageMapper.toDto(
-                                post.getCommunity().getProfileImageUrl(),
-                                post.getCommunity().getProfileImagePositionX(),
-                                post.getCommunity().getProfileImagePositionY())
-                        : null)
+                .communityName(
+                        post.getCategory() != null
+                                ? post.getCategory().getCommunity().getName()
+                                : null
+                )
+                .communityId(
+                        post.getCategory() != null
+                                ? post.getCategory().getCommunity().getId()
+                                : null
+                )
+                .communityProfilePicture(
+                        post.getCategory() != null
+                                ? ImageMapper.toDto(
+                                post.getCategory().getCommunity().getProfileImageUrl(),
+                                post.getCategory().getCommunity().getProfileImagePositionX(),
+                                post.getCategory().getCommunity().getProfileImagePositionY()
+                        )
+                                : null
+                )
 
                 .authorNickname(post.getAuthor().getProfile().getNickname())
                 .author(AuthorMapper.toDto(post.getAuthor()))
