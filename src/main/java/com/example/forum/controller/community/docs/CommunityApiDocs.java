@@ -4,6 +4,7 @@ import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
+import com.example.forum.dto.util.OnlineUserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -112,5 +113,30 @@ public interface CommunityApiDocs {
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
+    );
+
+    @Operation(
+            summary = "Get online users of a community",
+            description = "Retrieves a list of users who are currently online in the specified community.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Successfully retrieved list of online users",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = OnlineUserDTO.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Community not found",
+                            content = @Content
+                    )
+            }
+    )
+    @GetMapping("/{id}/online-users")
+    ResponseEntity<CommonResponse<List<OnlineUserDTO>>> getOnlineUsers(
+            @Parameter(description = "ID of the community to check online users", required = true)
+            @PathVariable("id") Long id
     );
 }

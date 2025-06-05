@@ -5,6 +5,7 @@ import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
+import com.example.forum.dto.util.OnlineUserDTO;
 import com.example.forum.service.community.CommunityService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,14 @@ public class CommunityController implements CommunityApiDocs {
         String username = authValidator.extractUsername(userDetails);
 
         CommunityDetailDTO response = communityService.getCommunityDetail(id, username);
+        return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<List<OnlineUserDTO>>> getOnlineUsers(
+            @PathVariable Long id) {
+
+        List<OnlineUserDTO> response = communityService.getOnlineUsers(id);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

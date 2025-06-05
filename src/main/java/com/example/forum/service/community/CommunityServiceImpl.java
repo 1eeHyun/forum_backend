@@ -3,7 +3,9 @@ package com.example.forum.service.community;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
+import com.example.forum.dto.util.OnlineUserDTO;
 import com.example.forum.mapper.community.CommunityMapper;
+import com.example.forum.mapper.util.OnlineUserMapper;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.community.CommunityRole;
@@ -76,25 +78,12 @@ public class CommunityServiceImpl implements CommunityService {
      */
     @Override
     public CommunityDetailDTO getCommunityDetail(Long id, String username) {
-
         Community community = communityValidator.validateExistingCommunity(id);
-
-        // Get every member
         List<CommunityMember> allMembers = communityMemberRepository.findByCommunity(community);
+        List<CommunityMember> onlineMembers = filterOnlineMembers(allMembers);
 
-        // Get online members
-        List<CommunityMember> onlineMembers = allMembers.stream()
-                .filter(cm -> cm.getUser().isOnline())
-                .toList();
-
-        User currentUser = null;
-        if (username != null)
-            currentUser = authValidator.validateUserByUsername(username);
-
-        // Check current user's role
-        CommunityRole role = communityMemberRepository.findByCommunityAndUser(community, currentUser)
-                .map(CommunityMember::getRole)
-                .orElse(null);
+        User currentUser = (username != null) ? authValidator.validateUserByUsername(username) : null;
+        CommunityRole role = findUserRoleInCommunity(community, currentUser);
 
         return CommunityMapper.toDetailDTO(community, allMembers, onlineMembers, role);
     }
@@ -111,5 +100,33 @@ public class CommunityServiceImpl implements CommunityService {
                     return CommunityMapper.toPreviewDTO(c);
                 })
                 .toList();
+    }
+
+    @Override
+    public List<OnlineUserDTO> getOnlineUsers(Long id) {
+
+        Community community = communityValidator.validateExistingCommunity(id);
+        List<CommunityMember> members = communityMemberRepository.findByCommunity(community);
+
+        return members.stream()
+                .filter(cm -> cm.getUser().isOnline())
+                .map(OnlineUserMapper::toDTO)
+                .toList();
+    }
+
+    /*****************************************************
+     * Helper methods
+     */
+    private List<CommunityMember> filterOnlineMembers(List<CommunityMember> members) {
+        return members.stream()
+                .filter(cm -> cm.getUser().isOnline())
+                .toList();
+    }
+
+    private CommunityRole findUserRoleInCommunity(Community community, User user) {
+        if (user == null) return null;
+        return communityMemberRepository.findByCommunityAndUser(community, user)
+                .map(CommunityMember::getRole)
+                .orElse(null);
     }
 }
