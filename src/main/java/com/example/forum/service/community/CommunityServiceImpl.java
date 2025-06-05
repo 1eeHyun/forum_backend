@@ -1,9 +1,6 @@
 package com.example.forum.service.community;
 
-import com.example.forum.dto.community.CategoryRequestDTO;
-import com.example.forum.dto.community.CommunityDetailDTO;
-import com.example.forum.dto.community.CommunityPreviewDTO;
-import com.example.forum.dto.community.CommunityRequestDTO;
+import com.example.forum.dto.community.*;
 import com.example.forum.dto.util.OnlineUserDTO;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.util.OnlineUserMapper;
@@ -12,6 +9,7 @@ import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.community.CommunityRole;
 import com.example.forum.model.user.User;
+import com.example.forum.repository.community.CategoryRepository;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.community.CommunityRepository;
 import com.example.forum.validator.auth.AuthValidator;
@@ -22,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +33,7 @@ public class CommunityServiceImpl implements CommunityService {
     // Repositories
     private final CommunityRepository communityRepository;
     private final CommunityMemberRepository communityMemberRepository;
+    private final CategoryRepository categoryRepository;
 
     // Services
     ///////
@@ -127,6 +127,20 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
+    public List<CategoryResponseDTO> getCategories(Long id) {
+
+        Community community = communityValidator.validateExistingCommunity(id);
+
+        return community.getCategories().stream()
+                .map(category -> new CategoryResponseDTO(
+                        category.getId(),
+                        category.getName(),
+                        category.getDescription()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void addCategory(Long communityId, CategoryRequestDTO dto, String username) {
 
         User user = authValidator.validateUserByUsername(username);
@@ -140,6 +154,7 @@ public class CommunityServiceImpl implements CommunityService {
                 .community(community)
                 .build();
 
+        categoryRepository.save(category);
         community.getCategories().add(category);
     }
 

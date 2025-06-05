@@ -2,13 +2,11 @@ package com.example.forum.controller.community.docs;
 
 
 import com.example.forum.dto.CommonResponse;
-import com.example.forum.dto.community.CategoryRequestDTO;
-import com.example.forum.dto.community.CommunityDetailDTO;
-import com.example.forum.dto.community.CommunityPreviewDTO;
-import com.example.forum.dto.community.CommunityRequestDTO;
+import com.example.forum.dto.community.*;
 import com.example.forum.dto.util.OnlineUserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -144,6 +142,21 @@ public interface CommunityApiDocs {
     );
 
     @Operation(
+            summary = "Get categories of a community",
+            description = "Retrieves all categories associated with the specified community.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved categories",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = CategoryResponseDTO.class)))),
+                    @ApiResponse(responseCode = "404", description = "Community not found")
+            }
+    )
+    @GetMapping("/{communityId}/categories")
+    ResponseEntity<CommonResponse<List<CategoryResponseDTO>>> getCategories(
+            @Parameter(description = "ID of the community to retrieve categories from", required = true)
+            @PathVariable("communityId") Long communityId
+    );
+
+    @Operation(
             summary = "Add a new category to a community",
             description = "Adds a new category to the specified community. Only accessible by community managers.",
             responses = {
@@ -158,7 +171,7 @@ public interface CommunityApiDocs {
             required = true,
             content = @Content(schema = @Schema(implementation = CategoryRequestDTO.class))
     )
-    @PostMapping("/{id}/categories")
+    @PostMapping("/{communityId}/categories")
     ResponseEntity<CommonResponse<Void>> addCategory(
             @Parameter(description = "ID of the community to which the category will be added", required = true)
             @PathVariable("id") Long communityId,

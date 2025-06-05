@@ -2,10 +2,7 @@ package com.example.forum.controller.community.api;
 
 import com.example.forum.controller.community.docs.CommunityApiDocs;
 import com.example.forum.dto.CommonResponse;
-import com.example.forum.dto.community.CategoryRequestDTO;
-import com.example.forum.dto.community.CommunityDetailDTO;
-import com.example.forum.dto.community.CommunityPreviewDTO;
-import com.example.forum.dto.community.CommunityRequestDTO;
+import com.example.forum.dto.community.*;
 import com.example.forum.dto.util.OnlineUserDTO;
 import com.example.forum.service.community.CommunityService;
 import com.example.forum.validator.auth.AuthValidator;
@@ -62,6 +59,14 @@ public class CommunityController implements CommunityApiDocs {
             @PathVariable Long id) {
 
         List<OnlineUserDTO> response = communityService.getOnlineUsers(id);
+        return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<List<CategoryResponseDTO>>> getCategories(
+            @PathVariable Long communityId) {
+
+        List<CategoryResponseDTO> response = communityService.getCategories(communityId);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
