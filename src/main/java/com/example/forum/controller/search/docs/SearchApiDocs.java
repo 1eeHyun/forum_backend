@@ -34,7 +34,7 @@ public interface SearchApiDocs {
                     )
             }
     )
-    @GetMapping("/search")
+    @GetMapping
     ResponseEntity<CommonResponse<SearchResponseDTO>> search(
             @Parameter(description = "Search keyword", required = true)
             @RequestParam("query") String query
