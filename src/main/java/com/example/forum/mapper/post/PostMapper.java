@@ -95,20 +95,6 @@ public class PostMapper {
                 .build();
     }
 
-//    private Long id;
-//    private String title;
-//    private List<String> thumbnailUrls;
-//    private int likeCount;
-//    private int commentCount;
-//    private String createdAtFormatted;
-//
-//    private String communityName;
-//    private Long communityId;
-//    private ImageDTO communityProfilePicture;
-//
-//    private String authorNickname;
-//    private AuthorDTO author;
-
     public static PostPreviewDTO toPreviewDTO(Post post) {
 
         return PostPreviewDTO.builder()
