@@ -4,6 +4,7 @@ import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.exception.post.TooManyPostImagesException;
+import com.example.forum.model.community.Category;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.Visibility;
@@ -11,8 +12,10 @@ import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.post.PostImageRepository;
 import com.example.forum.repository.post.PostRepository;
+import com.example.forum.service.common.RecentViewService;
 import com.example.forum.service.common.S3Service;
 import com.example.forum.validator.auth.AuthValidator;
+import com.example.forum.validator.community.CategoryValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import com.example.forum.validator.post.PostValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +44,11 @@ public class PostServiceImplTest {
     @Mock private PostRepository postRepository;
     @Mock private PostValidator postValidator;
     @Mock private CommunityValidator communityValidator;
+    @Mock private CategoryValidator categoryValidator;
     @Mock private PostImageRepository postImageRepository;
+    @Mock
+    private RecentViewService recentViewService;
+
     @Mock private S3Service s3Service;
 
     private User user;
@@ -108,23 +115,36 @@ public class PostServiceImplTest {
         @Test
         @DisplayName("Success - Create community post")
         void success_create_community_post() {
+            // given
             postRequestDTO = PostRequestDTO.builder()
                     .title("Title")
                     .content("Content")
                     .visibility(Visibility.COMMUNITY)
-                    .communityId(1L)
+                    .categoryId(1L)
                     .build();
 
             Community community = mock(Community.class);
+            Category category = mock(Category.class);
+
             when(authValidator.validateUserByUsername(anyString())).thenReturn(user);
-            when(communityValidator.validateMemberCommunity(anyLong(), any())).thenReturn(community);
+            when(categoryValidator.validateCategoryById(anyLong())).thenReturn(category);
+            when(category.getCommunity()).thenReturn(community);
+
+            when(community.getId()).thenReturn(1L);
+
+            when(communityValidator.validateMemberCommunity(anyLong(), any()))
+                    .thenReturn(community);
+
             when(postRepository.save(any())).thenReturn(post);
 
+            // when
             PostResponseDTO result = postService.createPost(postRequestDTO, "john");
 
+            // then
             assertThat(result).isNotNull();
             verify(communityValidator).validateMemberCommunity(anyLong(), any());
         }
+
 
         @Test
         @DisplayName("Failure - Too many images in post")

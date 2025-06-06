@@ -19,6 +19,7 @@ import com.example.forum.service.common.RecentViewService;
 import com.example.forum.service.common.S3Service;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CategoryValidator;
+import com.example.forum.validator.community.CommunityValidator;
 import com.example.forum.validator.post.PostValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ public class PostServiceImpl implements PostService {
     private final AuthValidator authValidator;
     private final PostValidator postValidator;
     private final CategoryValidator categoryValidator;
+    private final CommunityValidator communityValidator;
 
     // Repositories
     private final PostRepository postRepository;
@@ -115,6 +117,9 @@ public class PostServiceImpl implements PostService {
         User user = authValidator.validateUserByUsername(username);
         Category category = getValidCategoryIfNeeded(dto);
         postValidator.validatePostCount(dto.getImageUrls());
+
+        if (category != null)
+            communityValidator.validateMemberCommunity(category.getCommunity().getId(), user);
 
         Post post = buildPostFromDto(dto, user, category);
         savePostImages(post, dto.getImageUrls());
