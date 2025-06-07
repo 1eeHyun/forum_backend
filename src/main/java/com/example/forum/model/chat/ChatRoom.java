@@ -1,9 +1,7 @@
 package com.example.forum.model.chat;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.forum.model.user.User;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,6 +14,12 @@ public class ChatRoom {
     private Long id;
 
     private String roomId;
-    private Long user1Id;
-    private Long user2Id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user1_id")
+    private User user1;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user2_id")
+    private User user2;
 }

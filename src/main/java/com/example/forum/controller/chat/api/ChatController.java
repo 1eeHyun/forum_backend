@@ -3,6 +3,8 @@ package com.example.forum.controller.chat.api;
 import com.example.forum.controller.chat.docs.ChatApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.chat.ChatMessageDTO;
+import com.example.forum.dto.chat.ChatRoomDTO;
+import com.example.forum.dto.chat.ChatRoomRequestDTO;
 import com.example.forum.service.chat.ChatService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,12 +39,21 @@ public class ChatController implements ChatApiDocs {
 
     @Override
     public ResponseEntity<CommonResponse<String>> getOrCreateRoom(
-            @RequestParam Long user1Id,
-            @RequestParam Long user2Id,
+            @RequestBody ChatRoomRequestDTO request,
             @AuthenticationPrincipal UserDetails userDetails) {
 
+        String response = chatService.getOrCreateRoomId(request.getUser1Username(), request.getUser2Username());
 
-        String response = chatService.getOrCreateRoomId(user1Id, user2Id);
         return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<List<ChatRoomDTO>>> getMyChatRooms(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = authValidator.extractUsername(userDetails);
+        List<ChatRoomDTO> rooms = chatService.getUserChatRooms(username);
+
+        return ResponseEntity.ok(CommonResponse.success(rooms));
     }
 }

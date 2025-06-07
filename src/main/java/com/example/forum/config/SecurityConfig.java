@@ -41,8 +41,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/communities/**", "/api/comments/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/ws-chat/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/communities/**", "/api/comments/**", "/api/search").permitAll()
                         .requestMatchers("/api/posts/**").authenticated()
                         .requestMatchers("/api/communities/**").authenticated()
                         .requestMatchers("/api/profiles/**").authenticated()

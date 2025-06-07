@@ -1,11 +1,14 @@
 package com.example.forum.service.chat;
 
 import com.example.forum.dto.chat.ChatMessageDTO;
+import com.example.forum.dto.chat.ChatRoomDTO;
+import com.example.forum.mapper.chat.ChatMapper;
 import com.example.forum.model.chat.ChatMessage;
 import com.example.forum.model.chat.ChatRoom;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.chat.ChatMessageRepository;
 import com.example.forum.repository.chat.ChatRoomRepository;
+import com.example.forum.repository.user.UserRepository;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.chat.ChatValidator;
 import lombok.RequiredArgsConstructor;
@@ -21,43 +24,55 @@ public class ChatServiceImpl implements ChatService {
     // Repositories
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final UserRepository userRepository;
 
     // Validators
     private final AuthValidator userValidator;
     private final ChatValidator chatValidator;
 
-    @Override
-    public String getOrCreateRoomId(Long user1Id, Long user2Id) {
+    // Mapper
+    private final ChatMapper chatMapper;
 
-        Long min = Math.min(user1Id, user2Id);
-        Long max = Math.max(user1Id, user2Id);
+    @Override
+    public String getOrCreateRoomId(String user1Username, String user2Username) {
+        User user1 = userValidator.validateUserByUsername(user1Username);
+        User user2 = userValidator.validateUserByUsername(user2Username);
+
+        Long min = Math.min(user1.getId(), user2.getId());
+        Long max = Math.max(user1.getId(), user2.getId());
         String roomId = min + "_" + max;
 
-        // If chat exists with the two users, get the chat room
-        // otherwise, create a new chat room and return the room id
         return chatRoomRepository.findByRoomId(roomId)
                 .map(ChatRoom::getRoomId)
                 .orElseGet(() -> {
-
                     ChatRoom newRoom = new ChatRoom();
                     newRoom.setRoomId(roomId);
-                    newRoom.setUser1Id(min);
-                    newRoom.setUser2Id(max);
+
+                    if (user1.getId().equals(min)) {
+                        newRoom.setUser1(user1);
+                        newRoom.setUser2(user2);
+                    } else {
+                        newRoom.setUser1(user2);
+                        newRoom.setUser2(user1);
+                    }
 
                     chatRoomRepository.save(newRoom);
-
                     return roomId;
                 });
     }
 
     @Override
+
     public void saveMessage(ChatMessageDTO dto) {
+        User sender = userValidator.validateUserByUsername(dto.getSenderUsername());
+
+        LocalDateTime sentAt = dto.getSentAt() != null ? dto.getSentAt() : LocalDateTime.now();
 
         ChatMessage message = ChatMessage.builder()
                 .roomId(dto.getRoomId())
-                .senderId(dto.getSenderId())
+                .sender(sender)
                 .content(dto.getContent())
-                .sentAt(dto.getSentAt() != null ? dto.getSentAt() : LocalDateTime.now())
+                .sentAt(sentAt)
                 .build();
 
         chatMessageRepository.save(message);
@@ -65,18 +80,28 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatMessageDTO> getMessage(String roomId, String currUsername) {
-
-        User user = userValidator.validateUserByUsername(currUsername);
-        chatValidator.validateUserRoom(roomId, user.getId());
+        User currUser = userValidator.validateUserByUsername(currUsername);
+        chatValidator.validateUserRoom(roomId, currUser);
 
         return chatMessageRepository.findByRoomIdOrderBySentAtAsc(roomId)
                 .stream()
-                .map(msg -> ChatMessageDTO.builder()
-                        .roomId(msg.getRoomId())
-                        .senderId(msg.getSenderId())
-                        .content(msg.getContent())
-                        .sentAt(msg.getSentAt())
-                        .build())
+                .map(chatMapper::toChatMessageDTO)
                 .toList();
     }
+
+    @Override
+    public List<ChatRoomDTO> getUserChatRooms(String username) {
+        User me = userValidator.validateUserByUsername(username);
+
+        return chatRoomRepository.findAllByUser1OrUser2(me, me)
+                .stream()
+                .map(room -> {
+                    ChatMessage lastMessage = chatMessageRepository
+                            .findTopByRoomIdOrderBySentAtDesc(room.getRoomId())
+                            .orElse(null);
+                    return chatMapper.toChatRoomDTO(room, me, lastMessage);
+                })
+                .toList();
+    }
+
 }

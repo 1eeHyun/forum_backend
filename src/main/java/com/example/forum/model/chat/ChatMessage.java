@@ -1,17 +1,19 @@
 package com.example.forum.model.chat;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.forum.model.user.User;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Builder
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatMessage {
 
     @Id
@@ -19,7 +21,11 @@ public class ChatMessage {
     private Long id;
 
     private String roomId;
-    private Long senderId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id", nullable = false)
+    private User sender;
+
     private String content;
     private LocalDateTime sentAt;
 }

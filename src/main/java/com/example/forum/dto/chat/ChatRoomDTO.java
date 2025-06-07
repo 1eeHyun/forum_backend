@@ -9,12 +9,10 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatMessageDTO {
+public class ChatRoomDTO {
 
     private String roomId;
-    private String senderUsername;
-    private ProfilePreviewDTO senderProfile;
-
-    private String content;
-    private LocalDateTime sentAt;
+    private ProfilePreviewDTO user;
+    private String lastMessage;
+    private LocalDateTime lastMessageAt;
 }
