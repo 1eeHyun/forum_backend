@@ -12,4 +12,5 @@ public interface ChatService {
     List<ChatMessageDTO> getMessage(String roomId, String currUsername);
     List<ChatRoomDTO> getUserChatRooms(String username);
     void markAsRead(String roomId, String username, Long lastReadMessageId);
+    Long getLastReadMessageId(String roomId, String username);
 }

@@ -2,7 +2,6 @@ package com.example.forum.controller.chat.docs;
 
 
 import com.example.forum.dto.CommonResponse;
-import com.example.forum.dto.chat.ChatMessageDTO;
 import com.example.forum.dto.chat.ChatRoomDTO;
 import com.example.forum.dto.chat.ChatRoomRequestDTO;
 import com.example.forum.dto.chat.MarkAsReadRequest;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Chat", description = "API related to chat messages and chat rooms")
 public interface ChatApiDocs {
@@ -34,8 +34,8 @@ public interface ChatApiDocs {
                     @ApiResponse(responseCode = "404", description = "Chat room not found")
             }
     )
-    @GetMapping("/{roomId}/messages")
-    ResponseEntity<CommonResponse<List<ChatMessageDTO>>> getMessages(
+    @GetMapping("/rooms/{roomId}/messages")
+    ResponseEntity<CommonResponse<Map<String, Object>>> getMessages(
             @Parameter(description = "ID of the chat room", required = true)
             @PathVariable String roomId,
 

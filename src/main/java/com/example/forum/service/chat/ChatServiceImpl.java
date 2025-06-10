@@ -13,14 +13,17 @@ import com.example.forum.repository.chat.ChatRoomRepository;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.chat.ChatValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatServiceImpl implements ChatService {
 
     // Repositories
@@ -65,7 +68,6 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-
     public ChatMessageDTO saveMessage(ChatMessageDTO dto) {
 
         User sender = userValidator.validateUserByUsername(dto.getSenderUsername());
@@ -116,17 +118,38 @@ public class ChatServiceImpl implements ChatService {
 
         User user = userValidator.validateUserByUsername(username);
 
-        ChatReadStatus status = chatReadStatusRepository.findByRoomIdAndUser(roomId, user)
-                .orElse(ChatReadStatus.builder()
-                        .roomId(roomId)
-                        .user(user)
-                        .build());
+        Optional<ChatReadStatus> optionalStatus = chatReadStatusRepository.findByRoomIdAndUser(roomId, user);
 
-        // If a user reads more messages, renewal
-        if (status.getLastReadMessageId() == null || lastReadMessageId > status.getLastReadMessageId()) {
-            status.setLastReadMessageId(lastReadMessageId);
-            status.setUpdatedAt(LocalDateTime.now());
+        if (optionalStatus.isPresent()) {
+            ChatReadStatus status = optionalStatus.get();
+
+            if (status.getLastReadMessageId() == null || lastReadMessageId > status.getLastReadMessageId()) {
+                log.info("Previous={}, new={}", status.getLastReadMessageId(), lastReadMessageId);
+                status.setLastReadMessageId(lastReadMessageId);
+                status.setUpdatedAt(LocalDateTime.now());
+
+                chatReadStatusRepository.save(status);
+            }
+
+        } else {
+            ChatReadStatus status = ChatReadStatus.builder()
+                    .roomId(roomId)
+                    .user(user)
+                    .lastReadMessageId(lastReadMessageId)
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+
             chatReadStatusRepository.save(status);
+            log.info("Created new read status with id={}, readMessageId={}", status.getId(), lastReadMessageId);
         }
+    }
+
+    public Long getLastReadMessageId(String roomId, String username) {
+
+        User user = userValidator.validateUserByUsername(username);
+
+        return chatReadStatusRepository.findByRoomIdAndUser(roomId, user)
+                .map(ChatReadStatus::getLastReadMessageId)
+                .orElse(0L);
     }
 }
