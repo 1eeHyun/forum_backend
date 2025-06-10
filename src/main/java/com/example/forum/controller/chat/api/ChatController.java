@@ -5,6 +5,7 @@ import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.chat.ChatMessageDTO;
 import com.example.forum.dto.chat.ChatRoomDTO;
 import com.example.forum.dto.chat.ChatRoomRequestDTO;
+import com.example.forum.dto.chat.MarkAsReadRequest;
 import com.example.forum.service.chat.ChatService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
@@ -55,5 +56,17 @@ public class ChatController implements ChatApiDocs {
         List<ChatRoomDTO> rooms = chatService.getUserChatRooms(username);
 
         return ResponseEntity.ok(CommonResponse.success(rooms));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<Void>> markAsRead(
+            @PathVariable String roomId,
+            @RequestBody MarkAsReadRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = authValidator.extractUsername(userDetails);
+        chatService.markAsRead(roomId, username, request.lastReadMessageId());
+
+        return ResponseEntity.ok(CommonResponse.success());
     }
 }
