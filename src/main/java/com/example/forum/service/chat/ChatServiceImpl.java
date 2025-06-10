@@ -63,10 +63,10 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
 
-    public void saveMessage(ChatMessageDTO dto) {
+    public ChatMessageDTO saveMessage(ChatMessageDTO dto) {
         User sender = userValidator.validateUserByUsername(dto.getSenderUsername());
 
-        LocalDateTime sentAt = dto.getSentAt() != null ? dto.getSentAt() : LocalDateTime.now();
+        LocalDateTime sentAt = LocalDateTime.now();
 
         ChatMessage message = ChatMessage.builder()
                 .roomId(dto.getRoomId())
@@ -75,7 +75,8 @@ public class ChatServiceImpl implements ChatService {
                 .sentAt(sentAt)
                 .build();
 
-        chatMessageRepository.save(message);
+        ChatMessage saved = chatMessageRepository.save(message);
+        return chatMapper.toChatMessageDTO(saved);
     }
 
     @Override

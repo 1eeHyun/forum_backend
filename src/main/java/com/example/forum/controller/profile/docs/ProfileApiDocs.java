@@ -186,7 +186,6 @@ public interface ProfileApiDocs {
             @RequestBody BioUpdateDTO dto
     );
 
-
     @Operation(
             summary = "Update profile image",
             description = "Updates the profile image of the logged-in user along with image position coordinates (X, Y).",

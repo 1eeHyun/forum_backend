@@ -29,7 +29,8 @@ public class ChatWebSocketController {
         message.setSenderUsername(senderUsername);
 
         ChatMessageDTO enriched = chatMessageBuilder.enrichSenderProfile(message);
-        chatService.saveMessage(enriched);
-        messagingTemplate.convertAndSend("/topic/chat." + enriched.getRoomId(), enriched);
+        ChatMessageDTO saved = chatService.saveMessage(enriched);
+
+        messagingTemplate.convertAndSend("/topic/chat." + saved.getRoomId(), saved);
     }
 }
