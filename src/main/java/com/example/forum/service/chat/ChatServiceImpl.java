@@ -4,27 +4,32 @@ import com.example.forum.dto.chat.ChatMessageDTO;
 import com.example.forum.dto.chat.ChatRoomDTO;
 import com.example.forum.mapper.chat.ChatMapper;
 import com.example.forum.model.chat.ChatMessage;
+import com.example.forum.model.chat.ChatReadStatus;
 import com.example.forum.model.chat.ChatRoom;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.chat.ChatMessageRepository;
+import com.example.forum.repository.chat.ChatReadStatusRepository;
 import com.example.forum.repository.chat.ChatRoomRepository;
-import com.example.forum.repository.user.UserRepository;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.chat.ChatValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatServiceImpl implements ChatService {
 
     // Repositories
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final UserRepository userRepository;
+    private final ChatReadStatusRepository chatReadStatusRepository;
 
     // Validators
     private final AuthValidator userValidator;
@@ -35,6 +40,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public String getOrCreateRoomId(String user1Username, String user2Username) {
+
         User user1 = userValidator.validateUserByUsername(user1Username);
         User user2 = userValidator.validateUserByUsername(user2Username);
 
@@ -62,8 +68,8 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-
     public ChatMessageDTO saveMessage(ChatMessageDTO dto) {
+
         User sender = userValidator.validateUserByUsername(dto.getSenderUsername());
 
         LocalDateTime sentAt = LocalDateTime.now();
@@ -81,6 +87,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatMessageDTO> getMessage(String roomId, String currUsername) {
+
         User currUser = userValidator.validateUserByUsername(currUsername);
         chatValidator.validateUserRoom(roomId, currUser);
 
@@ -105,4 +112,44 @@ public class ChatServiceImpl implements ChatService {
                 .toList();
     }
 
+    @Override
+    @Transactional
+    public void markAsRead(String roomId, String username, Long lastReadMessageId) {
+
+        User user = userValidator.validateUserByUsername(username);
+
+        Optional<ChatReadStatus> optionalStatus = chatReadStatusRepository.findByRoomIdAndUser(roomId, user);
+
+        if (optionalStatus.isPresent()) {
+            ChatReadStatus status = optionalStatus.get();
+
+            if (status.getLastReadMessageId() == null || lastReadMessageId > status.getLastReadMessageId()) {
+                log.info("Previous={}, new={}", status.getLastReadMessageId(), lastReadMessageId);
+                status.setLastReadMessageId(lastReadMessageId);
+                status.setUpdatedAt(LocalDateTime.now());
+
+                chatReadStatusRepository.save(status);
+            }
+
+        } else {
+            ChatReadStatus status = ChatReadStatus.builder()
+                    .roomId(roomId)
+                    .user(user)
+                    .lastReadMessageId(lastReadMessageId)
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+
+            chatReadStatusRepository.save(status);
+            log.info("Created new read status with id={}, readMessageId={}", status.getId(), lastReadMessageId);
+        }
+    }
+
+    public Long getLastReadMessageId(String roomId, String username) {
+
+        User user = userValidator.validateUserByUsername(username);
+
+        return chatReadStatusRepository.findByRoomIdAndUser(roomId, user)
+                .map(ChatReadStatus::getLastReadMessageId)
+                .orElse(0L);
+    }
 }

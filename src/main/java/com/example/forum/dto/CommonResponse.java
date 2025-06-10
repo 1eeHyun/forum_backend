@@ -22,7 +22,7 @@ public class CommonResponse<T> {
         return new CommonResponse<>(200, "Request success", null, LocalDateTime.now());
     }
 
-    public static CommonResponse<Void> fail(int status, String message) {
+    public static <T> CommonResponse<T> fail(int status, String message) {
         return new CommonResponse<>(status, message, null, LocalDateTime.now());
     }
 }

@@ -15,9 +15,9 @@ public class ChatMapper {
 
     public ChatMessageDTO toChatMessageDTO(ChatMessage msg) {
         User sender = msg.getSender();
-        Profile profile = sender.getProfile();
 
         return ChatMessageDTO.builder()
+                .id(msg.getId())
                 .roomId(msg.getRoomId())
                 .senderUsername(sender.getUsername())
                 .senderProfile(toProfilePreviewDTO(sender))

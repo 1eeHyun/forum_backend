@@ -2,11 +2,13 @@ package com.example.forum.controller.chat.docs;
 
 
 import com.example.forum.dto.CommonResponse;
-import com.example.forum.dto.chat.ChatMessageDTO;
 import com.example.forum.dto.chat.ChatRoomDTO;
 import com.example.forum.dto.chat.ChatRoomRequestDTO;
+import com.example.forum.dto.chat.MarkAsReadRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Chat", description = "API related to chat messages and chat rooms")
 public interface ChatApiDocs {
@@ -31,8 +34,8 @@ public interface ChatApiDocs {
                     @ApiResponse(responseCode = "404", description = "Chat room not found")
             }
     )
-    @GetMapping("/{roomId}/messages")
-    ResponseEntity<CommonResponse<List<ChatMessageDTO>>> getMessages(
+    @GetMapping("/rooms/{roomId}/messages")
+    ResponseEntity<CommonResponse<Map<String, Object>>> getMessages(
             @Parameter(description = "ID of the chat room", required = true)
             @PathVariable String roomId,
 
@@ -70,5 +73,32 @@ public interface ChatApiDocs {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
     );
-}
 
+    @Operation(
+            summary = "Mark messages as read in a chat room",
+            description = "Marks messages up to the given message ID as read for the current user in the specified chat room.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Last read message ID",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MarkAsReadRequest.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Messages marked as read successfully"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized - user not logged in"),
+                    @ApiResponse(responseCode = "404", description = "Chat room not found")
+            }
+    )
+    @PostMapping("/rooms/{roomId}/read")
+    ResponseEntity<CommonResponse<Void>> markAsRead(
+            @Parameter(description = "Chat room ID", example = "abc123")
+            @PathVariable String roomId,
+
+            @RequestBody MarkAsReadRequest request,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
+    );
+}
