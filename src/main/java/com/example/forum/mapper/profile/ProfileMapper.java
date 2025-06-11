@@ -1,8 +1,10 @@
 package com.example.forum.mapper.profile;
 
 import com.example.forum.dto.follow.FollowUserDTO;
+import com.example.forum.dto.profile.ProfilePreviewDTO;
 import com.example.forum.dto.profile.ProfileResponseDTO;
 import com.example.forum.dto.util.ImageDTO;
+import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 
 import java.util.List;
@@ -25,4 +27,18 @@ public class ProfileMapper {
                 .followings(followings)
                 .build();
     }
+
+    public static ProfilePreviewDTO toProfilePreviewDTO(User user) {
+        Profile profile = user.getProfile();
+        return ProfilePreviewDTO.builder()
+                .username(user.getUsername())
+                .nickname(profile.getNickname())
+                .imageDto(ImageDTO.builder()
+                        .imageUrl(profile.getImageUrl())
+                        .imagePositionX(profile.getImagePositionX())
+                        .imagePositionY(profile.getImagePositionY())
+                        .build())
+                .build();
+    }
+
 }
