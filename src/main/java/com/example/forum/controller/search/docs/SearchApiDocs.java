@@ -57,7 +57,7 @@ public interface SearchApiDocs {
                     )
             )
     )
-    @GetMapping("/search/users")
+    @GetMapping("/users")
     ResponseEntity<CommonResponse<List<ProfilePreviewDTO>>> searchUsers(
             @Parameter(description = "User username", required = true)
             @RequestParam("keyword") String keyword
@@ -75,7 +75,7 @@ public interface SearchApiDocs {
                     )
             )
     )
-    @GetMapping("/search/posts")
+    @GetMapping("/posts")
     ResponseEntity<CommonResponse<List<PostPreviewDTO>>> searchPosts(
             @Parameter(description = "Post keyword", required = true)
             @RequestParam("keyword") String keyword
@@ -93,7 +93,7 @@ public interface SearchApiDocs {
                     )
             )
     )
-    @GetMapping("/search/communities")
+    @GetMapping("/communities")
     ResponseEntity<CommonResponse<List<CommunityPreviewDTO>>> searchCommunities(
             @Parameter(description = "Community keyword", required = true)
             @RequestParam("keyword") String keyword
