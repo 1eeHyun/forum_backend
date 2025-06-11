@@ -44,7 +44,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<ProfilePreviewDTO> searchUsers(String keyword) {
 
-        List<User> users = userRepository.findTop5ByNicknameContainingIgnoreCase(keyword);
+        List<User> users = userRepository.findTop5ByUsernameContainingIgnoreCase(keyword);
 
         return users.stream()
                 .map(ProfileMapper::toProfilePreviewDTO)

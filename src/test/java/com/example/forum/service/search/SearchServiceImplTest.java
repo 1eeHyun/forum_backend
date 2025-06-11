@@ -67,7 +67,7 @@ class SearchServiceImplTest {
 
         when(postRepository.findTop5ByTitleContainingIgnoreCase(keyword)).thenReturn(List.of(post));
         when(communityRepository.findTop5ByNameContainingIgnoreCase(keyword)).thenReturn(List.of(community));
-        when(userRepository.findTop5ByNicknameContainingIgnoreCase(keyword)).thenReturn(List.of(user));
+        when(userRepository.findTop5ByUsernameContainingIgnoreCase(keyword)).thenReturn(List.of(user));
 
         PostPreviewDTO postDTO = PostPreviewDTO.builder()
                 .id(1L).title("Title").author(authorDTO).build();
@@ -93,7 +93,7 @@ class SearchServiceImplTest {
 
             verify(postRepository).findTop5ByTitleContainingIgnoreCase(keyword);
             verify(communityRepository).findTop5ByNameContainingIgnoreCase(keyword);
-            verify(userRepository).findTop5ByNicknameContainingIgnoreCase(keyword);
+            verify(userRepository).findTop5ByUsernameContainingIgnoreCase(keyword);
         }
     }
 
@@ -105,7 +105,7 @@ class SearchServiceImplTest {
         ProfilePreviewDTO profileDTO = ProfilePreviewDTO.builder()
                 .username("user1").nickname("nick").imageDto(imageDTO).build();
 
-        when(userRepository.findTop5ByNicknameContainingIgnoreCase(keyword)).thenReturn(List.of(user));
+        when(userRepository.findTop5ByUsernameContainingIgnoreCase(keyword)).thenReturn(List.of(user));
 
         try (MockedStatic<ProfileMapper> mapper = mockStatic(ProfileMapper.class)) {
             mapper.when(() -> ProfileMapper.toProfilePreviewDTO(user)).thenReturn(profileDTO);
