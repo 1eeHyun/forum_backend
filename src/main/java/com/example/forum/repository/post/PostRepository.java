@@ -1,5 +1,6 @@
 package com.example.forum.repository.post;
 
+import com.example.forum.model.community.Category;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
@@ -136,4 +137,53 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findById(Long postId);
 
     List<Post> findTop5ByTitleContainingIgnoreCase(String title);
+
+    //
+    // --------------- Community Related Query ---------------
+    //
+    @Query(
+            """
+                SELECT p FROM Post p
+                WHERE p.category.community = :community
+            """
+    )
+    Page<Post> findByCommunity(@Param("community") Community community, Pageable pageable);
+    @Query("""
+                SELECT p FROM Post p
+                LEFT JOIN p.likes l
+                WHERE p.category.community = :community
+                GROUP BY p
+                ORDER BY COUNT(l) DESC, p.createdAt DESC
+           """
+    )
+    Page<Post> findByCommunityWithLikeCount(@Param("community") Community community, Pageable pageable);
+
+
+    @Query(
+            """
+                SELECT p FROM Post p
+                WHERE p.category.community = :community AND p.category = :category
+            """
+    )
+    Page<Post> findByCommunityAndCategory(
+            @Param("community") Community community,
+            @Param("category") Category category,
+            Pageable pageable
+    );
+
+    @Query(
+            """
+                SELECT p FROM Post p
+                LEFT JOIN p.likes l
+                WHERE p.category.community = :community AND p.category = :category
+                GROUP BY p
+                ORDER BY COUNT(l) DESC, p.createdAt DESC
+            """
+    )
+    Page<Post> findByCommunityAndCategoryWithLikeCount(
+            @Param("community") Community community,
+            @Param("category") Category category,
+            Pageable pageable
+    );
+
 }

@@ -79,11 +79,7 @@ public class PostServiceImpl implements PostService {
 
         boolean includePrivate = target.getId().equals(current.getId());
 
-        Pageable pageable = switch (sort) {
-            case NEWEST -> PageRequest.of(page, size, Sort.by("createdAt").descending().and(Sort.by("id").descending()));
-            case OLDEST -> PageRequest.of(page, size, Sort.by("createdAt").ascending().and(Sort.by("id").ascending()));
-            case TOP_LIKED -> PageRequest.of(page, size, Sort.by(Sort.Order.desc("likeCount"), Sort.Order.desc("createdAt")));
-        };
+        Pageable pageable = getSortedPageable(sort, page, size);
 
         Page<Post> postPage = switch (sort) {
             case TOP_LIKED -> postRepository.findPostsByAuthorWithLikeCount(target, includePrivate, pageable);
@@ -266,8 +262,41 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
-    // ------------------------------ Helper methods -------------------------------------
+    @Override
+    public List<PostResponseDTO> getCommunityPosts(Long communityId, SortOrder sort, int page, int size) {
 
+        Community community = communityValidator.validateExistingCommunity(communityId);
+        Pageable sorted = getSortedPageable(sort, page, size);
+
+        Page<Post> postPage = switch(sort) {
+            case TOP_LIKED -> postRepository.findByCommunityWithLikeCount(community, sorted);
+            default -> postRepository.findByCommunity(community, sorted);
+        };
+
+        return postPage.stream()
+                .map(PostMapper::toPostResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<PostResponseDTO> getCommunityCategoryPosts(Long communityId, Long categoryId, SortOrder sort, int page, int size) {
+
+
+        Community community = communityValidator.validateExistingCommunity(communityId);
+        Category category = categoryValidator.validateCategoryById(categoryId);
+        Pageable sorted = getSortedPageable(sort, page, size);
+
+        Page<Post> postPage = switch (sort) {
+            case TOP_LIKED -> postRepository.findByCommunityAndCategoryWithLikeCount(community, category, sorted);
+            default -> postRepository.findByCommunityAndCategory(community, category, sorted);
+        };
+
+        return postPage.stream()
+                .map(PostMapper::toPostResponseDTO)
+                .toList();
+    }
+
+    // ------------------------------ Helper methods -------------------------------------
     private Category getValidCategoryIfNeeded(PostRequestDTO dto) {
 
         if (dto.getVisibility() == Visibility.COMMUNITY) {
@@ -306,5 +335,13 @@ public class PostServiceImpl implements PostService {
                     .build();
             post.getImages().add(image);
         }
+    }
+
+    private Pageable getSortedPageable(SortOrder sort, int page, int size) {
+        return switch (sort) {
+            case NEWEST -> PageRequest.of(page, size, Sort.by("createdAt").descending());
+            case OLDEST -> PageRequest.of(page, size, Sort.by("createdAt").ascending());
+            case TOP_LIKED -> PageRequest.of(page, size);
+        };
     }
 }

@@ -11,6 +11,8 @@ import lombok.Data;
 public class OnlineUserDTO {
 
     private Long id;
+
+    private String username;
     private String nickname;
     private ImageDTO imageDto;
     private CommunityRole role;

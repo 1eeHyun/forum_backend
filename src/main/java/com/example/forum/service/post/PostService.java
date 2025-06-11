@@ -29,4 +29,8 @@ public interface PostService {
 
     List<PostPreviewDTO> getRecentlyViewedPosts(String username);
     List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids);
+
+    // ----------------- Community Posts -----------------
+    List<PostResponseDTO> getCommunityPosts(Long communityId, SortOrder sort, int page, int size);
+    List<PostResponseDTO> getCommunityCategoryPosts(Long communityId, Long categoryId, SortOrder sort, int page, int size);
 }

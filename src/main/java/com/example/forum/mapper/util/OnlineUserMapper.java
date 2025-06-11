@@ -20,6 +20,7 @@ public class OnlineUserMapper {
 
         return OnlineUserDTO.builder()
                 .id(member.getId())
+                .username(member.getUser().getUsername())
                 .nickname(profile != null ? profile.getNickname() : "Unknown")
                 .imageDto(profile != null ? ImageMapper.profileToImageDto(profile) : null)
                 .role(member.getRole())

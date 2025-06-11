@@ -25,6 +25,7 @@ import java.util.List;
 @Tag(name = "Post", description = "Post related API")
 public interface PostApiDocs {
 
+    // ---------------------- Posts for Home ----------------------
     @Operation(
             summary = "Get paginated posts",
             description = "Retrieves a list of posts with optional sorting and pagination.",
@@ -56,7 +57,7 @@ public interface PostApiDocs {
             @RequestParam(defaultValue = "10") int size
     );
 
-
+    // ---------------------- Posts for Detail ----------------------
     @Operation(
             summary = "Get post detail",
             description = "Retrieves the detailed content of a post. If the user is logged in, additional information such as like status may be included.",
@@ -85,7 +86,7 @@ public interface PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails
     );
 
-
+    // ---------------------- Create a new Post ----------------------
     @Operation(
             summary = "Create a new post",
             description = "Creates a new post for the authenticated user and returns the post preview data.",
@@ -124,6 +125,7 @@ public interface PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails
     );
 
+    // ---------------------- Update for an existing post ----------------------
     @Operation(
             summary = "Update a post",
             description = "Updates the content of a post. Only the author of the post can perform this action.",
@@ -174,6 +176,7 @@ public interface PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails
     );
 
+    // ---------------------- Delete for an existing post ----------------------
     @Operation(
             summary = "Delete a post",
             description = "Deletes a post by ID. Only the author of the post can delete it.",
@@ -209,6 +212,7 @@ public interface PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails
     );
 
+    // ---------------------- Like Post ----------------------
     @Operation(
             summary = "Toggle like on a post",
             description = "Toggles a like on the given post. If the user has already liked it, the like will be removed.",
@@ -239,7 +243,7 @@ public interface PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails
     );
 
-
+    // ---------------------- Get number of like of an existing post ----------------------
     @Operation(
             summary = "Get like count of a post",
             description = "Returns the total number of likes for the given post.",
@@ -265,7 +269,7 @@ public interface PostApiDocs {
             @PathVariable Long id
     );
 
-
+    // ---------------------- Who likes an existing Post ----------------------
     @Operation(
             summary = "Get users who liked a post",
             description = "Returns a list of users who liked the given post.",
@@ -291,7 +295,7 @@ public interface PostApiDocs {
             @PathVariable Long id
     );
 
-
+    // ---------------------- Upload an image to a new post ----------------------
     @Operation(
             summary = "Upload post image",
             description = "Uploads an image file for a post and returns the URL of the stored image.",
@@ -326,6 +330,7 @@ public interface PostApiDocs {
             @RequestParam("file") MultipartFile file
     );
 
+    // ---------------------- Posts of joined communities ----------------------
     @Operation(
             summary = "Get recent posts from joined communities",
             description = "Returns the 5 most recent posts from communities the current user has joined.",
@@ -355,6 +360,7 @@ public interface PostApiDocs {
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
     );
 
+    // ---------------------- Top five posts of a week ----------------------
     @Operation(
             summary = "Get top posts this week",
             description = "Retrieves the top 10 posts with the highest number of likes created within the last 7 days.",
@@ -366,6 +372,7 @@ public interface PostApiDocs {
     @GetMapping("/top-weekly")
     ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTopPostsThisWeek();
 
+    // ---------------------- Recently viewed posts ----------------------
     @Operation(
             summary = "Get recently viewed posts",
             description = "Retrieves the list of posts the user has recently viewed. "

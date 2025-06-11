@@ -80,6 +80,7 @@ public class CommunityServiceImpl implements CommunityService {
      */
     @Override
     public CommunityDetailDTO getCommunityDetail(Long id, String username) {
+        
         Community community = communityValidator.validateExistingCommunity(id);
         List<CommunityMember> allMembers = communityMemberRepository.findByCommunity(community);
         List<CommunityMember> onlineMembers = filterOnlineMembers(allMembers);
