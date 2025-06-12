@@ -208,4 +208,22 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("fromDate") LocalDateTime fromDate,
             @Param("size") int size
     );
+
+    @Query(
+            """
+                SELECT p FROM Post p
+                LEFT JOIN p.likes l
+                WHERE p.category.community.id = :communityId
+                  AND p.category.id = :categoryId
+                  AND p.createdAt >= :fromDate
+                GROUP BY p
+                ORDER BY COUNT(l) DESC, p.createdAt DESC
+            """
+    )
+    List<Post> findTopPostsByCommunityAndCategoryAndDateAfter(
+            @Param("communityId") Long communityId,
+            @Param("categoryId") Long categoryId,
+            @Param("fromDate") LocalDateTime fromDate,
+            Pageable pageable
+    );
 }

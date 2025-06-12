@@ -19,6 +19,7 @@ public class PostResponseDTO {
 
     private CommunityPreviewDTO community;
     private List<String> imageUrls;
+
     private int commentCount;
     private int likeCount;
     private LocalDateTime createdAt;

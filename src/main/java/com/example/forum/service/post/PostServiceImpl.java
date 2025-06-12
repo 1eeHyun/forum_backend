@@ -310,6 +310,33 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Map<String, List<PostResponseDTO>> getTopPostsThisWeekByCategories(Long communityId, int size) {
+
+        Community community = communityValidator.validateExistingCommunity(communityId);
+        LocalDateTime fromDate = LocalDateTime.now().minusWeeks(1);
+        Set<Category> categories = community.getCategories();
+
+        Map<String, List<PostResponseDTO>> result = new HashMap<>();
+
+        for (Category category : categories) {
+
+            List<Post> posts = postRepository.findTopPostsByCommunityAndCategoryAndDateAfter(
+                    community.getId(), category.getId(), fromDate, PageRequest.of(0, size)
+            );
+
+            List<PostResponseDTO> dtoList = posts.stream()
+                    .map(PostMapper::toPostResponseDTO)
+                    .toList();
+
+            if (!dtoList.isEmpty()) {
+                result.put(category.getName(), dtoList);
+            }
+        }
+
+        return result;
+    }
+
     // ------------------------------ Helper methods -------------------------------------
     private Category getValidCategoryIfNeeded(PostRequestDTO dto) {
 

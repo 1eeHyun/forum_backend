@@ -338,9 +338,8 @@ public interface CommunityApiDocs {
             }
     )
     @GetMapping("/{communityId}/top-posts-by-category")
-    ResponseEntity<Map<String, List<PostResponseDTO>>> getTopPostsByCategoryThisWeek(
+    ResponseEntity<CommonResponse<Map<String, List<PostResponseDTO>>>> getTopPostsByCategoryThisWeek(
             @PathVariable Long communityId,
-            @RequestParam(defaultValue = "week") String period,
             @RequestParam(defaultValue = "3") int limit
     );
 }

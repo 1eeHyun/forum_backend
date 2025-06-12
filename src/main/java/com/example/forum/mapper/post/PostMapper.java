@@ -101,7 +101,7 @@ public class PostMapper {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .thumbnailUrls(
+                .imageUrls(
                         post.getImages().stream().map(PostImage::getImageUrl).toList()
                 )
                 .likeCount(post.getLikes().size())

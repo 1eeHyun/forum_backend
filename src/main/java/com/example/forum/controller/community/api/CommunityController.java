@@ -137,11 +137,12 @@ public class CommunityController implements CommunityApiDocs {
     }
 
     @Override
-    public ResponseEntity<Map<String, List<PostResponseDTO>>> getTopPostsByCategoryThisWeek(
-            Long communityId,
-            String period,
-            int limit) {
+    public ResponseEntity<CommonResponse<Map<String, List<PostResponseDTO>>>> getTopPostsByCategoryThisWeek(
+            @PathVariable Long communityId,
+            @RequestParam(defaultValue = "3") int limit) {
 
-        return null;
+        Map<String, List<PostResponseDTO>> response = postService.getTopPostsThisWeekByCategories(communityId, limit);
+
+        return ResponseEntity.ok(CommonResponse.success(response));
     }
 }
