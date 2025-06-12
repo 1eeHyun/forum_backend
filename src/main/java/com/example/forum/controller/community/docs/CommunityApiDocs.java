@@ -7,6 +7,7 @@ import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.dto.util.OnlineUserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Community", description = "Community related API")
 public interface CommunityApiDocs {
@@ -109,10 +111,10 @@ public interface CommunityApiDocs {
                     )
             }
     )
-    @GetMapping("/{id}")
+    @GetMapping("/{communityId}")
     ResponseEntity<CommonResponse<CommunityDetailDTO>> getCommunity(
             @Parameter(description = "ID of the community to retrieve", required = true)
-            @PathVariable Long id,
+            @PathVariable Long communityId,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
@@ -137,10 +139,10 @@ public interface CommunityApiDocs {
                     )
             }
     )
-    @GetMapping("/{id}/online-users")
+    @GetMapping("/{communityId}/online-users")
     ResponseEntity<CommonResponse<List<OnlineUserDTO>>> getOnlineUsers(
             @Parameter(description = "ID of the community to check online users", required = true)
-            @PathVariable("id") Long id
+            @PathVariable Long communityId
     );
 
     @Operation(
@@ -155,7 +157,7 @@ public interface CommunityApiDocs {
     @GetMapping("/{communityId}/categories")
     ResponseEntity<CommonResponse<List<CategoryResponseDTO>>> getCategories(
             @Parameter(description = "ID of the community to retrieve categories from", required = true)
-            @PathVariable("communityId") Long communityId
+            @PathVariable Long communityId
     );
 
     @Operation(
@@ -176,9 +178,71 @@ public interface CommunityApiDocs {
     @PostMapping("/{communityId}/categories")
     ResponseEntity<CommonResponse<Void>> addCategory(
             @Parameter(description = "ID of the community to which the category will be added", required = true)
-            @PathVariable("id") Long communityId,
+            @PathVariable Long communityId,
 
             @Valid @RequestBody CategoryRequestDTO dto,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
+    );
+
+    @Operation(
+            summary = "Join a community",
+            description = "Allows the currently logged-in user to join the specified community.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Successfully joined the community"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "User already joined or community is private/restricted"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Community not found"
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized - user not logged in"
+                    )
+            }
+    )
+    @PostMapping("/{communityId}/join")
+    ResponseEntity<CommonResponse<Void>> joinCommunity(
+            @Parameter(description = "ID of the community to join", required = true)
+            @PathVariable Long communityId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
+    );
+
+    @Operation(
+            summary = "Leave a community",
+            description = "Allows the currently logged-in user to leave the specified community.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Successfully left the community"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "User is not a member of the community or is the only manager"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Community not found"
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized - user not logged in"
+                    )
+            }
+    )
+    @PostMapping("/{communityId}/leave")
+    ResponseEntity<CommonResponse<Void>> leaveCommunity(
+            @Parameter(description = "ID of the community to leave", required = true)
+            @PathVariable Long communityId,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
@@ -239,7 +303,7 @@ public interface CommunityApiDocs {
                     )
             }
     )
-    @GetMapping("/{communityId}/category/{categoryId}/posts")
+    @GetMapping("/{communityId}/categories/{categoryId}/posts")
     ResponseEntity<CommonResponse<List<PostResponseDTO>>> getCommunityCategoryPosts(
             @Parameter(description = "ID of the community", required = true)
             @PathVariable Long communityId,
@@ -255,5 +319,28 @@ public interface CommunityApiDocs {
 
             @Parameter(description = "Number of posts per page", example = "5")
             @RequestParam(defaultValue = "5") int size
+    );
+
+    @Operation(
+            summary = "Get top posts by category in a community",
+            description = "Returns top posts for each category in the community, within a given period such as 'week' or 'month'. Limited to a certain number per category.",
+            parameters = {
+                    @Parameter(name = "communityId", description = "ID of the community", required = true, in = ParameterIn.PATH),
+                    @Parameter(name = "period", description = "Time range (e.g., 'week', 'month')", in = ParameterIn.QUERY),
+                    @Parameter(name = "limit", description = "Maximum number of top posts per category", in = ParameterIn.QUERY)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Top posts grouped by category",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = PostResponseDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Community not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @GetMapping("/{communityId}/top-posts-by-category")
+    ResponseEntity<Map<String, List<PostResponseDTO>>> getTopPostsByCategoryThisWeek(
+            @PathVariable Long communityId,
+            @RequestParam(defaultValue = "week") String period,
+            @RequestParam(defaultValue = "3") int limit
     );
 }

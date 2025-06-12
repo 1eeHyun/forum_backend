@@ -118,13 +118,29 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void addMember(String username) {
+    @Transactional
+    public void addMember(Long communityId, String username) {
 
+        Community community = communityValidator.validateExistingCommunity(communityId);
+        User user = authValidator.validateUserByUsername(username);
+
+        if (community.getMembers().contains(user))
+            return;
+
+        community.addMember(user, CommunityRole.MEMBER);
     }
 
     @Override
-    public void removeMember(String username) {
+    @Transactional
+    public void removeMember(Long communityId, String username) {
 
+        Community community = communityValidator.validateExistingCommunity(communityId);
+        User user = authValidator.validateUserByUsername(username);
+
+        if (!community.getMembers().contains(user))
+            return;
+
+        community.removeMember(user);
     }
 
     @Override

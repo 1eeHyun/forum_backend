@@ -50,13 +50,13 @@ public class PostController implements PostApiDocs {
 
     @Override
     public ResponseEntity<CommonResponse<PostDetailDTO>> getPostDetail(
-            @PathVariable Long id,
+            @PathVariable Long postId,
             @AuthenticationPrincipal UserDetails userDetails) {
 
 
         String username = userDetails == null ? null : authValidator.extractUsername(userDetails);
 
-        PostDetailDTO response = postService.getPostDetail(id, username);
+        PostDetailDTO response = postService.getPostDetail(postId, username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -73,51 +73,51 @@ public class PostController implements PostApiDocs {
 
     @Override
     public ResponseEntity<CommonResponse<PostResponseDTO>> update(
-            @PathVariable Long id,
+            @PathVariable Long postId,
             @Valid @RequestBody PostRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
 
-        PostResponseDTO post = postService.updatePost(id, dto, username);
+        PostResponseDTO post = postService.updatePost(postId, dto, username);
         return ResponseEntity.ok(CommonResponse.success(post));
     }
 
     @Override
     public ResponseEntity<CommonResponse<Void>> delete(
-            @PathVariable Long id,
+            @PathVariable Long postId,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        postService.deletePost(id, username);
+        postService.deletePost(postId, username);
 
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
     @Override
     public ResponseEntity<CommonResponse<Void>> likePost(
-            @PathVariable Long id,
+            @PathVariable Long postId,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
 
-        postLikeService.toggleLike(id, username);
+        postLikeService.toggleLike(postId, username);
         return ResponseEntity.ok(CommonResponse.success());
     }
 
     @Override
     public ResponseEntity<CommonResponse<Long>> getLikesCount(
-            @PathVariable Long id) {
+            @PathVariable Long postId) {
 
-        long response = postLikeService.countLikes(id);
+        long response = postLikeService.countLikes(postId);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
     @Override
     public ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(
-            @PathVariable Long id) {
+            @PathVariable Long postId) {
 
-        List<LikeUserDTO> response = postLikeService.getLikeUsers(id);
+        List<LikeUserDTO> response = postLikeService.getLikeUsers(postId);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 

@@ -33,4 +33,5 @@ public interface PostService {
     // ----------------- Community Posts -----------------
     List<PostResponseDTO> getCommunityPosts(Long communityId, SortOrder sort, int page, int size);
     List<PostResponseDTO> getCommunityCategoryPosts(Long communityId, Long categoryId, SortOrder sort, int page, int size);
+    List<PostResponseDTO> getTopPostsThisWeek(Long communityId, int size);
 }

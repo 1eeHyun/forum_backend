@@ -12,8 +12,9 @@ public interface CommunityService {
     List<CommunityPreviewDTO> getMyCommunities(String username);
     List<OnlineUserDTO> getOnlineUsers(Long id);
 
-    void addMember(String username);
-    void removeMember(String username);
+    void addMember(Long communityId, String username);
+    void removeMember(Long communityId, String username);
+
     List<CategoryResponseDTO> getCategories(Long id);
     void addCategory(Long communityId, CategoryRequestDTO dto, String username);
 }

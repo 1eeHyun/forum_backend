@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/communities")
@@ -38,6 +39,28 @@ public class CommunityController implements CommunityApiDocs {
     }
 
     @Override
+    public ResponseEntity<CommonResponse<Void>> joinCommunity(
+            @PathVariable Long communityId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = authValidator.extractUsername(userDetails);
+        communityService.addMember(communityId, username);
+
+        return ResponseEntity.ok(CommonResponse.success());
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<Void>> leaveCommunity(
+            @PathVariable Long communityId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = authValidator.extractUsername(userDetails);
+        communityService.removeMember(communityId, username);
+
+        return ResponseEntity.ok(CommonResponse.success());
+    }
+
+    @Override
     public ResponseEntity<CommonResponse<List<CommunityPreviewDTO>>> getMyCommunities(
             @AuthenticationPrincipal UserDetails userDetails) {
 
@@ -49,20 +72,20 @@ public class CommunityController implements CommunityApiDocs {
 
     @Override
     public ResponseEntity<CommonResponse<CommunityDetailDTO>> getCommunity(
-            @PathVariable Long id,
+            @PathVariable Long communityId,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
 
-        CommunityDetailDTO response = communityService.getCommunityDetail(id, username);
+        CommunityDetailDTO response = communityService.getCommunityDetail(communityId, username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
     @Override
     public ResponseEntity<CommonResponse<List<OnlineUserDTO>>> getOnlineUsers(
-            @PathVariable Long id) {
+            @PathVariable Long communityId) {
 
-        List<OnlineUserDTO> response = communityService.getOnlineUsers(id);
+        List<OnlineUserDTO> response = communityService.getOnlineUsers(communityId);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -101,8 +124,8 @@ public class CommunityController implements CommunityApiDocs {
 
     @Override
     public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getCommunityCategoryPosts(
-            @PathVariable Long communityId,
-            @PathVariable Long categoryId,
+            @PathVariable("communityId") Long communityId,
+            @PathVariable("categoryId") Long categoryId,
             @RequestParam(defaultValue = "newest") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
@@ -111,5 +134,14 @@ public class CommunityController implements CommunityApiDocs {
         List<PostResponseDTO> response = postService.getCommunityCategoryPosts(communityId, categoryId, sortOrder, page, size);
 
         return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Override
+    public ResponseEntity<Map<String, List<PostResponseDTO>>> getTopPostsByCategoryThisWeek(
+            Long communityId,
+            String period,
+            int limit) {
+
+        return null;
     }
 }

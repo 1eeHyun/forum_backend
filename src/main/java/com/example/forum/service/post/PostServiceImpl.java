@@ -296,6 +296,20 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
+    @Override
+    public List<PostResponseDTO> getTopPostsThisWeek(Long communityId, int size) {
+
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+
+        List<Post> topPosts = postRepository.findTopPostsByCommunityAndDateAfter(
+                communityId, oneWeekAgo, size
+        );
+
+        return topPosts.stream()
+                .map(PostMapper::toPostResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     // ------------------------------ Helper methods -------------------------------------
     private Category getValidCategoryIfNeeded(PostRequestDTO dto) {
 

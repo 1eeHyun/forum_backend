@@ -21,7 +21,6 @@ import java.util.List;
 @Tag(name = "Notification", description = "Notification related API")
 public interface NotificationApiDocs {
 
-
     @Operation(
             summary = "Get my notifications",
             description = "Retrieves the list of notifications for the currently logged-in user, ordered by newest first.",

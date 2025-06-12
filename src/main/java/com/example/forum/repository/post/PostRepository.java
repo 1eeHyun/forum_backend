@@ -31,30 +31,40 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findPagedPostsNewest(@Param("limit") int limit, @Param("offset") int offset);
 
     // Home Feed - OLDEST
-    @Query(value = """
-        SELECT * FROM post
-        WHERE visibility = 'PUBLIC' OR visibility = 'COMMUNITY'
-        ORDER BY created_at ASC, id ASC
-        LIMIT :limit OFFSET :offset
-    """, nativeQuery = true)
+    @Query(
+            value = """
+                        SELECT * FROM post
+                        WHERE visibility = 'PUBLIC' OR visibility = 'COMMUNITY'
+                        ORDER BY created_at ASC, id ASC
+                        LIMIT :limit OFFSET :offset
+                    """,
+
+            nativeQuery = true
+    )
     List<Post> findPagedPostsOldest(@Param("limit") int limit, @Param("offset") int offset);
 
     // Home Feed - TOP LIKED
-    @Query(value = """
-        SELECT p.* FROM post p
-        LEFT JOIN post_likes l ON p.id = l.post_id
-        WHERE p.visibility = 'PUBLIC' OR p.visibility = 'COMMUNITY'
-        GROUP BY p.id
-        ORDER BY COUNT(l.id) DESC, p.created_at DESC
-        LIMIT :limit OFFSET :offset
-    """, nativeQuery = true)
+    @Query(
+            value = """
+                        SELECT p.* FROM post p
+                        LEFT JOIN post_likes l ON p.id = l.post_id
+                        WHERE p.visibility = 'PUBLIC' OR p.visibility = 'COMMUNITY'
+                        GROUP BY p.id
+                        ORDER BY COUNT(l.id) DESC, p.created_at DESC
+                        LIMIT :limit OFFSET :offset
+                    """,
+
+            nativeQuery = true
+    )
     List<Post> findPagedPostsTopLiked(@Param("limit") int limit, @Param("offset") int offset);
 
-    @Query("""
-    SELECT p FROM Post p 
-    WHERE p.createdAt >= :from 
-    ORDER BY SIZE(p.likes) DESC
-    """)
+    @Query(
+            """
+                SELECT p FROM Post p 
+                WHERE p.createdAt >= :from 
+                ORDER BY SIZE(p.likes) DESC
+            """
+    )
     List<Post> findTopPostsSince(@Param("from") LocalDateTime from, Pageable pageable);
 
 
@@ -186,4 +196,16 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             Pageable pageable
     );
 
+    @Query(
+            value = "SELECT * FROM post " +
+                    "WHERE community_id = :communityId AND created_at >= :fromDate " +
+                    "ORDER BY like_count DESC, comment_count DESC " +
+                    "LIMIT :size",
+            nativeQuery = true
+    )
+    List<Post> findTopPostsByCommunityAndDateAfter(
+            @Param("communityId") Long communityId,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("size") int size
+    );
 }

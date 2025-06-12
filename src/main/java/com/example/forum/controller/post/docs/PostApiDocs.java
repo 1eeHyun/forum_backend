@@ -77,10 +77,10 @@ public interface PostApiDocs {
                     )
             }
     )
-    @GetMapping("/{id}")
+    @GetMapping("/{postId}")
     ResponseEntity<CommonResponse<PostDetailDTO>> getPostDetail(
             @Parameter(description = "ID of the post to retrieve", required = true)
-            @PathVariable Long id,
+            @PathVariable Long postId,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
@@ -160,10 +160,10 @@ public interface PostApiDocs {
                     )
             }
     )
-    @PutMapping("/{id}")
+    @PutMapping("/{postId}")
     ResponseEntity<CommonResponse<PostResponseDTO>> update(
             @Parameter(description = "ID of the post to update", required = true)
-            @PathVariable Long id,
+            @PathVariable Long postId,
 
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Post update data (title, content, etc.)",
@@ -203,10 +203,10 @@ public interface PostApiDocs {
                     )
             }
     )
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{postId}")
     ResponseEntity<CommonResponse<Void>> delete(
             @Parameter(description = "ID of the post to delete", required = true)
-            @PathVariable Long id,
+            @PathVariable Long postId,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
@@ -234,10 +234,10 @@ public interface PostApiDocs {
                     )
             }
     )
-    @PostMapping("/{id}/likes")
+    @PostMapping("/{postId}/likes")
     ResponseEntity<CommonResponse<Void>> likePost(
             @Parameter(description = "ID of the post to like or unlike", required = true)
-            @PathVariable Long id,
+            @PathVariable Long postId,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
@@ -263,10 +263,10 @@ public interface PostApiDocs {
                     )
             }
     )
-    @GetMapping("/{id}/likes")
+    @GetMapping("/{postId}/likes")
     ResponseEntity<CommonResponse<Long>> getLikesCount(
             @Parameter(description = "ID of the post to retrieve like count for", required = true)
-            @PathVariable Long id
+            @PathVariable Long postId
     );
 
     // ---------------------- Who likes an existing Post ----------------------
@@ -289,10 +289,10 @@ public interface PostApiDocs {
                     )
             }
     )
-    @GetMapping("/{id}/likes/users")
+    @GetMapping("/{postId}/likes/users")
     ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(
             @Parameter(description = "ID of the post", required = true)
-            @PathVariable Long id
+            @PathVariable Long postId
     );
 
     // ---------------------- Upload an image to a new post ----------------------
