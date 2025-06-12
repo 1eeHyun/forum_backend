@@ -11,6 +11,7 @@ public interface CommunityService {
     Long create(CommunityRequestDTO dto, String username);
     List<CommunityPreviewDTO> getMyCommunities(String username);
     List<UserDTO> getOnlineUsers(Long id);
+    List<UserDTO> getNewMembersThisWeek(Long communityId);
 
     void addMember(Long communityId, String username);
     void removeMember(Long communityId, String username);

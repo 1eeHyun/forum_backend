@@ -145,4 +145,12 @@ public class CommunityController implements CommunityApiDocs {
 
         return ResponseEntity.ok(CommonResponse.success(response));
     }
+
+    @Override
+    public ResponseEntity<CommonResponse<List<UserDTO>>> getNewMembers(
+            @PathVariable Long communityId) {
+
+        List<UserDTO> response = communityService.getNewMembersThisWeek(communityId);
+        return ResponseEntity.ok(CommonResponse.success(response));
+    }
 }

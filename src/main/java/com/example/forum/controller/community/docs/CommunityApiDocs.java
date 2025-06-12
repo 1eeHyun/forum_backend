@@ -342,4 +342,40 @@ public interface CommunityApiDocs {
             @PathVariable Long communityId,
             @RequestParam(defaultValue = "3") int limit
     );
+
+    @Operation(
+            summary = "Get new members of a community this week",
+            description = "Returns a list of users who joined the specified community within the past 7 days.",
+            parameters = {
+                    @Parameter(
+                            name = "communityId",
+                            description = "ID of the community",
+                            required = true,
+                            in = ParameterIn.PATH
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "List of new members",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = UserDTO.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Community not found"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Internal server error"
+                    )
+            }
+    )
+    @GetMapping("/{communityId}/new-members")
+    ResponseEntity<CommonResponse<List<UserDTO>>> getNewMembers(
+            @PathVariable Long communityId
+    );
+
 }
