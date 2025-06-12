@@ -4,7 +4,7 @@ import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.profile.ProfilePreviewDTO;
 import com.example.forum.dto.search.SearchResponseDTO;
-import com.example.forum.dto.util.AuthorDTO;
+import com.example.forum.dto.util.UserDTO;
 import com.example.forum.dto.image.ImageDTO;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.post.PostMapper;
@@ -38,7 +38,7 @@ class SearchServiceImplTest {
     private SearchServiceImpl searchService;
 
     private ImageDTO imageDTO;
-    private AuthorDTO authorDTO;
+    private UserDTO authorDTO;
 
     @BeforeEach
     void setUp() {
@@ -50,10 +50,10 @@ class SearchServiceImplTest {
                 .imagePositionY(0.0)
                 .build();
 
-        authorDTO = AuthorDTO.builder()
+        authorDTO = UserDTO.builder()
                 .username("user1")
                 .nickname("nickname1")
-                .imageDTO(imageDTO)
+                .profileImage(imageDTO)
                 .build();
     }
 

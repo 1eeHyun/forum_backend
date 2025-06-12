@@ -2,8 +2,8 @@ package com.example.forum.service.auth;
 
 import com.example.forum.dto.auth.LoginRequestDTO;
 import com.example.forum.dto.auth.LoginResponseDTO;
-import com.example.forum.dto.auth.MeResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
+import com.example.forum.dto.util.UserDTO;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.profile.ProfileRepository;
@@ -197,23 +197,23 @@ class AuthServiceImplTest {
         // given
         String username = "testuser";
         User mockUser = User.builder().username(username).build();
-        MeResponseDTO meResponseDTO = MeResponseDTO.builder()
+        UserDTO meResponseDTO = UserDTO.builder()
                 .username(username)
                 .email("test@example.com")
                 .nickname("Tester")
-                .imageDTO(null)
+                .profileImage(null)
                 .build();
 
         when(authValidator.validateUserByUsername(username)).thenReturn(mockUser);
 
         // Static mocking for AuthorMapper.toMeDto
-        try (MockedStatic<com.example.forum.mapper.auth.AuthorMapper> mapper =
-                     mockStatic(com.example.forum.mapper.auth.AuthorMapper.class)) {
-            mapper.when(() -> com.example.forum.mapper.auth.AuthorMapper.toMeDto(mockUser))
+        try (MockedStatic<com.example.forum.mapper.user.UserMapper> mapper =
+                     mockStatic(com.example.forum.mapper.user.UserMapper.class)) {
+            mapper.when(() -> com.example.forum.mapper.user.UserMapper.toDtoWithEmail(mockUser))
                     .thenReturn(meResponseDTO);
 
             // when
-            MeResponseDTO result = authService.getCurrUser(username);
+            UserDTO result = authService.getCurrUser(username);
 
             // then
             assertNotNull(result);
