@@ -2,9 +2,9 @@ package com.example.forum.mapper.community;
 
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
-import com.example.forum.dto.util.ImageDTO;
-import com.example.forum.mapper.util.ImageMapper;
-import com.example.forum.mapper.util.OnlineUserMapper;
+import com.example.forum.dto.image.ImageDTO;
+import com.example.forum.mapper.image.ImageMapper;
+import com.example.forum.mapper.user.UserMapper;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.community.CommunityRole;
@@ -39,7 +39,7 @@ public class CommunityMapper {
                 .onlineCount(onlineMembers.size())
                 .memberCount(allMembers.size())
                 .role(currentUserRole)
-                .onlineUsers(OnlineUserMapper.toDTO(onlineMembers))
+                .onlineUsers(UserMapper.toListDtoByCommunityMemberList(onlineMembers))
                 .build();
     }
 

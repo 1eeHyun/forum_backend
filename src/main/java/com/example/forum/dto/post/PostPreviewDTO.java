@@ -1,7 +1,7 @@
 package com.example.forum.dto.post;
 
-import com.example.forum.dto.util.AuthorDTO;
-import com.example.forum.dto.util.ImageDTO;
+import com.example.forum.dto.image.ImageDTO;
+import com.example.forum.dto.util.UserDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -24,5 +24,5 @@ public class PostPreviewDTO {
     private ImageDTO communityProfilePicture;
 
     private String authorNickname;
-    private AuthorDTO author;
+    private UserDTO author;
 }

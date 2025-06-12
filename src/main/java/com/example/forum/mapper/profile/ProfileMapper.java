@@ -3,7 +3,7 @@ package com.example.forum.mapper.profile;
 import com.example.forum.dto.follow.FollowUserDTO;
 import com.example.forum.dto.profile.ProfilePreviewDTO;
 import com.example.forum.dto.profile.ProfileResponseDTO;
-import com.example.forum.dto.util.ImageDTO;
+import com.example.forum.dto.image.ImageDTO;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 

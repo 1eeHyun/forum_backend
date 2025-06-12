@@ -5,7 +5,7 @@ import com.example.forum.controller.community.docs.CommunityApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.*;
 import com.example.forum.dto.post.PostResponseDTO;
-import com.example.forum.dto.util.OnlineUserDTO;
+import com.example.forum.dto.util.UserDTO;
 import com.example.forum.service.community.CommunityService;
 import com.example.forum.service.post.PostService;
 import com.example.forum.validator.auth.AuthValidator;
@@ -82,10 +82,10 @@ public class CommunityController implements CommunityApiDocs {
     }
 
     @Override
-    public ResponseEntity<CommonResponse<List<OnlineUserDTO>>> getOnlineUsers(
+    public ResponseEntity<CommonResponse<List<UserDTO>>> getOnlineUsers(
             @PathVariable Long communityId) {
 
-        List<OnlineUserDTO> response = communityService.getOnlineUsers(communityId);
+        List<UserDTO> response = communityService.getOnlineUsers(communityId);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 

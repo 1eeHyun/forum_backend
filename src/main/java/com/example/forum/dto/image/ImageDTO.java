@@ -1,4 +1,4 @@
-package com.example.forum.dto.util;
+package com.example.forum.dto.image;
 
 import lombok.Builder;
 import lombok.Getter;

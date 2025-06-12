@@ -5,7 +5,7 @@ import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.profile.ProfilePreviewDTO;
 import com.example.forum.dto.search.SearchResponseDTO;
 import com.example.forum.dto.util.AuthorDTO;
-import com.example.forum.dto.util.ImageDTO;
+import com.example.forum.dto.image.ImageDTO;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.mapper.profile.ProfileMapper;

@@ -4,7 +4,7 @@ package com.example.forum.controller.community.docs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.*;
 import com.example.forum.dto.post.PostResponseDTO;
-import com.example.forum.dto.util.OnlineUserDTO;
+import com.example.forum.dto.util.UserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -129,7 +129,7 @@ public interface CommunityApiDocs {
                             description = "Successfully retrieved list of online users",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = OnlineUserDTO.class)
+                                    schema = @Schema(implementation = UserDTO.class)
                             )
                     ),
                     @ApiResponse(
@@ -140,7 +140,7 @@ public interface CommunityApiDocs {
             }
     )
     @GetMapping("/{communityId}/online-users")
-    ResponseEntity<CommonResponse<List<OnlineUserDTO>>> getOnlineUsers(
+    ResponseEntity<CommonResponse<List<UserDTO>>> getOnlineUsers(
             @Parameter(description = "ID of the community to check online users", required = true)
             @PathVariable Long communityId
     );

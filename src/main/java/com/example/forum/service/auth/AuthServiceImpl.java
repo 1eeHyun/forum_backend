@@ -2,9 +2,9 @@ package com.example.forum.service.auth;
 
 import com.example.forum.dto.auth.LoginRequestDTO;
 import com.example.forum.dto.auth.LoginResponseDTO;
-import com.example.forum.dto.auth.MeResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
-import com.example.forum.mapper.auth.AuthorMapper;
+import com.example.forum.dto.util.UserDTO;
+import com.example.forum.mapper.user.UserMapper;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.profile.ProfileRepository;
@@ -112,11 +112,11 @@ public class AuthServiceImpl implements AuthService{
      * @return
      */
     @Override
-    public MeResponseDTO getCurrUser(String username) {
+    public UserDTO getCurrUser(String username) {
 
         // Retrieves currently requesting user
         User user = authValidator.validateUserByUsername(username);
-        return AuthorMapper.toMeDto(user);
+        return UserMapper.toDtoWithEmail(user);
     }
 
     // Helper methods

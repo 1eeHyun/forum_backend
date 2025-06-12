@@ -1,6 +1,6 @@
 package com.example.forum.dto.comment;
 
-import com.example.forum.dto.util.AuthorDTO;
+import com.example.forum.dto.util.UserDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,7 +13,7 @@ public class CommentResponseDTO {
 
     private Long commentId;
     private String content;
-    private AuthorDTO author;
+    private UserDTO author;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<CommentResponseDTO> replies;

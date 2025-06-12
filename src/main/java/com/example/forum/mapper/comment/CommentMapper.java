@@ -1,7 +1,7 @@
 package com.example.forum.mapper.comment;
 
 import com.example.forum.dto.comment.CommentResponseDTO;
-import com.example.forum.mapper.auth.AuthorMapper;
+import com.example.forum.mapper.user.UserMapper;
 import com.example.forum.model.comment.Comment;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class CommentMapper {
         return CommentResponseDTO.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
-                .author(AuthorMapper.toDto(comment.getAuthor()))
+                .author(UserMapper.toDtoWithEmail(comment.getAuthor()))
                 .createdAt(comment.getCreatedAt())
                 .replies(comment.getReplies() != null
                         ? comment.getReplies().stream().map(CommentMapper::toDTO).toList()
@@ -48,7 +48,7 @@ public class CommentMapper {
         return CommentResponseDTO.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
-                .author(AuthorMapper.toDto(comment.getAuthor()))
+                .author(UserMapper.toDtoWithEmail(comment.getAuthor()))
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
                 .replies(replyMap.getOrDefault(comment.getId(), new ArrayList<>())

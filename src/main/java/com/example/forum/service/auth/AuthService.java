@@ -2,13 +2,13 @@ package com.example.forum.service.auth;
 
 import com.example.forum.dto.auth.LoginRequestDTO;
 import com.example.forum.dto.auth.LoginResponseDTO;
-import com.example.forum.dto.auth.MeResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
+import com.example.forum.dto.util.UserDTO;
 
 public interface AuthService {
 
     void signup(SignupRequestDTO dto);
     LoginResponseDTO login(LoginRequestDTO dto);
     void logout(String username);
-    MeResponseDTO getCurrUser(String username);
+    UserDTO getCurrUser(String username);
 }

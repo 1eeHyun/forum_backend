@@ -3,14 +3,14 @@ package com.example.forum.controller.auth.docs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginRequestDTO;
 import com.example.forum.dto.auth.LoginResponseDTO;
-import com.example.forum.dto.auth.MeResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
+import com.example.forum.dto.util.UserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -115,7 +115,7 @@ public interface AuthApiDocs {
                             description = "User info successfully retrieved",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = MeResponseDTO.class)
+                                    schema = @Schema(implementation = UserDTO.class)
                             )
                     ),
                     @ApiResponse(

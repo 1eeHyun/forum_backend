@@ -2,7 +2,7 @@ package com.example.forum.helper.chat;
 
 import com.example.forum.dto.chat.ChatMessageDTO;
 import com.example.forum.dto.profile.ProfilePreviewDTO;
-import com.example.forum.dto.util.ImageDTO;
+import com.example.forum.dto.image.ImageDTO;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.validator.auth.AuthValidator;

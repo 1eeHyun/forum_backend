@@ -1,6 +1,6 @@
 package com.example.forum.dto.notification;
 
-import com.example.forum.dto.util.AuthorDTO;
+import com.example.forum.dto.util.UserDTO;
 import com.example.forum.model.notification.Notification.NotificationType;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class NotificationResponseDTO {
 
     private Long notificationId;
-    private AuthorDTO sender;
+    private UserDTO sender;
     private NotificationType type;
     private Long targetId;
     private Long commentId;

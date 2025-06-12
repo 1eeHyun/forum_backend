@@ -1,9 +1,9 @@
 package com.example.forum.service.community;
 
 import com.example.forum.dto.community.*;
-import com.example.forum.dto.util.OnlineUserDTO;
+import com.example.forum.dto.util.UserDTO;
 import com.example.forum.mapper.community.CommunityMapper;
-import com.example.forum.mapper.util.OnlineUserMapper;
+import com.example.forum.mapper.user.UserMapper;
 import com.example.forum.model.community.Category;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
@@ -106,14 +106,14 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public List<OnlineUserDTO> getOnlineUsers(Long id) {
+    public List<UserDTO> getOnlineUsers(Long id) {
 
         Community community = communityValidator.validateExistingCommunity(id);
         List<CommunityMember> members = communityMemberRepository.findByCommunity(community);
 
         return members.stream()
                 .filter(cm -> cm.getUser().isOnline())
-                .map(OnlineUserMapper::toDTO)
+                .map(UserMapper::toDtoByCommunityMember)
                 .toList();
     }
 

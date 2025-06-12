@@ -4,10 +4,10 @@ import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostResponseDTO;
-import com.example.forum.mapper.auth.AuthorMapper;
 import com.example.forum.mapper.comment.CommentMapper;
 import com.example.forum.mapper.community.CommunityMapper;
-import com.example.forum.mapper.util.ImageMapper;
+import com.example.forum.mapper.image.ImageMapper;
+import com.example.forum.mapper.user.UserMapper;
 import com.example.forum.model.like.PostLike;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostImage;
@@ -24,7 +24,7 @@ public class PostMapper {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .author(AuthorMapper.toDto(post.getAuthor()))
+                .author(UserMapper.toDtoWithEmail(post.getAuthor()))
                 .community(
                         post.getCategory() != null
                                 ? CommunityMapper.toPreviewDTO(post.getCategory().getCommunity())
@@ -46,7 +46,7 @@ public class PostMapper {
                 .title(post.getTitle())
                 .content(post.getContent())
                 // Author of the post
-                .author(AuthorMapper.toDto(post.getAuthor()))
+                .author(UserMapper.toDtoWithEmail(post.getAuthor()))
                 .isAuthor(post.getAuthor().equals(viewer))
 
                 .community(
@@ -129,7 +129,7 @@ public class PostMapper {
                 )
 
                 .authorNickname(post.getAuthor().getProfile().getNickname())
-                .author(AuthorMapper.toDto(post.getAuthor()))
+                .author(UserMapper.toDtoWithEmail(post.getAuthor()))
                 .build();
     }
 

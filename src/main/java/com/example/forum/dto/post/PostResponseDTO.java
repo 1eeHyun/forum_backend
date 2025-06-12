@@ -1,7 +1,7 @@
 package com.example.forum.dto.post;
 
 import com.example.forum.dto.community.CommunityPreviewDTO;
-import com.example.forum.dto.util.AuthorDTO;
+import com.example.forum.dto.util.UserDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,7 +15,8 @@ public class PostResponseDTO {
     private Long id;
     private String title;
     private String content;
-    private AuthorDTO author;
+    private UserDTO author;
+
     private CommunityPreviewDTO community;
     private List<String> imageUrls;
     private int commentCount;

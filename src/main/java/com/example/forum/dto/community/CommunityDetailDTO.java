@@ -1,7 +1,7 @@
 package com.example.forum.dto.community;
 
-import com.example.forum.dto.util.ImageDTO;
-import com.example.forum.dto.util.OnlineUserDTO;
+import com.example.forum.dto.image.ImageDTO;
+import com.example.forum.dto.util.UserDTO;
 import com.example.forum.model.community.CommunityRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,5 +32,5 @@ public class CommunityDetailDTO {
 
     private CommunityRole role;
 
-    private List<OnlineUserDTO> onlineUsers;
+    private List<UserDTO> onlineUsers;
 }

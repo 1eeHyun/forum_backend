@@ -1,6 +1,6 @@
-package com.example.forum.mapper.util;
+package com.example.forum.mapper.image;
 
-import com.example.forum.dto.util.ImageDTO;
+import com.example.forum.dto.image.ImageDTO;
 import com.example.forum.model.profile.Profile;
 import lombok.Getter;
 

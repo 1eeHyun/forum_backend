@@ -4,15 +4,17 @@ import com.example.forum.controller.auth.docs.AuthApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginRequestDTO;
 import com.example.forum.dto.auth.LoginResponseDTO;
-import com.example.forum.dto.auth.MeResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
+import com.example.forum.dto.util.UserDTO;
 import com.example.forum.service.auth.AuthService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -48,7 +50,7 @@ public class AuthController implements AuthApiDocs {
     public ResponseEntity<CommonResponse<?>> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        MeResponseDTO response = authService.getCurrUser(username);
+        UserDTO response = authService.getCurrUser(username);
 
         return ResponseEntity.ok(CommonResponse.success(response));
     }

@@ -1,7 +1,7 @@
 package com.example.forum.dto.profile;
 
 import com.example.forum.dto.follow.FollowUserDTO;
-import com.example.forum.dto.util.ImageDTO;
+import com.example.forum.dto.image.ImageDTO;
 import lombok.Builder;
 import lombok.Getter;
 
