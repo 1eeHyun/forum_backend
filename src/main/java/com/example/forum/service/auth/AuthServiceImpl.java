@@ -29,6 +29,7 @@ public class AuthServiceImpl implements AuthService{
     private final ProfileRepository profileRepository;
 
     // Services
+    private final RedisService redisService;
 
     // Security
     private final PasswordEncoder passwordEncoder;
@@ -121,12 +122,10 @@ public class AuthServiceImpl implements AuthService{
 
     // Helper methods
     private void markUserOnline(User user) {
-        user.setOnline(true);
-        userRepository.save(user);
+        redisService.markUserOnline(user.getId());
     }
 
     private void markUserOffline(User user) {
-        user.setOnline(false);
-        userRepository.save(user);
+        redisService.markUserOffline(user.getId());
     }
 }

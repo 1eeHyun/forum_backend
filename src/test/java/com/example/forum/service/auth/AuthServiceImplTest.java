@@ -31,6 +31,8 @@ class AuthServiceImplTest {
     @InjectMocks
     private AuthServiceImpl authService;
 
+    @Mock private RedisService redisService;
+
     @Mock private UserRepository userRepository;
 
     @Mock private ProfileRepository profileRepository;
@@ -117,6 +119,7 @@ class AuthServiceImplTest {
         dto.setPassword("password123");
 
         User mockUser = User.builder()
+                .id(1L)
                 .username("testuser")
                 .build();
 
@@ -132,8 +135,10 @@ class AuthServiceImplTest {
         assertNotNull(response);
         assertEquals("mock.jwt.token", response.getToken());
         assertEquals("testuser", response.getUsername());
-        verify(userRepository).save(mockUser); // user marked as online
-        assertTrue(mockUser.isOnline());
+
+        verify(redisService).markUserOnline(1L);
+
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -154,24 +159,6 @@ class AuthServiceImplTest {
 
         assertEquals("Invalid credentials", ex.getMessage());
         verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("Should mark user offline when logout is called")
-    void logout_withValidUsername_shouldMarkUserOffline() {
-        // given
-        String username = "testuser";
-        User mockUser = User.builder().username(username).build();
-        mockUser.setOnline(true);
-
-        when(authValidator.validateUserByUsername(username)).thenReturn(mockUser);
-
-        // when
-        authService.logout(username);
-
-        // then
-        assertFalse(mockUser.isOnline());
-        verify(userRepository).save(mockUser);
     }
 
     @Test

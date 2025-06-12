@@ -12,6 +12,7 @@ import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CategoryRepository;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.community.CommunityRepository;
+import com.example.forum.service.auth.RedisService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class CommunityServiceImpl implements CommunityService {
     private final CategoryRepository categoryRepository;
 
     // Services
-    ///////
+    private final RedisService redisService;
 
     // Default values
     @Value("${app.default-community-image}")
@@ -112,7 +113,7 @@ public class CommunityServiceImpl implements CommunityService {
         List<CommunityMember> members = communityMemberRepository.findByCommunity(community);
 
         return members.stream()
-                .filter(cm -> cm.getUser().isOnline())
+                .filter(cm -> redisService.isUserOnline(cm.getUser().getId()))
                 .map(UserMapper::toDtoByCommunityMember)
                 .toList();
     }
