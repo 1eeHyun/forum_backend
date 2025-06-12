@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -142,6 +143,20 @@ public class CommunityServiceImpl implements CommunityService {
             return;
 
         community.removeMember(user);
+    }
+
+    @Override
+    public List<UserDTO> getNewMembersThisWeek(Long communityId) {
+
+        Community community = communityValidator.validateExistingCommunity(communityId);
+
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+
+        List<CommunityMember> recentMembers = communityMemberRepository.findByCommunityAndJoinedAtAfter(community, oneWeekAgo);
+
+        return recentMembers.stream()
+                .map(UserMapper::toDtoByCommunityMember)
+                .toList();
     }
 
     @Override

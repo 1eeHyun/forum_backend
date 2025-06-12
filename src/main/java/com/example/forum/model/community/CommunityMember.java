@@ -4,6 +4,8 @@ import com.example.forum.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter @Setter
 @NoArgsConstructor
@@ -26,4 +28,11 @@ public class CommunityMember {
 
     @Enumerated(EnumType.STRING)
     private CommunityRole role;
+
+    private LocalDateTime joinedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.joinedAt = LocalDateTime.now();
+    }
 }

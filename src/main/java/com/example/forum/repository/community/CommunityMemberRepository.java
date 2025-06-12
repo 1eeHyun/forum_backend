@@ -7,6 +7,7 @@ import com.example.forum.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,8 @@ public interface CommunityMemberRepository extends JpaRepository<CommunityMember
     List<CommunityMember> findByCommunity(Community community);
 
     List<CommunityMember> findByUser(User user);
+    List<CommunityMember> findByCommunityAndJoinedAtAfter(Community community, LocalDateTime joinedAt);
+
 
     List<CommunityMember> findByCommunityAndRole(Community community, CommunityRole role);
 
