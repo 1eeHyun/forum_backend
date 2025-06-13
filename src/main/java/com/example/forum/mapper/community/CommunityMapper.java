@@ -40,6 +40,7 @@ public class CommunityMapper {
                 )
                 .categories(
                         community.getCategories().stream()
+                                .sorted(Comparator.comparing(category -> category.getName().toLowerCase()))
                                 .map(CategoryMapper::toDTO)
                                 .toList()
                 )

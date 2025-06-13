@@ -1,7 +1,7 @@
-package com.example.forum.controller.community.api;
+package com.example.forum.controller.community.api.post;
 
 import com.example.forum.common.SortOrder;
-import com.example.forum.controller.community.docs.CommunityPostApiDocs;
+import com.example.forum.controller.community.docs.post.CommunityPostApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.service.post.PostService;

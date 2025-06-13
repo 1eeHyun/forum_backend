@@ -2,9 +2,11 @@ package com.example.forum.controller.community.api;
 
 import com.example.forum.controller.community.docs.CommunityApiDocs;
 import com.example.forum.dto.CommonResponse;
-import com.example.forum.dto.community.*;
-import com.example.forum.dto.util.UserDTO;
+import com.example.forum.dto.community.CommunityDetailDTO;
+import com.example.forum.dto.community.CommunityPreviewDTO;
+import com.example.forum.dto.community.CommunityRequestDTO;
 import com.example.forum.service.community.CommunityService;
+import com.example.forum.service.community.member.CommunityMemberService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ import java.util.List;
 public class CommunityController implements CommunityApiDocs {
 
     private final CommunityService communityService;
+    private final CommunityMemberService communityMemberService;
     private final AuthValidator authValidator;
 
     @Override
@@ -44,7 +47,7 @@ public class CommunityController implements CommunityApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        communityService.addMember(communityId, username);
+        communityMemberService.addMember(communityId, username);
 
         return ResponseEntity.ok(CommonResponse.success());
     }
@@ -55,7 +58,7 @@ public class CommunityController implements CommunityApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        communityService.removeMember(communityId, username);
+        communityMemberService.removeMember(communityId, username);
 
         return ResponseEntity.ok(CommonResponse.success());
     }
@@ -78,22 +81,6 @@ public class CommunityController implements CommunityApiDocs {
         String username = authValidator.extractUsername(userDetails);
 
         CommunityDetailDTO response = communityService.getCommunityDetail(communityId, username);
-        return ResponseEntity.ok(CommonResponse.success(response));
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<List<UserDTO>>> getOnlineUsers(
-            @PathVariable Long communityId) {
-
-        List<UserDTO> response = communityService.getOnlineUsers(communityId);
-        return ResponseEntity.ok(CommonResponse.success(response));
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<List<UserDTO>>> getNewMembers(
-            @PathVariable Long communityId) {
-
-        List<UserDTO> response = communityService.getNewMembersThisWeek(communityId);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

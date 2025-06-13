@@ -1,4 +1,4 @@
-package com.example.forum.controller.community.docs;
+package com.example.forum.controller.community.docs.manage;
 
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.CategoryRequestDTO;

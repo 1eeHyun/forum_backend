@@ -1,4 +1,4 @@
-package com.example.forum.service.community;
+package com.example.forum.service.community.manage;
 
 import com.example.forum.dto.community.CategoryRequestDTO;
 import com.example.forum.dto.community.CategoryResponseDTO;

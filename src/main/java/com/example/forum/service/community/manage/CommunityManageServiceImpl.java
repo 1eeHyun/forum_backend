@@ -1,4 +1,4 @@
-package com.example.forum.service.community;
+package com.example.forum.service.community.manage;
 
 import com.example.forum.dto.community.CategoryRequestDTO;
 import com.example.forum.dto.community.CategoryResponseDTO;
@@ -53,6 +53,7 @@ public class CommunityManageServiceImpl implements CommunityManageService {
         Community community = communityValidator.validateExistingCommunity(id);
 
         return community.getCategories().stream()
+                .sorted(Comparator.comparing(category -> category.getName().toLowerCase()))
                 .map(category -> new CategoryResponseDTO(
                         category.getId(),
                         category.getName(),

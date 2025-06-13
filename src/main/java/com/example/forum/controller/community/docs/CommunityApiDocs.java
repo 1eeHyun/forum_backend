@@ -5,10 +5,8 @@ import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
-import com.example.forum.dto.util.UserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -91,7 +89,7 @@ public interface CommunityApiDocs {
 
     @Operation(
             summary = "Retrieve a community",
-            description = "Retrieves full details of a community, including all members, online users, and the current user's role if applicable.",
+            description = "Retrieves full details of a community, including all online users, and the current user's role if applicable.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -115,31 +113,6 @@ public interface CommunityApiDocs {
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
-    );
-
-    @Operation(
-            summary = "Get online users of a community",
-            description = "Retrieves a list of users who are currently online in the specified community.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Successfully retrieved list of online users",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = UserDTO.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Community not found",
-                            content = @Content
-                    )
-            }
-    )
-    @GetMapping("/{communityId}/online-users")
-    ResponseEntity<CommonResponse<List<UserDTO>>> getOnlineUsers(
-            @Parameter(description = "ID of the community to check online users", required = true)
-            @PathVariable Long communityId
     );
 
     @Operation(
@@ -202,40 +175,5 @@ public interface CommunityApiDocs {
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
-    );
-
-    @Operation(
-            summary = "Get new members of a community this week",
-            description = "Returns a list of users who joined the specified community within the past 7 days.",
-            parameters = {
-                    @Parameter(
-                            name = "communityId",
-                            description = "ID of the community",
-                            required = true,
-                            in = ParameterIn.PATH
-                    )
-            },
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "List of new members",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = UserDTO.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Community not found"
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal server error"
-                    )
-            }
-    )
-    @GetMapping("/{communityId}/new-members")
-    ResponseEntity<CommonResponse<List<UserDTO>>> getNewMembers(
-            @PathVariable Long communityId
     );
 }
