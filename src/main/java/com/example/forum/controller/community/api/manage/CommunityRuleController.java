@@ -4,16 +4,16 @@ import com.example.forum.controller.community.docs.CommunityRuleApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.CommunityRuleRequestDTO;
 import com.example.forum.dto.community.CommunityRuleResponseDTO;
-import com.example.forum.service.community.CommunityService;
+import com.example.forum.service.community.manage.CommunityManageService;
 import com.example.forum.validator.auth.AuthValidator;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +25,7 @@ import java.util.List;
 @Slf4j
 public class CommunityRuleController implements CommunityRuleApiDocs {
 
-    private final CommunityService communityService;
+    private final CommunityManageService communityManageService;
     private final AuthValidator authValidator;
 
     @Override
@@ -35,7 +35,7 @@ public class CommunityRuleController implements CommunityRuleApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        communityService.addRule(communityId, request, username);
+        communityManageService.addRule(communityId, request, username);
 
         return ResponseEntity.ok(CommonResponse.success());
     }
@@ -48,7 +48,7 @@ public class CommunityRuleController implements CommunityRuleApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        communityService.updateRule(communityId, ruleId, request, username);
+        communityManageService.updateRule(communityId, ruleId, request, username);
         return ResponseEntity.ok(CommonResponse.success());
     }
 
@@ -59,7 +59,7 @@ public class CommunityRuleController implements CommunityRuleApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        communityService.deleteRule(communityId, ruleId, username);
+        communityManageService.deleteRule(communityId, ruleId, username);
 
         return ResponseEntity.ok(CommonResponse.success());
     }
@@ -68,7 +68,7 @@ public class CommunityRuleController implements CommunityRuleApiDocs {
     public ResponseEntity<CommonResponse<List<CommunityRuleResponseDTO>>> getRulesByCommunity(
             @PathVariable Long communityId) {
 
-        List<CommunityRuleResponseDTO> response = communityService.getRules(communityId);
+        List<CommunityRuleResponseDTO> response = communityManageService.getRules(communityId);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

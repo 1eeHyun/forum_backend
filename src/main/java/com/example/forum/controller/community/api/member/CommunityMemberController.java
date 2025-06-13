@@ -1,0 +1,45 @@
+package com.example.forum.controller.community.api;
+
+import com.example.forum.controller.community.docs.CommunityMemberApiDocs;
+import com.example.forum.dto.CommonResponse;
+import com.example.forum.dto.util.UserDTO;
+import com.example.forum.service.community.member.CommunityMemberService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/communities/{communityId}/members")
+@RequiredArgsConstructor
+public class CommunityMemberController implements CommunityMemberApiDocs {
+
+    private final CommunityMemberService communityMemberService;
+
+    @Override
+    public ResponseEntity<CommonResponse<List<UserDTO>>> getAllCommunityMembers(
+            @PathVariable Long communityId) {
+
+        List<UserDTO> response = communityMemberService.getAllMembers(communityId);
+        return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<List<UserDTO>>> getOnlineUsers(
+            @PathVariable Long communityId) {
+
+        List<UserDTO> response = communityMemberService.getOnlineUsers(communityId);
+        return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<List<UserDTO>>> getNewMembers(
+            @PathVariable Long communityId) {
+
+        List<UserDTO> response = communityMemberService.getNewMembersThisWeek(communityId);
+        return ResponseEntity.ok(CommonResponse.success(response));
+    }
+}

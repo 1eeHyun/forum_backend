@@ -4,7 +4,7 @@ import com.example.forum.controller.community.docs.CommunityCategoryApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.CategoryRequestDTO;
 import com.example.forum.dto.community.CategoryResponseDTO;
-import com.example.forum.service.community.CommunityService;
+import com.example.forum.service.community.manage.CommunityManageService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +22,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommunityCategoryController implements CommunityCategoryApiDocs {
 
-    private final CommunityService communityService;
+    private final CommunityManageService communityManageService;
     private final AuthValidator authValidator;
 
     @Override
     public ResponseEntity<CommonResponse<List<CategoryResponseDTO>>> getCategories(
             @PathVariable Long communityId) {
 
-        List<CategoryResponseDTO> response = communityService.getCategories(communityId);
+        List<CategoryResponseDTO> response = communityManageService.getCategories(communityId);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -40,7 +40,7 @@ public class CommunityCategoryController implements CommunityCategoryApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        communityService.addCategory(communityId, dto, username);
+        communityManageService.addCategory(communityId, dto, username);
 
         return ResponseEntity.ok(CommonResponse.success());
     }
