@@ -12,6 +12,7 @@ import com.example.forum.repository.community.CommunityRepository;
 import com.example.forum.repository.community.CommunityRuleRepository;
 import com.example.forum.service.auth.RedisService;
 import com.example.forum.validator.auth.AuthValidator;
+import com.example.forum.validator.community.CommunityRuleValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +32,7 @@ public class CommunityServiceImpl implements CommunityService {
     // Validators
     private final AuthValidator authValidator;
     private final CommunityValidator communityValidator;
+    private final CommunityRuleValidator communityRuleValidator;
 
     // Repositories
     private final CommunityRepository communityRepository;
@@ -46,6 +50,9 @@ public class CommunityServiceImpl implements CommunityService {
     @Value("${app.default-banner-image}")
     private String defaultBannerImage;
 
+    //
+    // ---------------- Community Related ----------------
+    //
     /**
      * This method handles creating a new community
      */
@@ -106,6 +113,9 @@ public class CommunityServiceImpl implements CommunityService {
                 .toList();
     }
 
+    //
+    // ---------------- Community Member Related ----------------
+    //
     @Override
     public List<UserDTO> getOnlineUsers(Long id) {
 
@@ -158,6 +168,9 @@ public class CommunityServiceImpl implements CommunityService {
                 .toList();
     }
 
+    //
+    // ---------------- Community Category Related ----------------
+    //
     @Override
     public List<CategoryResponseDTO> getCategories(Long id) {
 
@@ -191,6 +204,21 @@ public class CommunityServiceImpl implements CommunityService {
         community.getCategories().add(category);
     }
 
+    //
+    // ---------------- Community Rule Related ----------------
+    //
+    @Override
+    public List<CommunityRuleResponseDTO> getRules(Long communityId) {
+
+        Community community = communityValidator.validateExistingCommunity(communityId);
+
+        Set<CommunityRule> rules = community.getRules();
+        return rules.stream()
+                .sorted(Comparator.comparing(CommunityRule::getCreatedAt))
+                .map(CommunityMapper::toRuleResponseDto)
+                .toList();
+    }
+
     @Override
     @Transactional
     public void addRule(Long communityId, CommunityRuleRequestDTO request, String username) {
@@ -207,6 +235,35 @@ public class CommunityServiceImpl implements CommunityService {
                 .build();
 
         communityRuleRepository.save(newRule);
+    }
+
+    @Override
+    @Transactional
+    public void updateRule(Long communityId, Long ruleId, CommunityRuleRequestDTO request, String username) {
+
+        Community community = communityValidator.validateExistingCommunity(communityId);
+        User user = authValidator.validateUserByUsername(username);
+
+        communityValidator.validateManagerPermission(user, community);
+
+        CommunityRule rule = communityRuleValidator.validateExistingRuleInCommunity(ruleId, community);
+
+        rule.setTitle(request.getTitle());
+        rule.setContent(request.getContent());
+        communityRuleRepository.save(rule);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRule(Long communityId, Long ruleId, String username) {
+
+        Community community = communityValidator.validateExistingCommunity(communityId);
+        User user = authValidator.validateUserByUsername(username);
+
+        communityValidator.validateManagerPermission(user, community);
+
+        CommunityRule rule = communityRuleValidator.validateExistingRuleInCommunity(ruleId, community);
+        communityRuleRepository.deleteById(rule.getId());
     }
 
     /*****************************************************

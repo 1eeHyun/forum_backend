@@ -105,7 +105,7 @@ public interface CommunityRuleApiDocs {
                     @ApiResponse(responseCode = "404", description = "Community not found")
             }
     )
-    @GetMapping("/rules")
+    @GetMapping
     ResponseEntity<CommonResponse<List<CommunityRuleResponseDTO>>> getRulesByCommunity(
             @PathVariable Long communityId
     );

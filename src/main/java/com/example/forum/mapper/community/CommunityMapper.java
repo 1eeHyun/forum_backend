@@ -11,6 +11,7 @@ import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.community.CommunityRole;
 import com.example.forum.model.community.CommunityRule;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class CommunityMapper {
@@ -31,8 +32,12 @@ public class CommunityMapper {
                         community.getProfileImagePositionY()))
                 .bannerImageUrl(community.getBannerImageUrl())
                 .createdAt(community.getCreatedAt())
-                .rules(community.getRules().stream()
-                        .map(CommunityMapper::toRuleResponseDto).toList())
+                .rules(
+                        community.getRules().stream()
+                                .sorted(Comparator.comparing(CommunityRule::getCreatedAt))
+                                .map(CommunityMapper::toRuleResponseDto)
+                                .toList()
+                )
                 .categories(
                         community.getCategories().stream()
                                 .map(CategoryMapper::toDTO)
@@ -61,7 +66,7 @@ public class CommunityMapper {
 
     }
 
-    private static CommunityRuleResponseDTO toRuleResponseDto(CommunityRule rule) {
+    public static CommunityRuleResponseDTO toRuleResponseDto(CommunityRule rule) {
 
         return CommunityRuleResponseDTO.builder()
                 .id(rule.getId())

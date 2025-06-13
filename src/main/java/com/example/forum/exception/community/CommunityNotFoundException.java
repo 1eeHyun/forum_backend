@@ -7,6 +7,6 @@ import lombok.Getter;
 public class CommunityNotFoundException extends CustomException {
 
     public CommunityNotFoundException() {
-        super("Community not found", 400);
+        super("Community not found", 404);
     }
 }

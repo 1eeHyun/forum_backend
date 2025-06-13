@@ -3,15 +3,14 @@ package com.example.forum.dto.community;
 import com.example.forum.dto.image.ImageDTO;
 import com.example.forum.dto.util.UserDTO;
 import com.example.forum.model.community.CommunityRole;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter @Setter
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class CommunityDetailDTO {
 
