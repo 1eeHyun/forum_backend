@@ -12,12 +12,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -175,5 +175,67 @@ public interface CommunityApiDocs {
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
+    );
+
+    @Operation(
+            summary = "Update community profile image",
+            description = "Updates the profile image of a specific community. Only the manager of the community can perform this action.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Multipart form data including the image file and optional position (X, Y)",
+                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Profile image updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid file or coordinates"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden – Not a community manager"),
+                    @ApiResponse(responseCode = "404", description = "Community not found")
+            }
+    )
+    @PutMapping(value = "/{communityId}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<CommonResponse<Void>> updateCommunityProfileImage(
+            @Parameter(description = "ID of the community", required = true)
+            @PathVariable Long communityId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails,
+
+            @Parameter(description = "Profile image file", required = true)
+            @RequestParam MultipartFile image,
+
+            @Parameter(description = "X position (0.0 ~ 1.0)", example = "0.5")
+            @RequestParam(required = false) Double positionX,
+
+            @Parameter(description = "Y position (0.0 ~ 1.0)", example = "0.5")
+            @RequestParam(required = false) Double positionY
+    );
+
+    @Operation(
+            summary = "Update community banner image",
+            description = "Updates the banner image of a specific community. Only the manager of the community can perform this action.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Multipart form data including the banner image file",
+                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Banner image updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid file"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden – Not a community manager"),
+                    @ApiResponse(responseCode = "404", description = "Community not found")
+            }
+    )
+    @PutMapping(value = "/{communityId}/banner-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<CommonResponse<Void>> updateCommunityBannerImage(
+            @Parameter(description = "ID of the community", required = true)
+            @PathVariable Long communityId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails,
+
+            @Parameter(description = "Banner image file", required = true)
+            @RequestParam MultipartFile image
     );
 }

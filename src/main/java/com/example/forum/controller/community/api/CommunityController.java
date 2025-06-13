@@ -5,7 +5,9 @@ import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
+import com.example.forum.dto.image.ImageUploadRequestDTO;
 import com.example.forum.service.community.CommunityService;
+import com.example.forum.service.community.manage.CommunityManageService;
 import com.example.forum.service.community.member.CommunityMemberService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,6 +28,7 @@ public class CommunityController implements CommunityApiDocs {
 
     private final CommunityService communityService;
     private final CommunityMemberService communityMemberService;
+    private final CommunityManageService communityManageService;
     private final AuthValidator authValidator;
 
     @Override
@@ -82,5 +83,41 @@ public class CommunityController implements CommunityApiDocs {
 
         CommunityDetailDTO response = communityService.getCommunityDetail(communityId, username);
         return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<Void>> updateCommunityProfileImage(
+            @PathVariable Long communityId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam MultipartFile image,
+            @RequestParam(required = false) Double positionX,
+            @RequestParam(required = false) Double positionY) {
+
+        String username = authValidator.extractUsername(userDetails);
+
+        ImageUploadRequestDTO dto = new ImageUploadRequestDTO();
+        dto.setImage(image);
+        dto.setPositionX(positionX);
+        dto.setPositionY(positionY);
+
+        communityManageService.updateProfileImage(username, communityId, dto);
+
+        return ResponseEntity.ok(CommonResponse.success());
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<Void>> updateCommunityBannerImage(
+            Long communityId,
+            UserDetails userDetails,
+            MultipartFile image) {
+
+        String username = authValidator.extractUsername(userDetails);
+
+        ImageUploadRequestDTO dto = new ImageUploadRequestDTO();
+        dto.setImage(image);
+
+        communityManageService.updateBannerImage(username, communityId, dto);
+
+        return ResponseEntity.ok(CommonResponse.success());
     }
 }

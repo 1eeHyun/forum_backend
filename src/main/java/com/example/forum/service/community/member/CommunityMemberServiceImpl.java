@@ -88,9 +88,11 @@ public class CommunityMemberServiceImpl implements CommunityMemberService {
     }
 
     @Override
-    public List<UserDTO> getAllMembers(Long communityId) {
+    public List<UserDTO> getAllMembers(Long communityId, String username) {
 
+        User user = authValidator.validateUserByUsername(username);
         Community community = communityValidator.validateExistingCommunity(communityId);
+        communityValidator.validateManagerPermission(user, community);
         Set<CommunityMember> members = community.getMembers();
 
         return members.stream()

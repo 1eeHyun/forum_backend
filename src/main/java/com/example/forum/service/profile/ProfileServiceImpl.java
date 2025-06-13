@@ -20,6 +20,7 @@ import com.example.forum.validator.profile.ProfileValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -93,6 +94,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     // Nickname
     @Override
+    @Transactional
     public void updateNickname(String username, NicknameUpdateDTO dto) {
 
         User user = userValidator.validateUserByUsername(username);
@@ -104,6 +106,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     // Username
     @Override
+    @Transactional
     public LoginResponseDTO updateUsername(String currUsername, UsernameUpdateDTO dto) {
 
         userValidator.validateUniqueUsername(dto.getUsername());
@@ -119,6 +122,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     // Bio
     @Override
+    @Transactional
     public void updateBio(String username, BioUpdateDTO dto) {
 
         User user = userValidator.validateUserByUsername(username);
@@ -130,6 +134,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     // Image
     @Override
+    @Transactional
     public void updateProfileImage(String username, ProfileImageUpdateDTO dto) {
 
         User user = userValidator.validateUserByUsername(username);

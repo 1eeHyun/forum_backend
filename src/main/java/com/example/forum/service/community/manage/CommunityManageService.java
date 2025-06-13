@@ -4,6 +4,7 @@ import com.example.forum.dto.community.CategoryRequestDTO;
 import com.example.forum.dto.community.CategoryResponseDTO;
 import com.example.forum.dto.community.CommunityRuleRequestDTO;
 import com.example.forum.dto.community.CommunityRuleResponseDTO;
+import com.example.forum.dto.image.ImageUploadRequestDTO;
 
 import java.util.List;
 
@@ -18,4 +19,8 @@ public interface CommunityManageService {
     void addRule(Long communityId, CommunityRuleRequestDTO request, String username);
     void updateRule(Long communityId, Long ruleId, CommunityRuleRequestDTO request, String username);
     void deleteRule(Long communityId, Long ruleId, String username);
+
+    // image
+    void updateProfileImage(String username, Long communityId, ImageUploadRequestDTO dto);
+    void updateBannerImage(String username, Long communityId, ImageUploadRequestDTO dto);
 }

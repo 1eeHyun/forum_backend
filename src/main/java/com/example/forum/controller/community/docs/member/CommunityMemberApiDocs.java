@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -40,7 +42,10 @@ public interface CommunityMemberApiDocs {
     @GetMapping
     ResponseEntity<CommonResponse<List<UserDTO>>> getAllCommunityMembers(
             @Parameter(description = "ID of the community", required = true)
-            @PathVariable Long communityId
+            @PathVariable Long communityId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
     );
 
     @Operation(

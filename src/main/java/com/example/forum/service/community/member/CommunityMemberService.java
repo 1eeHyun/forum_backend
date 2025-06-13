@@ -11,5 +11,5 @@ public interface CommunityMemberService {
     List<UserDTO> getOnlineUsers(Long id);
     List<UserDTO> getNewMembersThisWeek(Long communityId);
 
-    List<UserDTO> getAllMembers(Long communityId);
+    List<UserDTO> getAllMembers(Long communityId, String username);
 }

@@ -4,8 +4,11 @@ import com.example.forum.controller.community.docs.member.CommunityMemberApiDocs
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.util.UserDTO;
 import com.example.forum.service.community.member.CommunityMemberService;
+import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,12 +21,15 @@ import java.util.List;
 public class CommunityMemberController implements CommunityMemberApiDocs {
 
     private final CommunityMemberService communityMemberService;
+    private final AuthValidator authValidator;
 
     @Override
     public ResponseEntity<CommonResponse<List<UserDTO>>> getAllCommunityMembers(
-            @PathVariable Long communityId) {
+            @PathVariable Long communityId,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        List<UserDTO> response = communityMemberService.getAllMembers(communityId);
+        String username = authValidator.extractUsername(userDetails);
+        List<UserDTO> response = communityMemberService.getAllMembers(communityId, username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
