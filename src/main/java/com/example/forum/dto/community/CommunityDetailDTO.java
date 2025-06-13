@@ -24,7 +24,7 @@ public class CommunityDetailDTO {
 
     private LocalDateTime createdAt;
 
-    private List<String> rules;
+    private List<CommunityRuleResponseDTO> rules;
     private List<CategoryResponseDTO> categories;
 
     private int memberCount;

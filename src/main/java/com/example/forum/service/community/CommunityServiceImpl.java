@@ -4,14 +4,12 @@ import com.example.forum.dto.community.*;
 import com.example.forum.dto.util.UserDTO;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.user.UserMapper;
-import com.example.forum.model.community.Category;
-import com.example.forum.model.community.Community;
-import com.example.forum.model.community.CommunityMember;
-import com.example.forum.model.community.CommunityRole;
+import com.example.forum.model.community.*;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CategoryRepository;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.community.CommunityRepository;
+import com.example.forum.repository.community.CommunityRuleRepository;
 import com.example.forum.service.auth.RedisService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
@@ -36,6 +34,7 @@ public class CommunityServiceImpl implements CommunityService {
     private final CommunityRepository communityRepository;
     private final CommunityMemberRepository communityMemberRepository;
     private final CategoryRepository categoryRepository;
+    private final CommunityRuleRepository communityRuleRepository;
 
     // Services
     private final RedisService redisService;
@@ -174,6 +173,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
+    @Transactional
     public void addCategory(Long communityId, CategoryRequestDTO dto, String username) {
 
         User user = authValidator.validateUserByUsername(username);
@@ -189,6 +189,24 @@ public class CommunityServiceImpl implements CommunityService {
 
         categoryRepository.save(category);
         community.getCategories().add(category);
+    }
+
+    @Override
+    @Transactional
+    public void addRule(Long communityId, CommunityRuleRequestDTO request, String username) {
+
+        Community community = communityValidator.validateExistingCommunity(communityId);
+        User user = authValidator.validateUserByUsername(username);
+
+        communityValidator.validateManagerPermission(user, community);
+
+        CommunityRule newRule = CommunityRule.builder()
+                .title(request.getTitle())
+                .community(community)
+                .content(request.getContent())
+                .build();
+
+        communityRuleRepository.save(newRule);
     }
 
     /*****************************************************

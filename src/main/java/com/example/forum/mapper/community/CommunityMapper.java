@@ -2,14 +2,15 @@ package com.example.forum.mapper.community;
 
 import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
+import com.example.forum.dto.community.CommunityRuleResponseDTO;
 import com.example.forum.dto.image.ImageDTO;
 import com.example.forum.mapper.image.ImageMapper;
 import com.example.forum.mapper.user.UserMapper;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.community.CommunityRole;
+import com.example.forum.model.community.CommunityRule;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CommunityMapper {
@@ -30,7 +31,8 @@ public class CommunityMapper {
                         community.getProfileImagePositionY()))
                 .bannerImageUrl(community.getBannerImageUrl())
                 .createdAt(community.getCreatedAt())
-                .rules(new ArrayList<>(community.getRules()))
+                .rules(community.getRules().stream()
+                        .map(CommunityMapper::toRuleResponseDto).toList())
                 .categories(
                         community.getCategories().stream()
                                 .map(CategoryMapper::toDTO)
@@ -57,5 +59,15 @@ public class CommunityMapper {
                         .build())
                 .build();
 
+    }
+
+    private static CommunityRuleResponseDTO toRuleResponseDto(CommunityRule rule) {
+
+        return CommunityRuleResponseDTO.builder()
+                .id(rule.getId())
+                .title(rule.getTitle())
+                .content(rule.getContent())
+                .createdAt(rule.getCreatedAt())
+                .build();
     }
 }

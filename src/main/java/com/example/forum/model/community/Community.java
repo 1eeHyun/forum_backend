@@ -44,10 +44,8 @@ public class Community {
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CommunityMember> members;
 
-    @ElementCollection
-    @CollectionTable(name = "community_rules", joinColumns = @JoinColumn(name = "community_id"))
-    @Column(name = "rule")
-    private Set<String> rules = new HashSet<>();
+    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CommunityRule> rules = new HashSet<>();
 
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Category> categories = new HashSet<>();

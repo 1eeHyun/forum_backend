@@ -16,6 +16,8 @@ public interface CommunityService {
     void addMember(Long communityId, String username);
     void removeMember(Long communityId, String username);
 
-    List<CategoryResponseDTO> getCategories(Long id);
+    List<CategoryResponseDTO> getCategories(Long communityId);
     void addCategory(Long communityId, CategoryRequestDTO dto, String username);
+
+    void addRule(Long communityId, CommunityRuleRequestDTO request, String username);
 }

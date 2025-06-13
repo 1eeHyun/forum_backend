@@ -36,5 +36,4 @@ public class RedisService {
     public Long extractUserIdFromKey(String key) {
         return Long.parseLong(key.replace("user:online:", ""));
     }
-
 }
