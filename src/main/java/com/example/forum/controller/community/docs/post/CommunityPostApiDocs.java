@@ -44,42 +44,7 @@ public interface CommunityPostApiDocs {
             @Parameter(description = "ID of the community", required = true)
             @PathVariable Long communityId,
 
-            @Parameter(description = "Sort order: top, newest, or oldest", example = "newest")
-            @RequestParam(defaultValue = "newest") String sort,
-
-            @Parameter(description = "Page number (zero-based)", example = "0")
-            @RequestParam(defaultValue = "0") int page,
-
-            @Parameter(description = "Number of posts per page", example = "5")
-            @RequestParam(defaultValue = "5") int size
-    );
-
-    @Operation(
-            summary = "Get posts in a specific category within a community",
-            description = "Returns paginated posts filtered by category in a community. Supports sorting.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Successfully retrieved posts",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = PostResponseDTO.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Community or Category not found",
-                            content = @Content
-                    )
-            }
-    )
-    @GetMapping("/categories/{categoryId}/posts")
-    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getCommunityCategoryPosts(
-            @Parameter(description = "ID of the community", required = true)
-            @PathVariable Long communityId,
-
-            @Parameter(description = "ID of the category", required = true)
-            @PathVariable Long categoryId,
+            @RequestParam(required = false) String category,
 
             @Parameter(description = "Sort order: top, newest, or oldest", example = "newest")
             @RequestParam(defaultValue = "newest") String sort,

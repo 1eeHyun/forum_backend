@@ -158,28 +158,42 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             """
     )
     Page<Post> findByCommunity(@Param("community") Community community, Pageable pageable);
-    @Query("""
-                SELECT p FROM Post p
-                LEFT JOIN p.likes l
-                WHERE p.category.community = :community
-                GROUP BY p
-                ORDER BY COUNT(l) DESC, p.createdAt DESC
-           """
-    )
-    Page<Post> findByCommunityWithLikeCount(@Param("community") Community community, Pageable pageable);
-
-
-    @Query(
-            """
-                SELECT p FROM Post p
-                WHERE p.category.community = :community AND p.category = :category
-            """
-    )
-    Page<Post> findByCommunityAndCategory(
-            @Param("community") Community community,
-            @Param("category") Category category,
-            Pageable pageable
+    @Query(value =
+    """
+        SELECT * FROM post
+        WHERE community_id = :communityId
+        ORDER BY
+        CASE WHEN :sort = 'TOP_LIKED' THEN like_count END DESC,
+        CASE WHEN :sort = 'NEWEST' THEN created_at END DESC,
+        CASE WHEN :sort = 'OLDEST' THEN created_at END ASC
+        LIMIT :limit OFFSET :offset
+    """, nativeQuery = true)
+    List<Post> findByCommunity(
+            @Param("communityId") Long communityId,
+            @Param("sort") String sort,
+            @Param("limit") int limit,
+            @Param("offset") int offset
     );
+
+    @Query(value = """
+    SELECT * FROM post
+    WHERE community_id = :communityId AND category_id = (
+        SELECT id FROM category WHERE name = :categoryName AND community_id = :communityId
+    )
+    ORDER BY
+        CASE WHEN :sort = 'TOP_LIKED' THEN like_count END DESC,
+        CASE WHEN :sort = 'NEWEST' THEN created_at END DESC,
+        CASE WHEN :sort = 'OLDEST' THEN created_at END ASC
+    LIMIT :limit OFFSET :offset
+""", nativeQuery = true)
+    List<Post> findByCommunityAndCategory(
+            @Param("communityId") Long communityId,
+            @Param("categoryName") String categoryName,
+            @Param("sort") String sort,
+            @Param("limit") int limit,
+            @Param("offset") int offset
+    );
+
 
     @Query(
             """
@@ -226,4 +240,84 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("fromDate") LocalDateTime fromDate,
             Pageable pageable
     );
+
+    @Query(value =
+            """
+                SELECT * FROM post
+                WHERE community_id = :communityId
+                AND category_id = :categoryId
+                ORDER BY created_at DESC
+                LIMIT :limit OFFSET :offset
+            """, nativeQuery = true
+    )
+    List<Post> findByCommunityIdAndCategoryIdPaged(
+            @Param("communityId") Long communityId,
+            @Param("categoryId") Long categoryId,
+            @Param("limit") int limit,
+            @Param("offset") int offset
+    );
+
+    // Without category
+    @Query(
+        """ 
+            SELECT p FROM Post p
+            WHERE p.category.community.id = :communityId
+            ORDER BY p.createdAt DESC
+        """
+    )
+    List<Post> findCommunityPostsNewest(@Param("communityId") Long communityId, Pageable pageable);
+
+    @Query(
+        """
+            SELECT p FROM Post p
+            WHERE p.category.community.id = :communityId
+            ORDER BY p.createdAt ASC
+        """
+    )
+    List<Post> findCommunityPostsOldest(@Param("communityId") Long communityId, Pageable pageable);
+
+    @Query(
+        """
+            SELECT p FROM Post p
+            LEFT JOIN p.likes l
+            WHERE p.category.community.id = :communityId
+            GROUP BY p
+            ORDER BY COUNT(l) DESC, p.createdAt DESC
+        """
+    )
+    List<Post> findCommunityPostsTopLiked(@Param("communityId") Long communityId, Pageable pageable);
+
+
+    // With category
+    @Query(
+        """
+            SELECT p FROM Post p
+            WHERE p.category.community.id = :communityId AND p.category.name = :categoryName
+            ORDER BY p.createdAt DESC
+        """
+    )
+    List<Post> findCommunityPostsByCategoryNewest(@Param("communityId") Long communityId, @Param("categoryName") String categoryName, Pageable pageable);
+
+    @Query(
+        """
+            SELECT p FROM Post p
+            WHERE p.category.community.id = :communityId AND p.category.name = :categoryName
+            ORDER BY p.createdAt ASC
+        """
+    )
+    List<Post> findCommunityPostsByCategoryOldest(@Param("communityId") Long communityId, @Param("categoryName") String categoryName, Pageable pageable);
+
+    @Query(
+        """
+            SELECT p FROM Post p
+            LEFT JOIN p.likes l
+            WHERE p.category.community.id = :communityId AND p.category.name = :categoryName
+            GROUP BY p
+            ORDER BY COUNT(l) DESC, p.createdAt DESC
+        """
+    )
+    List<Post> findCommunityPostsByCategoryTopLiked(@Param("communityId") Long communityId, @Param("categoryName") String categoryName, Pageable pageable);
+
+
+
 }

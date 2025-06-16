@@ -10,6 +10,7 @@ import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.service.like.post.PostLikeService;
 import com.example.forum.service.post.PostService;
+import com.example.forum.service.post.community.CommunityPostService;
 import com.example.forum.validator.auth.AuthValidator;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
@@ -36,6 +37,7 @@ public class PostController implements PostApiDocs {
     private final PostService postService;
     private final PostLikeService postLikeService;
     private final AuthValidator authValidator;
+    private final CommunityPostService communityPostService;
 
     @Override
     public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getPosts(
@@ -137,7 +139,7 @@ public class PostController implements PostApiDocs {
         if (userDetails != null)
              username = authValidator.extractUsername(userDetails);
 
-        List<PostPreviewDTO> response = postService.getRecentPostsFromJoinedCommunities(username);
+        List<PostPreviewDTO> response = communityPostService.getRecentPostsFromJoinedCommunities(username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 

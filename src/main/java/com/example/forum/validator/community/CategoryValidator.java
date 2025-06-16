@@ -24,6 +24,16 @@ public class CategoryValidator {
                 .orElseThrow(CategoryNotFoundException::new);
     }
 
+    public Category validateCategoryByName(Community community, String categoryName) {
+
+        if (categoryName == null || categoryName.trim().isEmpty()) {
+            throw new BadRequestException("Category name must be provided.");
+        }
+
+        return categoryRepository.findByCommunityAndName(community, categoryName)
+                .orElseThrow(CategoryNotFoundException::new);
+    }
+
     public Category validateExistingCategoryInCommunity(Long categoryId, Community community) {
 
         Category category = categoryRepository.findById(categoryId)

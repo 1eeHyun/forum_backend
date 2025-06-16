@@ -7,6 +7,7 @@ import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.dto.profile.*;
 import com.example.forum.service.post.PostService;
+import com.example.forum.service.post.profile.ProfilePostService;
 import com.example.forum.service.profile.ProfileService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class ProfileController implements ProfileApiDocs {
     private final ProfileService profileService;
     private final PostService postService;
     private final AuthValidator authValidator;
+    private final ProfilePostService profilePostService;
 
     @Override
     public ResponseEntity<CommonResponse<ProfileResponseDTO>> getProfile(
@@ -49,7 +51,7 @@ public class ProfileController implements ProfileApiDocs {
 
         SortOrder sortOrder = SortOrder.from(sort);
         String myUsername = authValidator.extractUsername(userDetails);
-        List<PostResponseDTO> posts = postService.getProfilePosts(username, myUsername, sortOrder, page, size);
+        List<PostResponseDTO> posts = profilePostService.getProfilePosts(username, myUsername, sortOrder, page, size);
 
         return ResponseEntity.ok(CommonResponse.success(posts));
     }

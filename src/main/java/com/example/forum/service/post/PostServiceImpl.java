@@ -7,13 +7,10 @@ import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Category;
-import com.example.forum.model.community.Community;
-import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostImage;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
-import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.common.RecentViewService;
 import com.example.forum.service.common.S3Service;
@@ -23,10 +20,7 @@ import com.example.forum.validator.community.CommunityValidator;
 import com.example.forum.validator.post.PostValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,7 +42,6 @@ public class PostServiceImpl implements PostService {
 
     // Repositories
     private final PostRepository postRepository;
-    private final CommunityMemberRepository communityMemberRepository;
 
     // Services
     private final S3Service s3Service;
@@ -57,36 +50,14 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size) {
 
-        int offset = (page == 0) ? 0 : 3 + (page - 1) * 10;
-        int limit = (page == 0) ? 3 : 10;
-
+        int offset = page * size;
         List<Post> posts = switch (sort) {
-            case NEWEST -> postRepository.findPagedPostsNewest(limit, offset);
-            case OLDEST -> postRepository.findPagedPostsOldest(limit, offset);
-            case TOP_LIKED -> postRepository.findPagedPostsTopLiked(limit, offset);
+            case NEWEST -> postRepository.findPagedPostsNewest(size, offset);
+            case OLDEST -> postRepository.findPagedPostsOldest(size, offset);
+            case TOP_LIKED -> postRepository.findPagedPostsTopLiked(size, offset);
         };
 
         return posts.stream()
-                .map(PostMapper::toPostResponseDTO)
-                .toList();
-    }
-
-    @Override
-    public List<PostResponseDTO> getProfilePosts(String targetUsername, String currentUsername, SortOrder sort, int page, int size) {
-
-        User target = authValidator.validateUserByUsername(targetUsername);
-        User current = authValidator.validateUserByUsername(currentUsername);
-
-        boolean includePrivate = target.getId().equals(current.getId());
-
-        Pageable pageable = getSortedPageable(sort, page, size);
-
-        Page<Post> postPage = switch (sort) {
-            case TOP_LIKED -> postRepository.findPostsByAuthorWithLikeCount(target, includePrivate, pageable);
-            default -> postRepository.findPostsByAuthor(target, includePrivate, pageable);
-        };
-
-        return postPage.stream()
                 .map(PostMapper::toPostResponseDTO)
                 .toList();
     }
@@ -186,27 +157,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostPreviewDTO> getRecentPostsFromJoinedCommunities(String username) {
-
-        if (username == null)
-            return null;
-
-        User user = authValidator.validateUserByUsername(username);
-        List<CommunityMember> memberShips = communityMemberRepository.findByUser(user);
-        List<Community> joinedCommunities = memberShips.stream()
-                .map(CommunityMember::getCommunity)
-                .toList();
-
-        if (joinedCommunities.isEmpty()) return List.of();
-
-        List<Post> posts = postRepository.findTop5ByCommunityInOrderByCreatedAtDesc(joinedCommunities);
-
-        return posts.stream()
-                .map(PostMapper::toPreviewDTO)
-                .toList();
-    }
-
-    @Override
     public List<PostPreviewDTO> getTopPostsThisWeek() {
 
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
@@ -262,81 +212,6 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
-    @Override
-    public List<PostResponseDTO> getCommunityPosts(Long communityId, SortOrder sort, int page, int size) {
-
-        Community community = communityValidator.validateExistingCommunity(communityId);
-        Pageable sorted = getSortedPageable(sort, page, size);
-
-        Page<Post> postPage = switch(sort) {
-            case TOP_LIKED -> postRepository.findByCommunityWithLikeCount(community, sorted);
-            default -> postRepository.findByCommunity(community, sorted);
-        };
-
-        return postPage.stream()
-                .map(PostMapper::toPostResponseDTO)
-                .toList();
-    }
-
-    @Override
-    public List<PostResponseDTO> getCommunityCategoryPosts(Long communityId, Long categoryId, SortOrder sort, int page, int size) {
-
-
-        Community community = communityValidator.validateExistingCommunity(communityId);
-        Category category = categoryValidator.validateCategoryById(categoryId);
-        Pageable sorted = getSortedPageable(sort, page, size);
-
-        Page<Post> postPage = switch (sort) {
-            case TOP_LIKED -> postRepository.findByCommunityAndCategoryWithLikeCount(community, category, sorted);
-            default -> postRepository.findByCommunityAndCategory(community, category, sorted);
-        };
-
-        return postPage.stream()
-                .map(PostMapper::toPostResponseDTO)
-                .toList();
-    }
-
-    @Override
-    public List<PostResponseDTO> getTopPostsThisWeek(Long communityId, int size) {
-
-        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
-
-        List<Post> topPosts = postRepository.findTopPostsByCommunityAndDateAfter(
-                communityId, oneWeekAgo, size
-        );
-
-        return topPosts.stream()
-                .map(PostMapper::toPostResponseDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Map<String, List<PostResponseDTO>> getTopPostsThisWeekByCategories(Long communityId, int size) {
-
-        Community community = communityValidator.validateExistingCommunity(communityId);
-        LocalDateTime fromDate = LocalDateTime.now().minusWeeks(1);
-        Set<Category> categories = community.getCategories();
-
-        Map<String, List<PostResponseDTO>> result = new HashMap<>();
-
-        for (Category category : categories) {
-
-            List<Post> posts = postRepository.findTopPostsByCommunityAndCategoryAndDateAfter(
-                    community.getId(), category.getId(), fromDate, PageRequest.of(0, size)
-            );
-
-            List<PostResponseDTO> dtoList = posts.stream()
-                    .map(PostMapper::toPostResponseDTO)
-                    .toList();
-
-            if (!dtoList.isEmpty()) {
-                result.put(category.getName(), dtoList);
-            }
-        }
-
-        return result;
-    }
-
     // ------------------------------ Helper methods -------------------------------------
     private Category getValidCategoryIfNeeded(PostRequestDTO dto) {
 
@@ -376,13 +251,5 @@ public class PostServiceImpl implements PostService {
                     .build();
             post.getImages().add(image);
         }
-    }
-
-    private Pageable getSortedPageable(SortOrder sort, int page, int size) {
-        return switch (sort) {
-            case NEWEST -> PageRequest.of(page, size, Sort.by("createdAt").descending());
-            case OLDEST -> PageRequest.of(page, size, Sort.by("createdAt").ascending());
-            case TOP_LIKED -> PageRequest.of(page, size);
-        };
     }
 }

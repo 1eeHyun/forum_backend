@@ -8,15 +8,14 @@ import com.example.forum.dto.post.PostResponseDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 public interface PostService {
 
     List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size);
-    List<PostResponseDTO> getProfilePosts(String targetUsername, String currentUsername, SortOrder sort, int page, int size);
+//    List<PostResponseDTO> getProfilePosts(String targetUsername, String currentUsername, SortOrder sort, int page, int size);
     PostDetailDTO getPostDetail(Long postId, String username);
 
-    List<PostPreviewDTO> getRecentPostsFromJoinedCommunities(String username);
+//    List<PostPreviewDTO> getRecentPostsFromJoinedCommunities(String username);
     List<PostPreviewDTO> getTopPostsThisWeek();
 
     // Post posts - POST
@@ -32,8 +31,7 @@ public interface PostService {
     List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids);
 
     // ----------------- Community Posts -----------------
-    List<PostResponseDTO> getCommunityPosts(Long communityId, SortOrder sort, int page, int size);
-    List<PostResponseDTO> getCommunityCategoryPosts(Long communityId, Long categoryId, SortOrder sort, int page, int size);
-    List<PostResponseDTO> getTopPostsThisWeek(Long communityId, int size);
-    Map<String, List<PostResponseDTO>> getTopPostsThisWeekByCategories(Long communityId, int size);
+//    List<PostResponseDTO> getCommunityPosts(Long communityId, SortOrder sort, int page, int size, String category);
+//    List<PostResponseDTO> getTopPostsThisWeek(Long communityId, int size);
+//    Map<String, List<PostResponseDTO>> getTopPostsThisWeekByCategories(Long communityId, int size);
 }
