@@ -44,4 +44,16 @@ public class CommunityCategoryController implements CommunityCategoryApiDocs {
 
         return ResponseEntity.ok(CommonResponse.success());
     }
+
+    @Override
+    public ResponseEntity<CommonResponse<Void>> deleteCategory(
+            @PathVariable Long communityId,
+            @PathVariable Long categoryId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = authValidator.extractUsername(userDetails);
+        communityManageService.deleteCategory(communityId, categoryId, username);
+
+        return null;
+    }
 }

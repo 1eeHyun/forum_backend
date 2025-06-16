@@ -59,7 +59,7 @@ public class CommunityController implements CommunityApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        communityMemberService.removeMember(communityId, username);
+        communityMemberService.leaveCommunity(communityId, username);
 
         return ResponseEntity.ok(CommonResponse.success());
     }

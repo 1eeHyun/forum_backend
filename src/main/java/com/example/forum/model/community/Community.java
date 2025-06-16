@@ -41,12 +41,15 @@ public class Community {
     @JoinColumn(name = "creator_id")
     private User creator;
 
+    @Builder.Default
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CommunityMember> members;
+    private Set<CommunityMember> members = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CommunityRule> rules = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Category> categories = new HashSet<>();
 
@@ -67,7 +70,15 @@ public class Community {
     }
 
     public void removeMember(User user) {
-        this.members.removeIf(cm -> cm.getUser().equals(user));
+
+        CommunityMember target = this.members.stream()
+                .filter(cm -> cm.getUser().equals(user))
+                .findFirst()
+                .orElse(null);
+
+        if (target != null) {
+            this.members.remove(target);
+        }
     }
 
     public void addCategory(String categoryName) {

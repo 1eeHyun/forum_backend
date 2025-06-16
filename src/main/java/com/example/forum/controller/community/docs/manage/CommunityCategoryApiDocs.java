@@ -5,6 +5,7 @@ import com.example.forum.dto.community.CategoryRequestDTO;
 import com.example.forum.dto.community.CategoryResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,6 +62,27 @@ public interface CommunityCategoryApiDocs {
             @PathVariable Long communityId,
 
             @Valid @RequestBody CategoryRequestDTO dto,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
+    );
+
+    @Operation(
+            summary = "Delete a category",
+            description = "Deletes a specific rule from the community.",
+            parameters = {
+                    @Parameter(name = "communityId", description = "ID of the community", in = ParameterIn.PATH),
+                    @Parameter(name = "categoryId", description = "ID of the category to delete", in = ParameterIn.PATH)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Category deleted successfully"),
+                    @ApiResponse(responseCode = "404", description = "Category or community not found")
+            }
+    )
+    @DeleteMapping("/{categoryId}")
+    ResponseEntity<CommonResponse<Void>> deleteCategory(
+            @PathVariable Long communityId,
+            @PathVariable Long categoryId,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails

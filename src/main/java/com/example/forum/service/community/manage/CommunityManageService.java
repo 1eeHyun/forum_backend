@@ -13,6 +13,7 @@ public interface CommunityManageService {
     // Category
     List<CategoryResponseDTO> getCategories(Long communityId);
     void addCategory(Long communityId, CategoryRequestDTO dto, String username);
+    void deleteCategory(Long communityId, Long categoryId, String username);
 
     // Rule
     List<CommunityRuleResponseDTO> getRules(Long communityId);

@@ -1,6 +1,7 @@
 package com.example.forum.service.community.member;
 
 import com.example.forum.dto.util.UserDTO;
+import com.example.forum.exception.auth.ForbiddenException;
 import com.example.forum.mapper.user.UserMapper;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
@@ -62,13 +63,19 @@ public class CommunityMemberServiceImpl implements CommunityMemberService {
 
     @Override
     @Transactional
-    public void removeMember(Long communityId, String username) {
+    public void leaveCommunity(Long communityId, String username) {
 
-        Community community = communityValidator.validateExistingCommunity(communityId);
         User user = authValidator.validateUserByUsername(username);
+        Community community = communityValidator.validateMemberCommunity(communityId, user);
 
-        if (!community.getMembers().contains(user))
-            return;
+        CommunityMember member = community.getMembers().stream()
+                .filter(cm -> cm.getUser().equals(user))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Membership record not found"));
+
+        if (member.getRole() == CommunityRole.MANAGER) {
+            throw new ForbiddenException("Managers cannot leave the community directly.");
+        }
 
         community.removeMember(user);
     }

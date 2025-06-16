@@ -2,7 +2,9 @@ package com.example.forum.validator.community;
 
 import com.example.forum.exception.common.BadRequestException;
 import com.example.forum.exception.community.CategoryNotFoundException;
+import com.example.forum.exception.community.InvalidCategoryForThisCommunity;
 import com.example.forum.model.community.Category;
+import com.example.forum.model.community.Community;
 import com.example.forum.repository.community.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,5 +22,16 @@ public class CategoryValidator {
 
         return categoryRepository.findById(id)
                 .orElseThrow(CategoryNotFoundException::new);
+    }
+
+    public Category validateExistingCategoryInCommunity(Long categoryId, Community community) {
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(CategoryNotFoundException::new);
+
+        if (!category.getCommunity().getId().equals(community.getId()))
+            throw new InvalidCategoryForThisCommunity();
+
+        return category;
     }
 }

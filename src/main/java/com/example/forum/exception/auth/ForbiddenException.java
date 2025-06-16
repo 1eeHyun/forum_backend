@@ -9,4 +9,8 @@ public class ForbiddenException extends RuntimeException {
     public ForbiddenException() {
         super("You are not authorized to do this action.");
     }
+
+    public ForbiddenException(String message) {
+        super(message);
+    }
 }

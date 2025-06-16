@@ -11,12 +11,12 @@ import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityRule;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CategoryRepository;
-import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.community.CommunityRepository;
 import com.example.forum.repository.community.CommunityRuleRepository;
 import com.example.forum.service.auth.RedisService;
 import com.example.forum.service.common.S3Service;
 import com.example.forum.validator.auth.AuthValidator;
+import com.example.forum.validator.community.CategoryValidator;
 import com.example.forum.validator.community.CommunityRuleValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import lombok.RequiredArgsConstructor;
@@ -37,10 +37,10 @@ public class CommunityManageServiceImpl implements CommunityManageService {
     private final AuthValidator authValidator;
     private final CommunityValidator communityValidator;
     private final CommunityRuleValidator communityRuleValidator;
+    private final CategoryValidator categoryValidator;
 
     // Repositories
     private final CommunityRepository communityRepository;
-    private final CommunityMemberRepository communityMemberRepository;
     private final CategoryRepository categoryRepository;
     private final CommunityRuleRepository communityRuleRepository;
 
@@ -89,6 +89,19 @@ public class CommunityManageServiceImpl implements CommunityManageService {
 
         categoryRepository.save(category);
         community.getCategories().add(category);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCategory(Long communityId, Long categoryId, String username) {
+
+        User user = authValidator.validateUserByUsername(username);
+        Community community = communityValidator.validateExistingCommunity(communityId);
+
+        communityValidator.validateManagerPermission(user, community);
+        Category category = categoryValidator.validateExistingCategoryInCommunity(categoryId, community);
+
+        categoryRepository.deleteById(category.getId());
     }
 
     //

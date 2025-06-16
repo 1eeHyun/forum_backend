@@ -7,7 +7,7 @@ import java.util.List;
 public interface CommunityMemberService {
 
     void addMember(Long communityId, String username);
-    void removeMember(Long communityId, String username);
+    void leaveCommunity(Long communityId, String username);
     List<UserDTO> getOnlineUsers(Long id);
     List<UserDTO> getNewMembersThisWeek(Long communityId);
 
