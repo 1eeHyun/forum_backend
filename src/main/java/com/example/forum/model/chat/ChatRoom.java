@@ -2,11 +2,13 @@ package com.example.forum.model.chat;
 
 import com.example.forum.model.user.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ChatRoom {
 
     @Id
