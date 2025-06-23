@@ -8,13 +8,10 @@ import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.community.CommunityRole;
 import com.example.forum.model.user.User;
-import com.example.forum.repository.community.CategoryRepository;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.community.CommunityRepository;
-import com.example.forum.repository.community.CommunityRuleRepository;
 import com.example.forum.service.auth.RedisService;
 import com.example.forum.validator.auth.AuthValidator;
-import com.example.forum.validator.community.CommunityRuleValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,13 +27,10 @@ public class CommunityServiceImpl implements CommunityService {
     // Validators
     private final AuthValidator authValidator;
     private final CommunityValidator communityValidator;
-    private final CommunityRuleValidator communityRuleValidator;
 
     // Repositories
     private final CommunityRepository communityRepository;
     private final CommunityMemberRepository communityMemberRepository;
-    private final CategoryRepository categoryRepository;
-    private final CommunityRuleRepository communityRuleRepository;
 
     // Services
     private final RedisService redisService;
@@ -121,7 +115,9 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     private CommunityRole findUserRoleInCommunity(Community community, User user) {
+
         if (user == null) return null;
+
         return communityMemberRepository.findByCommunityAndUser(community, user)
                 .map(CommunityMember::getRole)
                 .orElse(null);

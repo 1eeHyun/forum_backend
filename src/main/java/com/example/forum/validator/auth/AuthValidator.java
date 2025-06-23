@@ -41,6 +41,7 @@ public class AuthValidator {
     }
 
     public String extractUsername(UserDetails userDetails) {
+
         validateLoggedIn(userDetails);
         return userDetails.getUsername();
     }

@@ -1,6 +1,6 @@
 package com.example.forum.mapper.user;
 
-import com.example.forum.dto.util.UserDTO;
+import com.example.forum.dto.user.UserDTO;
 import com.example.forum.mapper.image.ImageMapper;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.profile.Profile;

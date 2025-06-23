@@ -1,6 +1,6 @@
 package com.example.forum.service.community.member;
 
-import com.example.forum.dto.util.UserDTO;
+import com.example.forum.dto.user.UserDTO;
 import com.example.forum.exception.auth.ForbiddenException;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;

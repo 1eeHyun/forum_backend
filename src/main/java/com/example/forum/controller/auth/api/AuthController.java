@@ -5,7 +5,7 @@ import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginRequestDTO;
 import com.example.forum.dto.auth.LoginResponseDTO;
 import com.example.forum.dto.auth.SignupRequestDTO;
-import com.example.forum.dto.util.UserDTO;
+import com.example.forum.dto.user.UserDTO;
 import com.example.forum.service.auth.AuthService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;

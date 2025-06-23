@@ -2,7 +2,7 @@ package com.example.forum.controller.community.api.member;
 
 import com.example.forum.controller.community.docs.member.CommunityMemberApiDocs;
 import com.example.forum.dto.CommonResponse;
-import com.example.forum.dto.util.UserDTO;
+import com.example.forum.dto.user.UserDTO;
 import com.example.forum.service.community.member.CommunityMemberService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;

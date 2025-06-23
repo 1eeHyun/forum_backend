@@ -1,6 +1,6 @@
 package com.example.forum.service.community.member;
 
-import com.example.forum.dto.util.UserDTO;
+import com.example.forum.dto.user.UserDTO;
 
 import java.util.List;
 

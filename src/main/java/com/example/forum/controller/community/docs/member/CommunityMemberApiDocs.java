@@ -1,7 +1,7 @@
 package com.example.forum.controller.community.docs.member;
 
 import com.example.forum.dto.CommonResponse;
-import com.example.forum.dto.util.UserDTO;
+import com.example.forum.dto.user.UserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;

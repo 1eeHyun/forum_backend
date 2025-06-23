@@ -4,7 +4,7 @@ import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.profile.ProfilePreviewDTO;
 import com.example.forum.dto.search.SearchResponseDTO;
-import com.example.forum.dto.util.UserDTO;
+import com.example.forum.dto.user.UserDTO;
 import com.example.forum.dto.image.ImageDTO;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.post.PostMapper;

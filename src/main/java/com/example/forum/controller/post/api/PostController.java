@@ -55,7 +55,6 @@ public class PostController implements PostApiDocs {
             @PathVariable Long postId,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-
         String username = userDetails == null ? null : authValidator.extractUsername(userDetails);
 
         PostDetailDTO response = postService.getPostDetail(postId, username);

@@ -1,7 +1,7 @@
 package com.example.forum.dto.post;
 
 import com.example.forum.dto.image.ImageDTO;
-import com.example.forum.dto.util.UserDTO;
+import com.example.forum.dto.user.UserDTO;
 import lombok.Builder;
 import lombok.Getter;
 
