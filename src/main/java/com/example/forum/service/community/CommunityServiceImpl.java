@@ -105,6 +105,19 @@ public class CommunityServiceImpl implements CommunityService {
                 .toList();
     }
 
+    @Override
+    public List<CommunityPreviewDTO> getJoinedCommunities(String target) {
+
+        User user = authValidator.validateUserByUsername(target);
+
+        List<CommunityMember> joinedMemberships = communityMemberRepository.findByUser(user);
+
+        return joinedMemberships.stream()
+                .map(CommunityMember::getCommunity)
+                .map(CommunityMapper::toPreviewDTO)
+                .toList();
+    }
+
     /*****************************************************
      * Helper methods
      */

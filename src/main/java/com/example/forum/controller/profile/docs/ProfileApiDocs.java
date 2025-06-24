@@ -2,7 +2,6 @@ package com.example.forum.controller.profile.docs;
 
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginResponseDTO;
-import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.dto.profile.BioUpdateDTO;
 import com.example.forum.dto.profile.NicknameUpdateDTO;
 import com.example.forum.dto.profile.ProfileResponseDTO;
@@ -23,8 +22,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Tag(name = "Profile", description = "Profile related API")
 public interface ProfileApiDocs {
@@ -52,44 +49,6 @@ public interface ProfileApiDocs {
     ResponseEntity<CommonResponse<ProfileResponseDTO>> getProfile(
             @Parameter(description = "Username of the profile to retrieve", required = true)
             @PathVariable String username,
-
-            @Parameter(hidden = true)
-            @AuthenticationPrincipal UserDetails userDetails
-    );
-
-
-    @Operation(
-            summary = "Get posts by user profile",
-            description = "Retrieves a paginated and sorted list of posts for the specified user. If the logged-in user is the same as the profile owner, all posts are shown. Otherwise, only public or shared-community posts are shown.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Posts retrieved successfully",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = PostResponseDTO.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "User not found",
-                            content = @Content
-                    )
-            }
-    )
-    @GetMapping("/{username}/posts")
-    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getProfilePosts(
-            @Parameter(description = "Username of the profile", required = true)
-            @PathVariable String username,
-
-            @Parameter(description = "Sort order: top, newest, or oldest", required = true, example = "newest")
-            @RequestParam String sort,
-
-            @Parameter(description = "Page number (zero-based)", example = "0")
-            @RequestParam int page,
-
-            @Parameter(description = "Number of posts per page", example = "10")
-            @RequestParam int size,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails

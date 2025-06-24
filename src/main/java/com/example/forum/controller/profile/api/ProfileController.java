@@ -1,10 +1,8 @@
 package com.example.forum.controller.profile.api;
 
-import com.example.forum.common.SortOrder;
 import com.example.forum.controller.profile.docs.ProfileApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.auth.LoginResponseDTO;
-import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.dto.profile.*;
 import com.example.forum.service.post.PostService;
 import com.example.forum.service.post.profile.ProfilePostService;
@@ -17,8 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/profiles")
@@ -40,22 +36,6 @@ public class ProfileController implements ProfileApiDocs {
         ProfileResponseDTO profile = profileService.getProfile(username, myUsername);
         return ResponseEntity.ok(CommonResponse.success(profile));
     }
-
-    @Override
-    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getProfilePosts(
-            @PathVariable String username,
-            @RequestParam String sort,
-            @RequestParam int page,
-            @RequestParam int size,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        SortOrder sortOrder = SortOrder.from(sort);
-        String myUsername = authValidator.extractUsername(userDetails);
-        List<PostResponseDTO> posts = profilePostService.getProfilePosts(username, myUsername, sortOrder, page, size);
-
-        return ResponseEntity.ok(CommonResponse.success(posts));
-    }
-
     @Override
     public ResponseEntity<CommonResponse<Void>> updateNickname(
             @PathVariable String targetUsername,
