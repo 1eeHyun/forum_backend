@@ -89,19 +89,18 @@ public class NotificationServiceImpl implements NotificationService {
             case POST_LIKE:
             case COMMENT_LIKE:
 
-                return commentId != null ? "/?postId=" + postId + "&commentId=" + commentId
-                        : "/?postId=" + postId;
+                return commentId != null ? "/posts/" + postId + "&commentId=" + commentId
+                        : "/posts/" + postId;
             case FOLLOW:
 
                 return "/profile/" + notification.getSender().getUsername();
             case JOINED_COMMUNITY:
 
-                return "/community/" + postId;
+                return "/communities/" + postId;
 
             default:
                 return "/";
 
         }
-
     }
 }
