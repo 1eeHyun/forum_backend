@@ -124,7 +124,6 @@ public class ChatServiceImpl implements ChatService {
             ChatReadStatus status = optionalStatus.get();
 
             if (status.getLastReadMessageId() == null || lastReadMessageId > status.getLastReadMessageId()) {
-                log.info("Previous={}, new={}", status.getLastReadMessageId(), lastReadMessageId);
                 status.setLastReadMessageId(lastReadMessageId);
                 status.setUpdatedAt(LocalDateTime.now());
 
@@ -140,7 +139,6 @@ public class ChatServiceImpl implements ChatService {
                     .build();
 
             chatReadStatusRepository.save(status);
-            log.info("Created new read status with id={}, readMessageId={}", status.getId(), lastReadMessageId);
         }
     }
 
