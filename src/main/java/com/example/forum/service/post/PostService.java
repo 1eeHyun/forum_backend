@@ -25,7 +25,7 @@ public interface PostService {
     // Delete a post - DELETE
     void deletePost(Long postId, String username);
 
-    String uploadImage(MultipartFile file);
+    String uploadFile(MultipartFile file);
 
     List<PostPreviewDTO> getRecentlyViewedPosts(String username);
     List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids);

@@ -297,17 +297,17 @@ public interface PostApiDocs {
 
     // ---------------------- Upload an image to a new post ----------------------
     @Operation(
-            summary = "Upload post image",
-            description = "Uploads an image file for a post and returns the URL of the stored image.",
+            summary = "Upload file (image/video/etc)",
+            description = "Uploads a media file (image or video) and returns the URL of the stored file.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Image file to upload (multipart/form-data)",
+                    description = "Uploads a media file to upload (multipart/form-data)",
                     required = true,
                     content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
             ),
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Image uploaded successfully",
+                            description = "File uploaded successfully",
                             content = @Content(
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = String.class)
@@ -320,10 +320,10 @@ public interface PostApiDocs {
                     )
             }
     )
-    @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<CommonResponse<String>> uploadPostImage(
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<CommonResponse<String>> uploadFile(
             @Parameter(
-                    description = "The image file to upload",
+                    description = "The media file to upload",
                     required = true,
                     content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
             )

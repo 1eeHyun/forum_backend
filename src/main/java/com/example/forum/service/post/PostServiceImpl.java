@@ -152,7 +152,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public String uploadImage(MultipartFile file) {
+    public String uploadFile(MultipartFile file) {
         return s3Service.upload(file);
     }
 

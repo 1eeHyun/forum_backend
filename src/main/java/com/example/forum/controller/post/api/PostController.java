@@ -123,10 +123,10 @@ public class PostController implements PostApiDocs {
     }
 
     @Override
-    public ResponseEntity<CommonResponse<String>> uploadPostImage(
-            @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<CommonResponse<String>> uploadFile(
+        @RequestParam("file") MultipartFile file) {
 
-        String response = postService.uploadImage(file);
+        String response = postService.uploadFile(file);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
