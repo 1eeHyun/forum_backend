@@ -24,7 +24,7 @@ public class PostDetailDTO {
 
     private String visibility;
 
-    private List<String> imageUrls;
+    private List<PostFileDTO> fileUrls;
 
     private int likeCount;
     private int commentCount;

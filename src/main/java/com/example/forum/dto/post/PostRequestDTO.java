@@ -25,7 +25,7 @@ public class PostRequestDTO {
     @NotNull(message = "Visibility must be provided.")
     private Visibility visibility;
 
-    private List<String> imageUrls;
+    private List<PostFileDTO> fileUrls;
 
     private Long categoryId; // Optional: community's category selection
 }

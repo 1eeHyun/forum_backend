@@ -1,14 +1,11 @@
 package com.example.forum.service.post;
 
 import com.example.forum.common.SortOrder;
-import com.example.forum.dto.post.PostDetailDTO;
-import com.example.forum.dto.post.PostPreviewDTO;
-import com.example.forum.dto.post.PostRequestDTO;
-import com.example.forum.dto.post.PostResponseDTO;
+import com.example.forum.dto.post.*;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Category;
 import com.example.forum.model.post.Post;
-import com.example.forum.model.post.PostImage;
+import com.example.forum.model.post.PostFile;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.post.PostRepository;
@@ -83,13 +80,13 @@ public class PostServiceImpl implements PostService {
 
         User user = authValidator.validateUserByUsername(username);
         Category category = getValidCategoryIfNeeded(dto);
-        postValidator.validatePostCount(dto.getImageUrls());
+        postValidator.validatePostCount(dto.getFileUrls());
 
         if (category != null)
             communityValidator.validateMemberCommunity(category.getCommunity().getId(), user);
 
         Post post = buildPostFromDto(dto, user, category);
-        savePostImages(post, dto.getImageUrls());
+        savePostFiles(post, dto.getFileUrls());
 
         Post savedPost = postRepository.save(post);
         return PostMapper.toPostResponseDTO(savedPost);
@@ -106,12 +103,12 @@ public class PostServiceImpl implements PostService {
         postValidator.validatePostAuthor(post, user);
 
         // 2. Validate image count and community (optional)
-        postValidator.validatePostCount(dto.getImageUrls());
+        postValidator.validatePostCount(dto.getFileUrls());
         Category category = getValidCategoryIfNeeded(dto);
 
         // 3. Delete old images from S3
-        List<String> oldImageUrls = post.getImages() == null ? List.of()
-                : post.getImages().stream().map(PostImage::getImageUrl).toList();
+        List<String> oldImageUrls = post.getFiles() == null ? List.of()
+                : post.getFiles().stream().map(PostFile::getFileUrl).toList();
         s3Service.deleteFiles(oldImageUrls);
 
         // 4. Update fields
@@ -120,15 +117,16 @@ public class PostServiceImpl implements PostService {
         post.setVisibility(dto.getVisibility());
         post.setCategory(category);
 
-        // 5. Update images safely
-        if (post.getImages() != null) post.getImages().clear();
-        if (dto.getImageUrls() != null) {
-            for (String url : dto.getImageUrls()) {
-                PostImage image = PostImage.builder()
-                        .imageUrl(url)
+        // 5. Update files safely
+        if (post.getFiles() != null) post.getFiles().clear();
+        if (dto.getFileUrls() != null) {
+            for (PostFileDTO postFile : dto.getFileUrls()) {
+                PostFile file = PostFile.builder()
+                        .fileUrl(postFile.getFileUrl())
+                        .type(postFile.getType())
                         .post(post)
                         .build();
-                post.getImages().add(image);
+                post.getFiles().add(file);
             }
         }
 
@@ -232,24 +230,25 @@ public class PostServiceImpl implements PostService {
                 .build();
     }
 
-    private void savePostImages(Post post, List<String> imageUrls) {
+    private void savePostFiles(Post post, List<PostFileDTO> fileDTOs) {
 
         // Ensure list is initialized (in case builder left it null)
-        if (post.getImages() == null) {
-            post.setImages(new ArrayList<>());
+        if (post.getFiles() == null) {
+            post.setFiles(new ArrayList<>());
         }
 
         // Clear old references (orphanRemoval = true will delete them from DB)
-        post.getImages().clear();
+        post.getFiles().clear();
 
-        if (imageUrls == null || imageUrls.isEmpty()) return;
+        if (fileDTOs == null || fileDTOs.isEmpty()) return;
 
-        for (String url : imageUrls) {
-            PostImage image = PostImage.builder()
-                    .imageUrl(url)
+        for (PostFileDTO postFile : fileDTOs) {
+            PostFile file = PostFile.builder()
+                    .fileUrl(postFile.getFileUrl())
+                    .type(postFile.getType())
                     .post(post)
                     .build();
-            post.getImages().add(image);
+            post.getFiles().add(file);
         }
     }
 }

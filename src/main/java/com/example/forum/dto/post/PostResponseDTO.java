@@ -18,7 +18,7 @@ public class PostResponseDTO {
     private UserDTO author;
 
     private CommunityPreviewDTO community;
-    private List<String> imageUrls;
+    private List<PostFileDTO> fileUrls;
 
     private int commentCount;
     private int likeCount;

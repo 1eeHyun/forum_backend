@@ -2,6 +2,7 @@ package com.example.forum.mapper.post;
 
 import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.PostDetailDTO;
+import com.example.forum.dto.post.PostFileDTO;
 import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.comment.CommentMapper;
@@ -10,7 +11,7 @@ import com.example.forum.mapper.image.ImageMapper;
 import com.example.forum.mapper.user.UserMapper;
 import com.example.forum.model.like.PostLike;
 import com.example.forum.model.post.Post;
-import com.example.forum.model.post.PostImage;
+import com.example.forum.model.post.PostFile;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 
@@ -30,8 +31,8 @@ public class PostMapper {
                                 ? CommunityMapper.toPreviewDTO(post.getCategory().getCommunity())
                                 : null
                 )
-                .imageUrls(post.getImages() != null
-                            ? convertImageUrls(post.getImages())
+                .fileUrls(post.getFiles() != null
+                            ? convertFileUrls(post.getFiles())
                             : null)
                 .commentCount(post.getComments() != null ? post.getComments().size() : 0)
                 .likeCount(post.getLikes() != null ? post.getLikes().size() : 0)
@@ -59,8 +60,8 @@ public class PostMapper {
 
                 .likedByMe(post.getLikes().stream().anyMatch(like -> like.getUser().equals(viewer)))
                 .likeCount(post.getLikes().size())
-                .imageUrls(post.getImages() != null
-                        ? convertImageUrls(post.getImages())
+                .fileUrls(post.getFiles() != null
+                        ? convertFileUrls(post.getFiles())
                         : null)
 
                 // Like users
@@ -101,8 +102,8 @@ public class PostMapper {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .imageUrls(
-                        post.getImages().stream().map(PostImage::getImageUrl).toList()
+                .fileUrls(
+                        convertFileUrls(post.getFiles())
                 )
                 .likeCount(post.getLikes().size())
                 .commentCount(post.getComments().size())
@@ -133,10 +134,13 @@ public class PostMapper {
                 .build();
     }
 
-    private static List<String> convertImageUrls(List<PostImage> images) {
+    private static List<PostFileDTO> convertFileUrls(List<PostFile> files) {
 
-        return images.stream()
-                .map(PostImage::getImageUrl)
+        return files.stream()
+                .map(file -> PostFileDTO.builder()
+                        .fileUrl(file.getFileUrl())
+                        .type(file.getType())
+                        .build())
                 .toList();
     }
 }

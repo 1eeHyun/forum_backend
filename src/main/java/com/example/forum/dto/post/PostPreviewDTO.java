@@ -14,7 +14,7 @@ public class PostPreviewDTO {
     private Long id;
     private String title;
     private String content;
-    private List<String> imageUrls;
+    private List<PostFileDTO> fileUrls;
 
     private int likeCount;
     private int commentCount;

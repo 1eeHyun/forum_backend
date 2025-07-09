@@ -1,8 +1,9 @@
 package com.example.forum.validator.post;
 
+import com.example.forum.dto.post.PostFileDTO;
 import com.example.forum.exception.post.PostNotAuthorException;
 import com.example.forum.exception.post.PostNotFoundException;
-import com.example.forum.exception.post.TooManyPostImagesException;
+import com.example.forum.exception.post.TooManyPostFilesException;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.post.PostRepository;
@@ -33,9 +34,9 @@ public class PostValidator {
                 .orElseThrow(PostNotFoundException::new);
     }
 
-    public void validatePostCount(List<String> imageUrls) {
+    public void validatePostCount(List<PostFileDTO> fileUrls) {
 
-        if (imageUrls != null && imageUrls.size() > 5)
-            throw new TooManyPostImagesException();
+        if (fileUrls != null && fileUrls.size() > 5)
+            throw new TooManyPostFilesException();
     }
 }

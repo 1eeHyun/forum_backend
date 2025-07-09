@@ -30,7 +30,7 @@ public class Post {
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostImage> images = new ArrayList<>();
+    private List<PostFile> files = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Visibility visibility;
