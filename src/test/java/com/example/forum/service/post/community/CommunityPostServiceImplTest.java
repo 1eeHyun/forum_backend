@@ -13,6 +13,7 @@ import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.post.PostRepository;
+import com.example.forum.service.post.hidden.HiddenPostService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,7 @@ class CommunityPostServiceImplTest {
     @Mock private CommunityValidator communityValidator;
     @Mock private CommunityMemberRepository communityMemberRepository;
     @Mock private PostRepository postRepository;
+    @Mock private HiddenPostService hiddenPostService;
 
     @InjectMocks
     private CommunityPostServiceImpl communityPostService;
@@ -127,7 +129,7 @@ class CommunityPostServiceImplTest {
         @DisplayName("Success: Null username returns null")
         void success_nullUsername() {
             List<PostPreviewDTO> result = communityPostService.getRecentPostsFromJoinedCommunities(null);
-            assertThat(result).isNull();
+            assertThat(result).isEmpty();
         }
     }
 
@@ -144,7 +146,7 @@ class CommunityPostServiceImplTest {
             when(postRepository.findTopPostsByCommunityAndCategoryAndDateAfter(
                     eq(1L), eq(1L), any(), any())).thenReturn(List.of(post));
 
-            Map<String, List<PostResponseDTO>> result = communityPostService.getTopPostsThisWeekByCategories(1L, 3);
+            Map<String, List<PostResponseDTO>> result = communityPostService.getTopPostsThisWeekByCategories(1L, 3, "test");
 
             assertThat(result).containsKey("general");
             assertThat(result.get("general")).hasSize(1);
@@ -159,7 +161,7 @@ class CommunityPostServiceImplTest {
             when(postRepository.findTopPostsByCommunityAndCategoryAndDateAfter(
                     eq(1L), eq(1L), any(), any())).thenReturn(List.of());
 
-            Map<String, List<PostResponseDTO>> result = communityPostService.getTopPostsThisWeekByCategories(1L, 3);
+            Map<String, List<PostResponseDTO>> result = communityPostService.getTopPostsThisWeekByCategories(1L, 3, "test");
 
             assertThat(result).isEmpty();
         }
@@ -170,7 +172,7 @@ class CommunityPostServiceImplTest {
             when(communityValidator.validateExistingCommunity(999L))
                     .thenThrow(new IllegalArgumentException("Not Found"));
 
-            assertThatThrownBy(() -> communityPostService.getTopPostsThisWeekByCategories(999L, 3))
+            assertThatThrownBy(() -> communityPostService.getTopPostsThisWeekByCategories(999L, 3, "test"))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
@@ -185,7 +187,7 @@ class CommunityPostServiceImplTest {
             when(postRepository.findTopPostsByCommunityAndDateAfter(eq(1L), any(), eq(5)))
                     .thenReturn(List.of(post));
 
-            List<PostResponseDTO> result = communityPostService.getTopPostsThisWeek(1L, 5);
+            List<PostResponseDTO> result = communityPostService.getTopPostsThisWeek(1L, 5, "test");
 
             assertThat(result).hasSize(1);
         }
@@ -203,7 +205,7 @@ class CommunityPostServiceImplTest {
 
             List<PostResponseDTO> result = communityPostService.getCommunityPosts(
                     1L, SortOrder.NEWEST, 0, 10, "general"
-            );
+            , "test");
 
             assertThat(result).hasSize(1);
         }
@@ -215,8 +217,7 @@ class CommunityPostServiceImplTest {
                     .thenReturn(List.of(post));
 
             List<PostResponseDTO> result = communityPostService.getCommunityPosts(
-                    1L, SortOrder.TOP_LIKED, 1, 10, null
-            );
+                    1L, SortOrder.TOP_LIKED, 1, 10, null, "test");
 
             assertThat(result).hasSize(1);
         }

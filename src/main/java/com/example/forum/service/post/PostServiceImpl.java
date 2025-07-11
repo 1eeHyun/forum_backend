@@ -4,13 +4,16 @@ import com.example.forum.common.SortOrder;
 import com.example.forum.dto.post.*;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Category;
+import com.example.forum.model.post.HiddenPost;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostFile;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
+import com.example.forum.repository.post.HiddenPostRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.common.RecentViewService;
 import com.example.forum.service.common.S3Service;
+import com.example.forum.service.post.hidden.HiddenPostService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CategoryValidator;
 import com.example.forum.validator.community.CommunityValidator;
@@ -39,13 +42,16 @@ public class PostServiceImpl implements PostService {
 
     // Repositories
     private final PostRepository postRepository;
+    private final HiddenPostRepository hiddenPostRepository;
 
     // Services
     private final S3Service s3Service;
     private final RecentViewService recentViewService;
 
+    private final HiddenPostService hiddenPostService;
+
     @Override
-    public List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size) {
+    public List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size, String username) {
 
         int offset = page * size;
         List<Post> posts = switch (sort) {
@@ -54,8 +60,10 @@ public class PostServiceImpl implements PostService {
             case TOP_LIKED -> postRepository.findPagedPostsTopLiked(size, offset);
         };
 
+        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
+
         return posts.stream()
-                .map(PostMapper::toPostResponseDTO)
+                .map(post -> PostMapper.toPostResponseDTO(post, hiddenPostIds.contains(post.getId())))
                 .toList();
     }
 
@@ -67,11 +75,12 @@ public class PostServiceImpl implements PostService {
             viewer = authValidator.validateUserByUsername(username);
 
         Post post = postValidator.validateDetailPostId(postId);
+        boolean isHidden = hiddenPostService.isHiddenByUsername(post, username);
 
         if (viewer != null)
             recentViewService.addPostView(viewer.getId(), postId);
 
-        return PostMapper.toPostDetailDTO(post, viewer);
+        return PostMapper.toPostDetailDTO(post, viewer, isHidden);
     }
 
     @Override
@@ -89,7 +98,7 @@ public class PostServiceImpl implements PostService {
         savePostFiles(post, dto.getFileUrls());
 
         Post savedPost = postRepository.save(post);
-        return PostMapper.toPostResponseDTO(savedPost);
+        return PostMapper.toPostResponseDTO(savedPost, false);
     }
 
     @Override
@@ -134,7 +143,7 @@ public class PostServiceImpl implements PostService {
         Post saved = postRepository.save(post); // make sure Hibernate flushes
 
         // 7. Return response
-        return PostMapper.toPostResponseDTO(saved); // or just `post`
+        return PostMapper.toPostResponseDTO(saved, false); // or just `post`
     }
 
     @Override
@@ -155,13 +164,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostPreviewDTO> getTopPostsThisWeek() {
+    public List<PostPreviewDTO> getTopPostsThisWeek(String username) {
 
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+
         List<Post> posts = postRepository.findTopPostsSince(oneWeekAgo, PageRequest.of(0, 5));
+        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
 
         return posts.stream()
-                .map(PostMapper::toPreviewDTO)
+                .map(post -> PostMapper.toPreviewDTO(post, hiddenPostIds.contains(post.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -180,6 +191,8 @@ public class PostServiceImpl implements PostService {
         // Retrieve posts from DB
         List<Post> posts = postRepository.findAllById(ids);
 
+        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
+
         // postId → Post Mapping
         Map<Long, Post> postMap = posts.stream()
                 .collect(Collectors.toMap(Post::getId, p -> p));
@@ -188,17 +201,18 @@ public class PostServiceImpl implements PostService {
         return ids.stream()
                 .map(postMap::get)
                 .filter(Objects::nonNull)
-                .map(PostMapper::toPreviewDTO)
+                .map(post -> PostMapper.toPreviewDTO(post, hiddenPostIds.contains(post.getId())))
                 .toList();
     }
 
     @Override
-    public List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids) {
+    public List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids, String username) {
 
         if (ids == null || ids.isEmpty())
             return Collections.emptyList();
 
         List<Post> posts = postRepository.findAllById(ids);
+        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
 
         Map<Long, Post> map = posts.stream()
                 .collect(Collectors.toMap(Post::getId, p -> p));
@@ -206,8 +220,31 @@ public class PostServiceImpl implements PostService {
         return ids.stream()
                 .map(map::get)
                 .filter(Objects::nonNull)
-                .map(PostMapper::toPreviewDTO)
+                .map(post -> PostMapper.toPreviewDTO(post, hiddenPostIds.contains(post.getId())))
                 .toList();
+    }
+
+    @Override
+    public void toggleHidePost(Long postId, String username) {
+
+        User user = authValidator.validateUserByUsername(username);
+        Post post = postValidator.validatePost(postId);
+
+        Optional<HiddenPost> hiddenPostOpt = hiddenPostRepository.findByUserAndPost(user, post);
+
+        if (hiddenPostOpt.isPresent())
+            hiddenPostRepository.delete(hiddenPostOpt.get());
+        else {
+            HiddenPost hiddenPost = new HiddenPost(user, post);
+            hiddenPostRepository.save(hiddenPost);
+        }
+    }
+
+    @Override
+    public List<Long> getHiddenPostIds(String username) {
+
+        User user = authValidator.validateUserByUsername(username);
+        return hiddenPostRepository.findHiddenPostIdsByUser(user);
     }
 
     // ------------------------------ Helper methods -------------------------------------

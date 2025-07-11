@@ -43,10 +43,14 @@ public class PostController implements PostApiDocs {
     public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getPosts(
             @RequestParam(defaultValue = "newest") String sort,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
 
         SortOrder sortOrder = SortOrder.from(sort);
-        List<PostResponseDTO> posts = postService.getPagedPosts(sortOrder, page, size);
+        List<PostResponseDTO> posts = postService.getPagedPosts(sortOrder, page, size, username);
+
         return ResponseEntity.ok(CommonResponse.success(posts));
     }
 
@@ -55,7 +59,7 @@ public class PostController implements PostApiDocs {
             @PathVariable Long postId,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        String username = userDetails == null ? null : authValidator.extractUsername(userDetails);
+        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
 
         PostDetailDTO response = postService.getPostDetail(postId, username);
         return ResponseEntity.ok(CommonResponse.success(response));
@@ -134,18 +138,20 @@ public class PostController implements PostApiDocs {
     public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentPostsFromMyCommunities(
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        String username = null;
-        if (userDetails != null)
-             username = authValidator.extractUsername(userDetails);
+        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
 
         List<PostPreviewDTO> response = communityPostService.getRecentPostsFromJoinedCommunities(username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
     @Override
-    public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTopPostsThisWeek() {
+    public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTopPostsThisWeek(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
 
-        List<PostPreviewDTO> topPosts = postService.getTopPostsThisWeek();
+        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
+
+        List<PostPreviewDTO> topPosts = postService.getTopPostsThisWeek(username);
         return ResponseEntity.ok(CommonResponse.success(topPosts));
     }
 
@@ -162,11 +168,21 @@ public class PostController implements PostApiDocs {
         }
 
         if (localIds != null && !localIds.isEmpty()) {
-            List<PostPreviewDTO> response = postService.getPreviewPostsByIds(localIds);
+            List<PostPreviewDTO> response = postService.getPreviewPostsByIds(localIds, null);
 
             return ResponseEntity.ok(CommonResponse.success(response));
         }
 
         return ResponseEntity.ok(CommonResponse.success(Collections.emptyList()));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<Void>> toggleHidePost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = authValidator.extractUsername(userDetails);
+        postService.toggleHidePost(postId, username);
+        return ResponseEntity.ok(CommonResponse.success());
     }
 }

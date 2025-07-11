@@ -26,4 +26,6 @@ public class PostPreviewDTO {
 
     private String authorNickname;
     private UserDTO author;
+
+    private Boolean isHidden;
 }

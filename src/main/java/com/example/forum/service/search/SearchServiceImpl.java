@@ -13,10 +13,12 @@ import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.repository.user.UserRepository;
+import com.example.forum.service.post.hidden.HiddenPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +29,13 @@ public class SearchServiceImpl implements SearchService {
     private final PostRepository postRepository;
     private final CommunityRepository communityRepository;
 
-    @Override
-    public SearchResponseDTO searchAll(String keyword) {
+    // Services
+    private final HiddenPostService hiddenPostService;
 
-        List<PostPreviewDTO> posts = searchPosts(keyword);
+    @Override
+    public SearchResponseDTO searchAll(String keyword, String username) {
+
+        List<PostPreviewDTO> posts = searchPosts(keyword, username);
         List<CommunityPreviewDTO> communities = searchCommunities(keyword);
         List<ProfilePreviewDTO> users = searchUsers(keyword);
 
@@ -52,12 +57,13 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public List<PostPreviewDTO> searchPosts(String keyword) {
+    public List<PostPreviewDTO> searchPosts(String keyword, String username) {
 
         List<Post> posts = postRepository.findTop5ByTitleContainingIgnoreCase(keyword);
+        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
 
         return posts.stream()
-                .map(PostMapper::toPreviewDTO)
+                .map(post -> PostMapper.toPreviewDTO(post, hiddenPostIds.contains(post.getId())))
                 .toList();
     }
 

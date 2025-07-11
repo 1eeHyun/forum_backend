@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,7 +55,10 @@ public interface CommunityPostApiDocs {
             @RequestParam(defaultValue = "0") int page,
 
             @Parameter(description = "Number of posts per page", example = "5")
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "5") int size,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
     );
 
     @Operation(
@@ -75,6 +80,9 @@ public interface CommunityPostApiDocs {
     @GetMapping("/top-posts-by-category")
     ResponseEntity<CommonResponse<Map<String, List<PostResponseDTO>>>> getTopPostsByCategoryThisWeek(
             @PathVariable Long communityId,
-            @RequestParam(defaultValue = "3") int limit
+            @RequestParam(defaultValue = "3") int limit,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
     );
 }

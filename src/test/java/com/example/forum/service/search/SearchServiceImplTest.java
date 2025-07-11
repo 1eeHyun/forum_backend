@@ -1,11 +1,11 @@
 package com.example.forum.service.search;
 
 import com.example.forum.dto.community.CommunityPreviewDTO;
+import com.example.forum.dto.image.ImageDTO;
 import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.profile.ProfilePreviewDTO;
 import com.example.forum.dto.search.SearchResponseDTO;
 import com.example.forum.dto.user.UserDTO;
-import com.example.forum.dto.image.ImageDTO;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.mapper.profile.ProfileMapper;
@@ -15,6 +15,7 @@ import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.repository.user.UserRepository;
+import com.example.forum.service.post.hidden.HiddenPostService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ class SearchServiceImplTest {
     @Mock private PostRepository postRepository;
     @Mock private CommunityRepository communityRepository;
     @Mock private UserRepository userRepository;
+    @Mock private HiddenPostService hiddenPostService;
 
     @InjectMocks
     private SearchServiceImpl searchService;
@@ -81,11 +83,11 @@ class SearchServiceImplTest {
                 MockedStatic<CommunityMapper> communityMapper = mockStatic(CommunityMapper.class);
                 MockedStatic<ProfileMapper> profileMapper = mockStatic(ProfileMapper.class)
         ) {
-            postMapper.when(() -> PostMapper.toPreviewDTO(post)).thenReturn(postDTO);
+            postMapper.when(() -> PostMapper.toPreviewDTO(post, false)).thenReturn(postDTO);
             communityMapper.when(() -> CommunityMapper.toPreviewDTO(community)).thenReturn(communityDTO);
             profileMapper.when(() -> ProfileMapper.toProfilePreviewDTO(user)).thenReturn(profileDTO);
 
-            SearchResponseDTO result = searchService.searchAll(keyword);
+            SearchResponseDTO result = searchService.searchAll(keyword, "test");
 
             assertThat(result.getPosts()).hasSize(1);
             assertThat(result.getCommunities()).hasSize(1);
@@ -127,9 +129,9 @@ class SearchServiceImplTest {
         when(postRepository.findTop5ByTitleContainingIgnoreCase(keyword)).thenReturn(List.of(post));
 
         try (MockedStatic<PostMapper> mapper = mockStatic(PostMapper.class)) {
-            mapper.when(() -> PostMapper.toPreviewDTO(post)).thenReturn(postDTO);
+            mapper.when(() -> PostMapper.toPreviewDTO(post, false)).thenReturn(postDTO);
 
-            List<PostPreviewDTO> result = searchService.searchPosts(keyword);
+            List<PostPreviewDTO> result = searchService.searchPosts(keyword,"test");
 
             assertThat(result).hasSize(1);
             assertThat(result.get(0).getTitle()).contains("post");

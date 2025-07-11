@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -42,7 +44,9 @@ public interface SearchApiDocs {
     @GetMapping
     ResponseEntity<CommonResponse<SearchResponseDTO>> search(
             @Parameter(description = "Search keyword", required = true)
-            @RequestParam("query") String query
+            @RequestParam("query") String query,
+
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
     );
 
     @Operation(
@@ -78,7 +82,9 @@ public interface SearchApiDocs {
     @GetMapping("/posts")
     ResponseEntity<CommonResponse<List<PostPreviewDTO>>> searchPosts(
             @Parameter(description = "Post keyword", required = true)
-            @RequestParam("keyword") String keyword
+            @RequestParam("keyword") String keyword,
+
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
     );
 
     @Operation(

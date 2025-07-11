@@ -20,7 +20,7 @@ import java.util.List;
 import static com.example.forum.common.TimeUtils.formatTimeAgo;
 
 public class PostMapper {
-    public static PostResponseDTO toPostResponseDTO(Post post) {
+    public static PostResponseDTO toPostResponseDTO(Post post, boolean isHidden) {
         return PostResponseDTO.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -38,10 +38,11 @@ public class PostMapper {
                 .likeCount(post.getLikes() != null ? post.getLikes().size() : 0)
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
+                .isHidden(isHidden)
                 .build();
     }
 
-    public static PostDetailDTO toPostDetailDTO(Post post, User viewer) {
+    public static PostDetailDTO toPostDetailDTO(Post post, User viewer, boolean isHidden) {
         return PostDetailDTO.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -82,6 +83,7 @@ public class PostMapper {
                 .comments(CommentMapper.toResponseList(post.getComments()))
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
+                .isHidden(isHidden)
                 .build();
     }
 
@@ -96,7 +98,7 @@ public class PostMapper {
                 .build();
     }
 
-    public static PostPreviewDTO toPreviewDTO(Post post) {
+    public static PostPreviewDTO toPreviewDTO(Post post, boolean isHidden) {
 
         return PostPreviewDTO.builder()
                 .id(post.getId())
@@ -131,6 +133,7 @@ public class PostMapper {
 
                 .authorNickname(post.getAuthor().getProfile().getNickname())
                 .author(UserMapper.toDtoWithEmail(post.getAuthor()))
+                .isHidden(isHidden)
                 .build();
     }
 

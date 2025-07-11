@@ -10,6 +10,7 @@ import com.example.forum.model.user.User;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.common.RecentViewService;
 import com.example.forum.service.common.S3Service;
+import com.example.forum.service.post.hidden.HiddenPostService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CategoryValidator;
 import com.example.forum.validator.community.CommunityValidator;
@@ -47,6 +48,9 @@ class PostServiceImplTest {
 
     @Mock
     private CommunityValidator communityValidator;
+
+    @Mock
+    private HiddenPostService hiddenPostService;
 
     @Mock
     private S3Service s3Service;

@@ -37,4 +37,6 @@ public class PostDetailDTO {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private Boolean isHidden;
 }

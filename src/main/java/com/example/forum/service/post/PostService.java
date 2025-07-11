@@ -11,12 +11,10 @@ import java.util.List;
 
 public interface PostService {
 
-    List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size);
-//    List<PostResponseDTO> getProfilePosts(String targetUsername, String currentUsername, SortOrder sort, int page, int size);
+    List<PostResponseDTO> getPagedPosts(SortOrder sort, int page, int size, String username);
     PostDetailDTO getPostDetail(Long postId, String username);
 
-//    List<PostPreviewDTO> getRecentPostsFromJoinedCommunities(String username);
-    List<PostPreviewDTO> getTopPostsThisWeek();
+    List<PostPreviewDTO> getTopPostsThisWeek(String username);
 
     // Post posts - POST
     PostResponseDTO createPost(PostRequestDTO dto, String username);
@@ -28,10 +26,11 @@ public interface PostService {
     String uploadFile(MultipartFile file);
 
     List<PostPreviewDTO> getRecentlyViewedPosts(String username);
-    List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids);
+    List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids, String username);
 
-    // ----------------- Community Posts -----------------
-//    List<PostResponseDTO> getCommunityPosts(Long communityId, SortOrder sort, int page, int size, String category);
-//    List<PostResponseDTO> getTopPostsThisWeek(Long communityId, int size);
-//    Map<String, List<PostResponseDTO>> getTopPostsThisWeekByCategories(Long communityId, int size);
+    // Toggle hide/unhide
+    void toggleHidePost(Long postId, String username);
+
+    // Get IDs of posts hidden by the user (for filtering)
+    List<Long> getHiddenPostIds(String username);
 }

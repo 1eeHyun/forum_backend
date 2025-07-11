@@ -11,6 +11,7 @@ import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.post.PostRepository;
+import com.example.forum.service.post.hidden.HiddenPostService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import lombok.RequiredArgsConstructor;
@@ -37,11 +38,14 @@ public class CommunityPostServiceImpl implements CommunityPostService {
     private final CommunityMemberRepository communityMemberRepository;
     private final PostRepository postRepository;
 
+    // Services
+    private final HiddenPostService hiddenPostService;
+
     @Override
     public List<PostPreviewDTO> getRecentPostsFromJoinedCommunities(String username) {
 
         if (username == null)
-            return null;
+            return List.of();
 
         User user = authValidator.validateUserByUsername(username);
         List<CommunityMember> memberShips = communityMemberRepository.findByUser(user);
@@ -52,14 +56,15 @@ public class CommunityPostServiceImpl implements CommunityPostService {
         if (joinedCommunities.isEmpty()) return List.of();
 
         List<Post> posts = postRepository.findTop5ByCommunityInOrderByCreatedAtDesc(joinedCommunities);
+        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
 
         return posts.stream()
-                .map(PostMapper::toPreviewDTO)
+                .map(post -> PostMapper.toPreviewDTO(post, hiddenPostIds.contains(post.getId())))
                 .toList();
     }
 
     @Override
-    public List<PostResponseDTO> getCommunityPosts(Long communityId, SortOrder sort, int page, int size, String category) {
+    public List<PostResponseDTO> getCommunityPosts(Long communityId, SortOrder sort, int page, int size, String category, String username) {
 
         int offset = (category != null && page == 0) ? 0 : page * size;
         int limit = (category != null && page == 0) ? 3 : size;
@@ -82,13 +87,15 @@ public class CommunityPostServiceImpl implements CommunityPostService {
             };
         }
 
+        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
+
         return posts.stream()
-                .map(PostMapper::toPostResponseDTO)
+                .map(post -> PostMapper.toPostResponseDTO(post, hiddenPostIds.contains(post.getId())))
                 .toList();
     }
 
     @Override
-    public List<PostResponseDTO> getTopPostsThisWeek(Long communityId, int size) {
+    public List<PostResponseDTO> getTopPostsThisWeek(Long communityId, int size, String username) {
 
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
 
@@ -96,19 +103,22 @@ public class CommunityPostServiceImpl implements CommunityPostService {
                 communityId, oneWeekAgo, size
         );
 
+        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
+
         return topPosts.stream()
-                .map(PostMapper::toPostResponseDTO)
+                .map(post -> PostMapper.toPostResponseDTO(post, hiddenPostIds.contains(post.getId())))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Map<String, List<PostResponseDTO>> getTopPostsThisWeekByCategories(Long communityId, int size) {
+    public Map<String, List<PostResponseDTO>> getTopPostsThisWeekByCategories(Long communityId, int size, String username) {
 
         Community community = communityValidator.validateExistingCommunity(communityId);
         LocalDateTime fromDate = LocalDateTime.now().minusWeeks(1);
         Set<Category> categories = community.getCategories();
 
         Map<String, List<PostResponseDTO>> result = new HashMap<>();
+        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
 
         for (Category category : categories) {
 
@@ -117,7 +127,7 @@ public class CommunityPostServiceImpl implements CommunityPostService {
             );
 
             List<PostResponseDTO> dtoList = posts.stream()
-                    .map(PostMapper::toPostResponseDTO)
+                    .map(post -> PostMapper.toPostResponseDTO(post, hiddenPostIds.contains(post.getId())))
                     .toList();
 
             if (!dtoList.isEmpty()) {

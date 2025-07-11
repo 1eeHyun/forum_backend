@@ -24,4 +24,6 @@ public class PostResponseDTO {
     private int likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private Boolean isHidden;
 }

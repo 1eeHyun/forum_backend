@@ -6,19 +6,26 @@ import com.example.forum.model.bookmark.Bookmark;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.bookmark.BookmarkRepository;
+import com.example.forum.service.post.hidden.HiddenPostService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.post.PostValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class BookmarkServiceImpl implements BookmarkService {
 
+    // Repositories
     private final BookmarkRepository bookmarkRepository;
 
+    // Services
+    private final HiddenPostService hiddenPostService;
+
+    // Validators
     private final PostValidator postValidator;
     private final AuthValidator userValidator;
 
@@ -49,8 +56,10 @@ public class BookmarkServiceImpl implements BookmarkService {
 
         User user = userValidator.validateUserByUsername(username);
 
+        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
+
         return bookmarkRepository.findAllByUser(user).stream()
-                .map(bookmark -> PostMapper.toPreviewDTO(bookmark.getPost()))
+                .map(bookmark -> PostMapper.toPreviewDTO(bookmark.getPost(), hiddenPostIds.contains(bookmark.getPost().getId())))
                 .toList();
     }
 }

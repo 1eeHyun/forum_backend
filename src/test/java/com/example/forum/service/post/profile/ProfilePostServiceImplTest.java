@@ -6,6 +6,7 @@ import com.example.forum.model.post.Post;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
+import com.example.forum.repository.post.HiddenPostRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.validator.auth.AuthValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,7 @@ class ProfilePostServiceImplTest {
 
     @Mock private AuthValidator authValidator;
     @Mock private PostRepository postRepository;
+    @Mock private HiddenPostRepository hiddenPostRepository;
 
     @InjectMocks
     private ProfilePostServiceImpl profilePostService;

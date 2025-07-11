@@ -6,6 +6,7 @@ import com.example.forum.model.post.Post;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.bookmark.BookmarkRepository;
+import com.example.forum.service.post.hidden.HiddenPostService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.post.PostValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,14 +28,11 @@ class BookmarkServiceImplTest {
     @InjectMocks
     private BookmarkServiceImpl bookmarkService;
 
-    @Mock
-    private BookmarkRepository bookmarkRepository;
+    @Mock private BookmarkRepository bookmarkRepository;
+    @Mock private PostValidator postValidator;
 
-    @Mock
-    private PostValidator postValidator;
-
-    @Mock
-    private AuthValidator authValidator;
+    @Mock private AuthValidator authValidator;
+    @Mock private HiddenPostService hiddenPostService;
 
     @Captor
     ArgumentCaptor<Bookmark> bookmarkCaptor;

@@ -7,8 +7,11 @@ import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.profile.ProfilePreviewDTO;
 import com.example.forum.dto.search.SearchResponseDTO;
 import com.example.forum.service.search.SearchService;
+import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,12 +24,16 @@ import java.util.List;
 public class SearchController implements SearchApiDocs {
 
     private final SearchService searchService;
+    private final AuthValidator authValidator;
 
     @Override
     public ResponseEntity<CommonResponse<SearchResponseDTO>> search(
-            @RequestParam("query") String query) {
+            @RequestParam("query") String query,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        SearchResponseDTO response = searchService.searchAll(query);
+        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
+
+        SearchResponseDTO response = searchService.searchAll(query, username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -40,9 +47,12 @@ public class SearchController implements SearchApiDocs {
 
     @Override
     public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> searchPosts(
-            @RequestParam("keyword") String keyword) {
+            @RequestParam("keyword") String keyword,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        List<PostPreviewDTO> response = searchService.searchPosts(keyword);
+        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
+
+        List<PostPreviewDTO> response = searchService.searchPosts(keyword, username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 

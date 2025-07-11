@@ -54,7 +54,10 @@ public interface PostApiDocs {
             @RequestParam(defaultValue = "0") int page,
 
             @Parameter(description = "Number of posts per page", example = "10")
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
     );
 
     // ---------------------- Posts for Detail ----------------------
@@ -370,7 +373,9 @@ public interface PostApiDocs {
             }
     )
     @GetMapping("/top-weekly")
-    ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTopPostsThisWeek();
+    ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTopPostsThisWeek(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
+    );
 
     // ---------------------- Recently viewed posts ----------------------
     @Operation(
@@ -387,4 +392,24 @@ public interface PostApiDocs {
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) List<Long> localIds
     );
+
+    // ---------------------- Toggle hide/unhide a post ----------------------
+    @Operation(
+            summary = "Toggle hide/unhide a post",
+            description = "Hides the given post for the current user. If the post is already hidden, it will be unhidden.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Post hidden/unhidden successfully"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized - user not logged in"),
+                    @ApiResponse(responseCode = "404", description = "Post not found")
+            }
+    )
+    @PostMapping("/{postId}/hide-toggle")
+    ResponseEntity<CommonResponse<Void>> toggleHidePost(
+            @Parameter(description = "ID of the post to hide/unhide", required = true)
+            @PathVariable Long postId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
+    );
+
 }

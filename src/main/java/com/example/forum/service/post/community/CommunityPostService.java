@@ -10,7 +10,15 @@ import java.util.Map;
 public interface CommunityPostService {
 
     List<PostPreviewDTO> getRecentPostsFromJoinedCommunities(String username);
-    List<PostResponseDTO> getCommunityPosts(Long communityId, SortOrder sort, int page, int size, String category);
-    List<PostResponseDTO> getTopPostsThisWeek(Long communityId, int size);
-    Map<String, List<PostResponseDTO>> getTopPostsThisWeekByCategories(Long communityId, int size);
+
+    List<PostResponseDTO> getCommunityPosts(
+            Long communityId,
+            SortOrder sort,
+            int page, int size,
+            String category,
+            String username
+    );
+
+    List<PostResponseDTO> getTopPostsThisWeek(Long communityId, int size, String username);
+    Map<String, List<PostResponseDTO>> getTopPostsThisWeekByCategories(Long communityId, int size, String username);
 }
