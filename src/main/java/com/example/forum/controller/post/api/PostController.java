@@ -154,8 +154,6 @@ public class PostController implements PostApiDocs {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) List<Long> localIds) {
 
-        log.info("localIds = " + localIds);
-
         if (userDetails != null) {
             String username = authValidator.extractUsername(userDetails);
             List<PostPreviewDTO> response = postService.getRecentlyViewedPosts(username);

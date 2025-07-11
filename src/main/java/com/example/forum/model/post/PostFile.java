@@ -15,6 +15,7 @@ public class PostFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 1000, nullable = false)
     private String fileUrl;
 
     private FileType type;
