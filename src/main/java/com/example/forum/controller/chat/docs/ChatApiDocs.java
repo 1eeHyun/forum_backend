@@ -3,7 +3,6 @@ package com.example.forum.controller.chat.docs;
 
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.chat.ChatRoomDTO;
-import com.example.forum.dto.chat.ChatRoomRequestDTO;
 import com.example.forum.dto.chat.MarkAsReadRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -54,7 +54,7 @@ public interface ChatApiDocs {
     @PostMapping("/rooms")
     ResponseEntity<CommonResponse<String>> getOrCreateRoom(
             @Parameter(description = "ID of the first and second user dto", required = true)
-            @RequestBody ChatRoomRequestDTO request,
+            @RequestParam String targetUsername,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails

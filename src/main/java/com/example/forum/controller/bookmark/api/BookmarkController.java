@@ -38,7 +38,7 @@ public class BookmarkController implements BookmarkApiDocs {
     public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getBookmarkedPosts(
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        String username = authValidator.extractUsername(userDetails);
+        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
         List<PostPreviewDTO> response = bookmarkService.getBookmarkedPosts(username);
 
         return ResponseEntity.ok(CommonResponse.success(response));

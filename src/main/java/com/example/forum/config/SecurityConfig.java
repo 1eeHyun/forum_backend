@@ -43,10 +43,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/ws-chat/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/communities/**", "/api/comments/**", "/api/search").permitAll()
-                        .requestMatchers("/api/posts/**").authenticated()
                         .requestMatchers("/api/communities/**").authenticated()
                         .requestMatchers("/api/profiles/**").authenticated()
                         .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/chat/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

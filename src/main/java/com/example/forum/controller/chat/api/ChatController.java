@@ -4,7 +4,6 @@ import com.example.forum.controller.chat.docs.ChatApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.chat.ChatMessageDTO;
 import com.example.forum.dto.chat.ChatRoomDTO;
-import com.example.forum.dto.chat.ChatRoomRequestDTO;
 import com.example.forum.dto.chat.MarkAsReadRequest;
 import com.example.forum.service.chat.ChatService;
 import com.example.forum.validator.auth.AuthValidator;
@@ -12,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -48,10 +44,11 @@ public class ChatController implements ChatApiDocs {
 
     @Override
     public ResponseEntity<CommonResponse<String>> getOrCreateRoom(
-            @RequestBody ChatRoomRequestDTO request,
+            @RequestParam String targetUsername,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        String response = chatService.getOrCreateRoomId(request.getUser1Username(), request.getUser2Username());
+        String username = authValidator.extractUsername(userDetails);
+        String response = chatService.getOrCreateRoomId(username, targetUsername);
 
         return ResponseEntity.ok(CommonResponse.success(response));
     }
