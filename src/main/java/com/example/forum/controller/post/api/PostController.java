@@ -3,14 +3,10 @@ package com.example.forum.controller.post.api;
 import com.example.forum.common.SortOrder;
 import com.example.forum.controller.post.docs.PostApiDocs;
 import com.example.forum.dto.CommonResponse;
-import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.PostDetailDTO;
-import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
-import com.example.forum.service.like.post.PostLikeService;
 import com.example.forum.service.post.PostService;
-import com.example.forum.service.post.community.CommunityPostService;
 import com.example.forum.validator.auth.AuthValidator;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
@@ -23,9 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -35,9 +29,7 @@ import java.util.List;
 public class PostController implements PostApiDocs {
 
     private final PostService postService;
-    private final PostLikeService postLikeService;
     private final AuthValidator authValidator;
-    private final CommunityPostService communityPostService;
 
     @Override
     public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getPosts(
@@ -97,92 +89,5 @@ public class PostController implements PostApiDocs {
         postService.deletePost(postId, username);
 
         return ResponseEntity.ok(CommonResponse.success(null));
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<Void>> likePost(
-            @PathVariable Long postId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        String username = authValidator.extractUsername(userDetails);
-
-        postLikeService.toggleLike(postId, username);
-        return ResponseEntity.ok(CommonResponse.success());
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<Long>> getLikesCount(
-            @PathVariable Long postId) {
-
-        long response = postLikeService.countLikes(postId);
-        return ResponseEntity.ok(CommonResponse.success(response));
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(
-            @PathVariable Long postId) {
-
-        List<LikeUserDTO> response = postLikeService.getLikeUsers(postId);
-        return ResponseEntity.ok(CommonResponse.success(response));
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<String>> uploadFile(
-        @RequestParam("file") MultipartFile file) {
-
-        String response = postService.uploadFile(file);
-        return ResponseEntity.ok(CommonResponse.success(response));
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentPostsFromMyCommunities(
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
-
-        List<PostPreviewDTO> response = communityPostService.getRecentPostsFromJoinedCommunities(username);
-        return ResponseEntity.ok(CommonResponse.success(response));
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTopPostsThisWeek(
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
-
-        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
-
-        List<PostPreviewDTO> topPosts = postService.getTopPostsThisWeek(username);
-        return ResponseEntity.ok(CommonResponse.success(topPosts));
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentlyViewedPosts(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(required = false) List<Long> localIds) {
-
-        if (userDetails != null) {
-            String username = authValidator.extractUsername(userDetails);
-            List<PostPreviewDTO> response = postService.getRecentlyViewedPosts(username);
-
-            return ResponseEntity.ok(CommonResponse.success(response));
-        }
-
-        if (localIds != null && !localIds.isEmpty()) {
-            List<PostPreviewDTO> response = postService.getPreviewPostsByIds(localIds, null);
-
-            return ResponseEntity.ok(CommonResponse.success(response));
-        }
-
-        return ResponseEntity.ok(CommonResponse.success(Collections.emptyList()));
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<Void>> toggleHidePost(
-            @PathVariable Long postId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        String username = authValidator.extractUsername(userDetails);
-        postService.toggleHidePost(postId, username);
-        return ResponseEntity.ok(CommonResponse.success());
     }
 }

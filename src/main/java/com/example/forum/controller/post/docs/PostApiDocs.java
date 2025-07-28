@@ -1,9 +1,7 @@
 package com.example.forum.controller.post.docs;
 
 import com.example.forum.dto.CommonResponse;
-import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.dto.post.PostDetailDTO;
-import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,12 +11,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -214,202 +210,4 @@ public interface PostApiDocs {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
     );
-
-    // ---------------------- Like Post ----------------------
-    @Operation(
-            summary = "Toggle like on a post",
-            description = "Toggles a like on the given post. If the user has already liked it, the like will be removed.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Post like toggled successfully",
-                            content = @Content
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized - user not logged in",
-                            content = @Content
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Post not found",
-                            content = @Content
-                    )
-            }
-    )
-    @PostMapping("/{postId}/likes")
-    ResponseEntity<CommonResponse<Void>> likePost(
-            @Parameter(description = "ID of the post to like or unlike", required = true)
-            @PathVariable Long postId,
-
-            @Parameter(hidden = true)
-            @AuthenticationPrincipal UserDetails userDetails
-    );
-
-    // ---------------------- Get number of like of an existing post ----------------------
-    @Operation(
-            summary = "Get like count of a post",
-            description = "Returns the total number of likes for the given post.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Like count retrieved successfully",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Long.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Post not found",
-                            content = @Content
-                    )
-            }
-    )
-    @GetMapping("/{postId}/likes")
-    ResponseEntity<CommonResponse<Long>> getLikesCount(
-            @Parameter(description = "ID of the post to retrieve like count for", required = true)
-            @PathVariable Long postId
-    );
-
-    // ---------------------- Who likes an existing Post ----------------------
-    @Operation(
-            summary = "Get users who liked a post",
-            description = "Returns a list of users who liked the given post.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Successfully retrieved list of users who liked the post",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = LikeUserDTO.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Post not found",
-                            content = @Content
-                    )
-            }
-    )
-    @GetMapping("/{postId}/likes/users")
-    ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(
-            @Parameter(description = "ID of the post", required = true)
-            @PathVariable Long postId
-    );
-
-    // ---------------------- Upload an image to a new post ----------------------
-    @Operation(
-            summary = "Upload file (image/video/etc)",
-            description = "Uploads a media file (image or video) and returns the URL of the stored file.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Uploads a media file to upload (multipart/form-data)",
-                    required = true,
-                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
-            ),
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "File uploaded successfully",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = String.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Invalid file or upload failed",
-                            content = @Content
-                    )
-            }
-    )
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<CommonResponse<String>> uploadFile(
-            @Parameter(
-                    description = "The media file to upload",
-                    required = true,
-                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
-            )
-            @RequestParam("file") MultipartFile file
-    );
-
-    // ---------------------- Posts of joined communities ----------------------
-    @Operation(
-            summary = "Get recent posts from joined communities",
-            description = "Returns the 5 most recent posts from communities the current user has joined.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Successfully retrieved recent posts",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = PostPreviewDTO.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized - user is not authenticated",
-                            content = @Content
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal server error",
-                            content = @Content
-                    )
-            }
-    )
-    @GetMapping("/my-communities/recent")
-    ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentPostsFromMyCommunities(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
-    );
-
-    // ---------------------- Top five posts of a week ----------------------
-    @Operation(
-            summary = "Get top posts this week",
-            description = "Retrieves the top 10 posts with the highest number of likes created within the last 7 days.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Top posts fetched successfully"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized")
-            }
-    )
-    @GetMapping("/top-weekly")
-    ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTopPostsThisWeek(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
-    );
-
-    // ---------------------- Recently viewed posts ----------------------
-    @Operation(
-            summary = "Get recently viewed posts",
-            description = "Retrieves the list of posts the user has recently viewed. "
-                    + "If logged in, views are fetched from Redis. "
-                    + "If not logged in, postIds must be passed via query parameters.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Recently viewed posts fetched successfully")
-            }
-    )
-    @GetMapping("/recent")
-    ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentlyViewedPosts(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(required = false) List<Long> localIds
-    );
-
-    // ---------------------- Toggle hide/unhide a post ----------------------
-    @Operation(
-            summary = "Toggle hide/unhide a post",
-            description = "Hides the given post for the current user. If the post is already hidden, it will be unhidden.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Post hidden/unhidden successfully"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized - user not logged in"),
-                    @ApiResponse(responseCode = "404", description = "Post not found")
-            }
-    )
-    @PostMapping("/{postId}/hide-toggle")
-    ResponseEntity<CommonResponse<Void>> toggleHidePost(
-            @Parameter(description = "ID of the post to hide/unhide", required = true)
-            @PathVariable Long postId,
-
-            @Parameter(hidden = true)
-            @AuthenticationPrincipal UserDetails userDetails
-    );
-
 }
