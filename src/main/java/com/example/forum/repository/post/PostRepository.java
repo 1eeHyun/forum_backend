@@ -318,6 +318,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     )
     List<Post> findCommunityPostsByCategoryTopLiked(@Param("communityId") Long communityId, @Param("categoryName") String categoryName, Pageable pageable);
 
-
-
+    @Query(
+        """
+            SELECT p FROM Post p
+            WHERE p.createdAt >= :from
+            ORDER BY SIZE(p.comments) DESC
+        """
+    )
+    Page<Post> findTrendingPosts(@Param("from") LocalDateTime from, Pageable pageable);
 }

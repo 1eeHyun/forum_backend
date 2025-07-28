@@ -33,4 +33,7 @@ public interface PostService {
 
     // Get IDs of posts hidden by the user (for filtering)
     List<Long> getHiddenPostIds(String username);
+
+    // Trending posts
+    List<PostResponseDTO> getTrendingPosts(String username);
 }

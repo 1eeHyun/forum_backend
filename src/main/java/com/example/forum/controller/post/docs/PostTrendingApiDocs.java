@@ -2,6 +2,7 @@ package com.example.forum.controller.post.docs;
 
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.post.PostPreviewDTO;
+import com.example.forum.dto.post.PostResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -40,7 +41,7 @@ public interface PostTrendingApiDocs {
             }
     )
     @GetMapping("/trending")
-    ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTrendingPosts(
+    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getTrendingPosts(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
     );
 
