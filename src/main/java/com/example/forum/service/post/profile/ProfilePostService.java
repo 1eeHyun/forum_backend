@@ -13,9 +13,4 @@ public interface ProfilePostService {
             SortOrder sort,
             int page,
             int size);
-
-
-
-
-
 }

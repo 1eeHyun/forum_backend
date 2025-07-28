@@ -1,7 +1,10 @@
 package com.example.forum.service.post;
 
 import com.example.forum.common.SortOrder;
-import com.example.forum.dto.post.*;
+import com.example.forum.dto.post.PostDetailDTO;
+import com.example.forum.dto.post.PostFileDTO;
+import com.example.forum.dto.post.PostRequestDTO;
+import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Category;
 import com.example.forum.model.post.HiddenPost;
@@ -20,14 +23,13 @@ import com.example.forum.validator.community.CommunityValidator;
 import com.example.forum.validator.post.PostValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -159,72 +161,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public String uploadFile(MultipartFile file) {
-        return s3Service.upload(file);
-    }
-
-    @Override
-    public List<PostPreviewDTO> getTopPostsThisWeek(String username) {
-
-        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
-
-        List<Post> posts = postRepository.findTopPostsSince(oneWeekAgo, PageRequest.of(0, 5));
-        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
-
-        return posts.stream()
-                .map(post -> PostMapper.toPreviewDTO(post, hiddenPostIds.contains(post.getId())))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<PostPreviewDTO> getRecentlyViewedPosts(String username) {
-
-        User user = authValidator.validateUserByUsername(username);
-        Long userId = user.getId();
-
-        // Retrieve postId list from Redis post
-        List<Long> ids = recentViewService.getRecentPostIds(userId);
-        if (ids.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // Retrieve posts from DB
-        List<Post> posts = postRepository.findAllById(ids);
-
-        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
-
-        // postId → Post Mapping
-        Map<Long, Post> postMap = posts.stream()
-                .collect(Collectors.toMap(Post::getId, p -> p));
-
-        // Convert to DTO
-        return ids.stream()
-                .map(postMap::get)
-                .filter(Objects::nonNull)
-                .map(post -> PostMapper.toPreviewDTO(post, hiddenPostIds.contains(post.getId())))
-                .toList();
-    }
-
-    @Override
-    public List<PostPreviewDTO> getPreviewPostsByIds(List<Long> ids, String username) {
-
-        if (ids == null || ids.isEmpty())
-            return Collections.emptyList();
-
-        List<Post> posts = postRepository.findAllById(ids);
-        Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
-
-        Map<Long, Post> map = posts.stream()
-                .collect(Collectors.toMap(Post::getId, p -> p));
-
-        return ids.stream()
-                .map(map::get)
-                .filter(Objects::nonNull)
-                .map(post -> PostMapper.toPreviewDTO(post, hiddenPostIds.contains(post.getId())))
-                .toList();
-    }
-
-    @Override
     public void toggleHidePost(Long postId, String username) {
 
         User user = authValidator.validateUserByUsername(username);
@@ -246,23 +182,6 @@ public class PostServiceImpl implements PostService {
         User user = authValidator.validateUserByUsername(username);
         return hiddenPostRepository.findHiddenPostIdsByUser(user);
     }
-
-    @Override
-    public List<PostResponseDTO> getTrendingPosts(String username) {
-
-        LocalDateTime from = LocalDateTime.now().minusDays(1);
-        List<Post> posts = postRepository.findTrendingPosts(from, PageRequest.of(0, 20)).getContent();
-
-        Set<Long> hiddenPostIds = username != null
-                ? hiddenPostService.getHiddenPostIdsByUsername(username)
-                : Collections.emptySet();
-
-        return posts.stream()
-                .filter(post -> !hiddenPostIds.contains(post.getId()))
-                .map(post -> PostMapper.toPostResponseDTO(post, false))
-                .toList();
-    }
-
 
     // ------------------------------ Helper methods -------------------------------------
     private Category getValidCategoryIfNeeded(PostRequestDTO dto) {

@@ -4,8 +4,8 @@ import com.example.forum.controller.post.docs.PostTrendingApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostResponseDTO;
-import com.example.forum.service.post.PostService;
 import com.example.forum.service.post.community.CommunityPostService;
+import com.example.forum.service.post.trending.TrendingPostService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ public class PostTrendingController implements PostTrendingApiDocs {
 
     private final AuthValidator authValidator;
     private final CommunityPostService communityPostService;
-    private final PostService postService;
+    private final TrendingPostService trendingPostService;
 
     @Override
     public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentPostsFromMyCommunities(
@@ -42,7 +42,7 @@ public class PostTrendingController implements PostTrendingApiDocs {
 
         String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
 
-        List<PostPreviewDTO> response = postService.getTopPostsThisWeek(username);
+        List<PostPreviewDTO> response = trendingPostService.getTopPostsThisWeek(username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -51,7 +51,7 @@ public class PostTrendingController implements PostTrendingApiDocs {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
-        List<PostResponseDTO> response = postService.getTrendingPosts(username);
+        List<PostResponseDTO> response = trendingPostService.getTrendingPosts(username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

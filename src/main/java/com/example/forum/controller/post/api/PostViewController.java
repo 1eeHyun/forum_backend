@@ -3,7 +3,7 @@ package com.example.forum.controller.post.api;
 import com.example.forum.controller.post.docs.PostViewApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.post.PostPreviewDTO;
-import com.example.forum.service.post.PostService;
+import com.example.forum.service.post.view.ViewedPostService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ import java.util.List;
 public class PostViewController implements PostViewApiDocs {
 
     private final AuthValidator authValidator;
-    private final PostService postService;
+    private final ViewedPostService viewedPostService;
 
     @Override
     public ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getRecentlyViewedPosts(
@@ -31,13 +31,13 @@ public class PostViewController implements PostViewApiDocs {
 
         if (userDetails != null) {
             String username = authValidator.extractUsername(userDetails);
-            List<PostPreviewDTO> response = postService.getRecentlyViewedPosts(username);
+            List<PostPreviewDTO> response = viewedPostService.getRecentlyViewedPosts(username);
 
             return ResponseEntity.ok(CommonResponse.success(response));
         }
 
         if (localIds != null && !localIds.isEmpty()) {
-            List<PostPreviewDTO> response = postService.getPreviewPostsByIds(localIds, null);
+            List<PostPreviewDTO> response = viewedPostService.getPreviewPostsByIds(localIds, null);
 
             return ResponseEntity.ok(CommonResponse.success(response));
         }
