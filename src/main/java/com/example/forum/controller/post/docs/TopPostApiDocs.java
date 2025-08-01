@@ -2,7 +2,6 @@ package com.example.forum.controller.post.docs;
 
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.post.PostPreviewDTO;
-import com.example.forum.dto.post.PostResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,8 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
-@Tag(name = "Post Trending", description = "Trending / Top posts")
-public interface PostTrendingApiDocs {
+@Tag(name = "Top post related API", description = "Top posts")
+public interface TopPostApiDocs {
 
     @Operation(
             summary = "Get top posts this week",
@@ -29,19 +28,6 @@ public interface PostTrendingApiDocs {
     )
     @GetMapping("/top-weekly")
     ResponseEntity<CommonResponse<List<PostPreviewDTO>>> getTopPostsThisWeek(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
-    );
-
-    @Operation(
-            summary = "Get trending posts",
-            description = "Retrieves posts ordered by trending score (likes, comments, views) within the past day.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Trending posts fetched successfully"),
-                    @ApiResponse(responseCode = "400", description = "Bad request")
-            }
-    )
-    @GetMapping("/trending")
-    ResponseEntity<CommonResponse<List<PostResponseDTO>>> getTrendingPosts(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
     );
 

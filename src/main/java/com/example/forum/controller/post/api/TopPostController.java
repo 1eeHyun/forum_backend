@@ -1,9 +1,8 @@
 package com.example.forum.controller.post.api;
 
-import com.example.forum.controller.post.docs.PostTrendingApiDocs;
+import com.example.forum.controller.post.docs.TopPostApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.post.PostPreviewDTO;
-import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.service.post.PostService;
 import com.example.forum.service.post.community.CommunityPostService;
 import com.example.forum.validator.auth.AuthValidator;
@@ -19,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
-public class PostTrendingController implements PostTrendingApiDocs {
+public class TopPostController implements TopPostApiDocs {
 
     private final AuthValidator authValidator;
     private final CommunityPostService communityPostService;
@@ -43,15 +42,6 @@ public class PostTrendingController implements PostTrendingApiDocs {
         String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
 
         List<PostPreviewDTO> response = postService.getTopPostsThisWeek(username);
-        return ResponseEntity.ok(CommonResponse.success(response));
-    }
-
-    @Override
-    public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getTrendingPosts(
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        String username = authValidator.extractUsername(userDetails);
-        List<PostResponseDTO> response = postService.getTrendingPosts(username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

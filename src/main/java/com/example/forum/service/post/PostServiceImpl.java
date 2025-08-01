@@ -247,23 +247,6 @@ public class PostServiceImpl implements PostService {
         return hiddenPostRepository.findHiddenPostIdsByUser(user);
     }
 
-    @Override
-    public List<PostResponseDTO> getTrendingPosts(String username) {
-
-        LocalDateTime from = LocalDateTime.now().minusDays(1);
-        List<Post> posts = postRepository.findTrendingPosts(from, PageRequest.of(0, 20)).getContent();
-
-        Set<Long> hiddenPostIds = username != null
-                ? hiddenPostService.getHiddenPostIdsByUsername(username)
-                : Collections.emptySet();
-
-        return posts.stream()
-                .filter(post -> !hiddenPostIds.contains(post.getId()))
-                .map(post -> PostMapper.toPostResponseDTO(post, false))
-                .toList();
-    }
-
-
     // ------------------------------ Helper methods -------------------------------------
     private Category getValidCategoryIfNeeded(PostRequestDTO dto) {
 
