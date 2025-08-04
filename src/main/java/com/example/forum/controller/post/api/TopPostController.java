@@ -3,11 +3,6 @@ package com.example.forum.controller.post.api;
 import com.example.forum.controller.post.docs.TopPostApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.post.PostPreviewDTO;
-<<<<<<< HEAD:src/main/java/com/example/forum/controller/post/api/PostTrendingController.java
-import com.example.forum.dto.post.PostResponseDTO;
-=======
-import com.example.forum.service.post.PostService;
->>>>>>> f54d5da9bb04b87072a4f7697d5e1c2edbac7be3:src/main/java/com/example/forum/controller/post/api/TopPostController.java
 import com.example.forum.service.post.community.CommunityPostService;
 import com.example.forum.service.post.trending.TrendingPostService;
 import com.example.forum.validator.auth.AuthValidator;
