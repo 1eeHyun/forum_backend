@@ -30,7 +30,7 @@ public class TrendingServiceImpl implements TrendingService {
     @Override
     public List<PostResponseDTO> getTrendingPosts(String username) {
 
-        LocalDateTime from = LocalDateTime.now().minusDays(7);
+        LocalDateTime from = LocalDateTime.now().minusMonths(1);
         List<Post> posts = postRepository.findTrendingPosts(from, PageRequest.of(0, 20)).getContent();
 
         Set<Long> hiddenPostIds = username != null
