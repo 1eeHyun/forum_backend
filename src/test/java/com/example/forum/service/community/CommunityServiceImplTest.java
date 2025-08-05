@@ -4,19 +4,18 @@ import com.example.forum.dto.community.CommunityDetailDTO;
 import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
 import com.example.forum.model.community.Community;
+import com.example.forum.model.community.CommunityFavorite;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.community.CommunityRole;
 import com.example.forum.model.user.User;
-import com.example.forum.repository.community.CategoryRepository;
+import com.example.forum.repository.community.CommunityFavoriteRepository;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.community.CommunityRepository;
-import com.example.forum.repository.community.CommunityRuleRepository;
-import com.example.forum.service.auth.RedisService;
 import com.example.forum.validator.auth.AuthValidator;
-import com.example.forum.validator.community.CommunityRuleValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,9 +26,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CommunityServiceImplTest {
@@ -39,12 +40,9 @@ class CommunityServiceImplTest {
 
     @Mock private AuthValidator authValidator;
     @Mock private CommunityValidator communityValidator;
-    @Mock private CommunityRuleValidator communityRuleValidator;
     @Mock private CommunityRepository communityRepository;
     @Mock private CommunityMemberRepository communityMemberRepository;
-    @Mock private CategoryRepository categoryRepository;
-    @Mock private CommunityRuleRepository communityRuleRepository;
-    @Mock private RedisService redisService;
+    @Mock private CommunityFavoriteRepository communityFavoriteRepository;
 
     private User user;
     private Community community;
@@ -60,9 +58,9 @@ class CommunityServiceImplTest {
     void create_success() {
         // given
         CommunityRequestDTO dto = new CommunityRequestDTO("test-name", "desc");
-        User creator = User.builder().id(100L).username("testuser").build();
+        User creator = User.builder().id(100L).username("tester").build();
 
-        when(authValidator.validateUserByUsername("testuser")).thenReturn(creator);
+        when(authValidator.validateUserByUsername("tester")).thenReturn(creator);
         when(communityRepository.save(any(Community.class))).thenAnswer(invocation -> {
             Community c = invocation.getArgument(0);
             c.setId(1L);
@@ -71,7 +69,7 @@ class CommunityServiceImplTest {
         when(communityMemberRepository.save(any(CommunityMember.class))).thenReturn(null); // or any stub
 
         // when
-        Long communityId = communityService.create(dto, "testuser");
+        Long communityId = communityService.create(dto, "tester");
 
         // then
         assertNotNull(communityId);
@@ -135,5 +133,67 @@ class CommunityServiceImplTest {
         when(authValidator.validateUserByUsername("invalid")).thenThrow(new RuntimeException("Invalid user"));
 
         assertThrows(RuntimeException.class, () -> communityService.create(dto, "invalid"));
+    }
+
+    @Nested
+    @DisplayName("toggleFavorite")
+    class ToggleFavoriteTest {
+
+        @Test
+        @DisplayName("Should remove favorite if it already exists")
+        void shouldRemoveFavoriteIfExists() {
+            // given
+            CommunityFavorite favorite = CommunityFavorite.builder().user(user).community(community).build();
+
+            given(authValidator.validateUserByUsername("tester")).willReturn(user);
+            given(communityValidator.validateExistingCommunity(10L)).willReturn(community);
+            given(communityFavoriteRepository.findByUserAndCommunity(user, community)).willReturn(Optional.of(favorite));
+
+            // when
+            communityService.toggleFavorite("tester", 10L);
+
+            // then
+            verify(communityFavoriteRepository).delete(favorite);
+            verify(communityFavoriteRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should add favorite if it does not exist")
+        void shouldAddFavoriteIfNotExists() {
+            // given
+            given(authValidator.validateUserByUsername("tester")).willReturn(user);
+            given(communityValidator.validateExistingCommunity(10L)).willReturn(community);
+            given(communityFavoriteRepository.findByUserAndCommunity(user, community)).willReturn(Optional.empty());
+
+            // when
+            communityService.toggleFavorite("tester", 10L);
+
+            // then
+            verify(communityFavoriteRepository).save(any(CommunityFavorite.class));
+            verify(communityFavoriteRepository, never()).delete(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("getFavoriteCommunities")
+    class GetFavoriteCommunitiesTest {
+
+        @Test
+        @DisplayName("Should return list of favorite communities for user")
+        void shouldReturnFavoriteCommunities() {
+            // given
+            CommunityFavorite favorite = CommunityFavorite.builder().user(user).community(community).build();
+            List<CommunityFavorite> favorites = List.of(favorite);
+
+            given(authValidator.validateUserByUsername("tester")).willReturn(user);
+            given(communityFavoriteRepository.findAllByUser(user)).willReturn(favorites);
+
+            // when
+            List<CommunityPreviewDTO> result = communityService.getFavoriteCommunities("tester");
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getName()).isEqualTo("devs");
+        }
     }
 }

@@ -13,4 +13,7 @@ public interface CommunityService {
     List<CommunityPreviewDTO> getMyCommunities(String username);
 
     List<CommunityPreviewDTO> getJoinedCommunities(String target);
+
+    void toggleFavorite(String username, Long id);
+    List<CommunityPreviewDTO> getFavoriteCommunities(String username);
 }

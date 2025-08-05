@@ -122,4 +122,25 @@ public class CommunityController implements CommunityApiDocs {
 
         return ResponseEntity.ok(CommonResponse.success());
     }
+
+    @Override
+    public ResponseEntity<CommonResponse<Void>> toggleFavoriteCommunity(
+            @PathVariable Long communityId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = authValidator.extractUsername(userDetails);
+
+        communityService.toggleFavorite(username, communityId);
+        return ResponseEntity.ok(CommonResponse.success());
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<List<CommunityPreviewDTO>>> getFavoriteCommunities(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String username = authValidator.extractUsername(userDetails);
+
+        List<CommunityPreviewDTO> response = communityService.getFavoriteCommunities(username);
+        return ResponseEntity.ok(CommonResponse.success(response));
+    }
 }

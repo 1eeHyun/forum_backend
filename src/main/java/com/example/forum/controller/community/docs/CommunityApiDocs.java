@@ -238,4 +238,48 @@ public interface CommunityApiDocs {
             @Parameter(description = "Banner image file", required = true)
             @RequestParam MultipartFile image
     );
+
+    @Operation(
+            summary = "Toggle favorite status for a community",
+            description = "Toggles the favorite status for the specified community. If the user has already favorited it, the community will be unfavorited. Otherwise, it will be added to favorites.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully toggled favorite status"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "404", description = "Community not found")
+            }
+    )
+    @PostMapping("/{communityId}/favorite-toggle")
+    ResponseEntity<CommonResponse<Void>> toggleFavoriteCommunity(
+            @Parameter(description = "ID of the community to toggle favorite", required = true)
+            @PathVariable Long communityId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
+    );
+
+    @Operation(
+            summary = "Get user's favorite communities",
+            description = "Retrieves a list of communities the currently logged-in user has marked as favorite.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Successfully retrieved favorite communities",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = CommunityPreviewDTO.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized - user not logged in",
+                            content = @Content
+                    )
+            }
+    )
+    @GetMapping("/me/favorite-communities")
+    ResponseEntity<CommonResponse<List<CommunityPreviewDTO>>> getFavoriteCommunities(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
+    );
+
 }

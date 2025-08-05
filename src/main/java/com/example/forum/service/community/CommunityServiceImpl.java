@@ -5,9 +5,11 @@ import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.community.CommunityRequestDTO;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.model.community.Community;
+import com.example.forum.model.community.CommunityFavorite;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.community.CommunityRole;
 import com.example.forum.model.user.User;
+import com.example.forum.repository.community.CommunityFavoriteRepository;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.community.CommunityRepository;
 import com.example.forum.service.auth.RedisService;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,7 @@ public class CommunityServiceImpl implements CommunityService {
     // Repositories
     private final CommunityRepository communityRepository;
     private final CommunityMemberRepository communityMemberRepository;
+    private final CommunityFavoriteRepository communityFavoriteRepository;
 
     // Services
     private final RedisService redisService;
@@ -115,6 +119,37 @@ public class CommunityServiceImpl implements CommunityService {
         return joinedMemberships.stream()
                 .map(CommunityMember::getCommunity)
                 .map(CommunityMapper::toPreviewDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void toggleFavorite(String username, Long id) {
+
+        User user = authValidator.validateUserByUsername(username);
+        Community community = communityValidator.validateExistingCommunity(id);
+
+        Optional<CommunityFavorite> favoriteOpt = communityFavoriteRepository.findByUserAndCommunity(user, community);
+
+        if (favoriteOpt.isPresent()) {
+            communityFavoriteRepository.delete(favoriteOpt.get());
+        } else {
+            CommunityFavorite favorite = CommunityFavorite.builder()
+                    .user(user)
+                    .community(community)
+                    .build();
+            communityFavoriteRepository.save(favorite);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommunityPreviewDTO> getFavoriteCommunities(String username) {
+
+        User user = authValidator.validateUserByUsername(username);
+
+        return communityFavoriteRepository.findAllByUser(user).stream()
+                .map(favorite -> CommunityMapper.toPreviewDTO(favorite.getCommunity()))
                 .toList();
     }
 
