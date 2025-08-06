@@ -1,16 +1,14 @@
 package com.example.forum.exception.auth;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import com.example.forum.exception.CustomException;
 
-@ResponseStatus(HttpStatus.FORBIDDEN)
-public class ForbiddenException extends RuntimeException {
+public class ForbiddenException extends CustomException {
 
     public ForbiddenException() {
-        super("You are not authorized to do this action.");
+        super("You are not authorized to do this action.", 403);
     }
 
     public ForbiddenException(String message) {
-        super(message);
+        super(message, 403);
     }
 }
