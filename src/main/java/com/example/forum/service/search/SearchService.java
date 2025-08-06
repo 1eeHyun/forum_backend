@@ -12,5 +12,5 @@ public interface SearchService {
     SearchResponseDTO searchAll(String keyword, String username);
     List<ProfilePreviewDTO> searchUsers(String keyword);
     List<PostPreviewDTO> searchPosts(String keyword, String username);
-    List<CommunityPreviewDTO> searchCommunities(String keyword);
+    List<CommunityPreviewDTO> searchCommunities(String keyword, String username);
 }

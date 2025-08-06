@@ -11,4 +11,5 @@ public class CommunityPreviewDTO {
     private Long id;
     private String name;
     private ImageDTO imageDTO;
+    private boolean isFavorite;
 }

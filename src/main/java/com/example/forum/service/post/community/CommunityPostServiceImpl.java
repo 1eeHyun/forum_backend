@@ -9,9 +9,11 @@ import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
+import com.example.forum.repository.community.CommunityFavoriteRepository;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.post.hidden.HiddenPostService;
+import com.example.forum.helper.community.CommunityHelper;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import lombok.RequiredArgsConstructor;
@@ -36,10 +38,14 @@ public class CommunityPostServiceImpl implements CommunityPostService {
 
     // Repositories
     private final CommunityMemberRepository communityMemberRepository;
+    private final CommunityFavoriteRepository communityFavoriteRepository;
     private final PostRepository postRepository;
 
     // Services
     private final HiddenPostService hiddenPostService;
+
+    // Helper
+    private final CommunityHelper communityHelper;
 
     @Override
     public List<PostPreviewDTO> getRecentPostsFromJoinedCommunities(String username) {
@@ -88,9 +94,10 @@ public class CommunityPostServiceImpl implements CommunityPostService {
         }
 
         Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
+        Set<Long> favoriteCommunityIds = communityHelper.getFavoriteCommunityIdsByUsername(username);
 
         return posts.stream()
-                .map(post -> PostMapper.toPostResponseDTO(post, hiddenPostIds.contains(post.getId())))
+                .map(post -> PostMapper.toPostResponseDTOWithFlags(post, hiddenPostIds, favoriteCommunityIds))
                 .toList();
     }
 
@@ -104,9 +111,10 @@ public class CommunityPostServiceImpl implements CommunityPostService {
         );
 
         Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
+        Set<Long> favoriteCommunityIds = communityHelper.getFavoriteCommunityIdsByUsername(username);
 
         return topPosts.stream()
-                .map(post -> PostMapper.toPostResponseDTO(post, hiddenPostIds.contains(post.getId())))
+                .map(post -> PostMapper.toPostResponseDTOWithFlags(post, hiddenPostIds, favoriteCommunityIds))
                 .collect(Collectors.toList());
     }
 
@@ -119,6 +127,7 @@ public class CommunityPostServiceImpl implements CommunityPostService {
 
         Map<String, List<PostResponseDTO>> result = new HashMap<>();
         Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
+        Set<Long> favoriteCommunityIds = communityHelper.getFavoriteCommunityIdsByUsername(username);
 
         for (Category category : categories) {
 
@@ -127,7 +136,7 @@ public class CommunityPostServiceImpl implements CommunityPostService {
             );
 
             List<PostResponseDTO> dtoList = posts.stream()
-                    .map(post -> PostMapper.toPostResponseDTO(post, hiddenPostIds.contains(post.getId())))
+                    .map(post -> PostMapper.toPostResponseDTOWithFlags(post, hiddenPostIds, favoriteCommunityIds))
                     .toList();
 
             if (!dtoList.isEmpty()) {

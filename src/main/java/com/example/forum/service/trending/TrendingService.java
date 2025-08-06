@@ -8,5 +8,5 @@ import java.util.List;
 public interface TrendingService {
 
     List<PostResponseDTO> getTrendingPosts(String username);
-    TrendingSidebarDTO getTrendingSidebarData();
+    TrendingSidebarDTO getTrendingSidebarData(String username);
 }

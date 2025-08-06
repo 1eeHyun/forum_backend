@@ -58,9 +58,12 @@ public class SearchController implements SearchApiDocs {
 
     @Override
     public ResponseEntity<CommonResponse<List<CommunityPreviewDTO>>> searchCommunities(
-            @RequestParam("keyword") String keyword) {
+            @RequestParam("keyword") String keyword,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        List<CommunityPreviewDTO> response = searchService.searchCommunities(keyword);
+        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
+
+        List<CommunityPreviewDTO> response = searchService.searchCommunities(keyword, username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

@@ -12,7 +12,7 @@ public interface CommunityService {
     Long create(CommunityRequestDTO dto, String username);
     List<CommunityPreviewDTO> getMyCommunities(String username);
 
-    List<CommunityPreviewDTO> getJoinedCommunities(String target);
+    List<CommunityPreviewDTO> getJoinedCommunities(String target, String currentUsername);
 
     void toggleFavorite(String username, Long id);
     List<CommunityPreviewDTO> getFavoriteCommunities(String username);

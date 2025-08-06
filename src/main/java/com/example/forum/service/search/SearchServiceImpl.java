@@ -4,6 +4,7 @@ import com.example.forum.dto.community.CommunityPreviewDTO;
 import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.profile.ProfilePreviewDTO;
 import com.example.forum.dto.search.SearchResponseDTO;
+import com.example.forum.helper.community.CommunityHelper;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.mapper.profile.ProfileMapper;
@@ -32,11 +33,14 @@ public class SearchServiceImpl implements SearchService {
     // Services
     private final HiddenPostService hiddenPostService;
 
+    // Helper
+    private final CommunityHelper communityHelper;
+
     @Override
     public SearchResponseDTO searchAll(String keyword, String username) {
 
         List<PostPreviewDTO> posts = searchPosts(keyword, username);
-        List<CommunityPreviewDTO> communities = searchCommunities(keyword);
+        List<CommunityPreviewDTO> communities = searchCommunities(keyword, username);
         List<ProfilePreviewDTO> users = searchUsers(keyword);
 
         return SearchResponseDTO.builder()
@@ -68,12 +72,17 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public List<CommunityPreviewDTO> searchCommunities(String keyword) {
+    public List<CommunityPreviewDTO> searchCommunities(String keyword, String username) {
 
         List<Community> communities = communityRepository.findTop5ByNameContainingIgnoreCase(keyword);
 
+        Set<Long> favoriteCommunityIds = communityHelper.getFavoriteCommunityIdsByUsername(username); // ✅ 추가
+
         return communities.stream()
-                .map(CommunityMapper::toPreviewDTO)
+                .map(community -> CommunityMapper.toPreviewDTO(
+                        community,
+                        favoriteCommunityIds.contains(community.getId())
+                ))
                 .toList();
     }
 }

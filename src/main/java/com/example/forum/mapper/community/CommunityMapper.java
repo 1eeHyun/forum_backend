@@ -51,7 +51,7 @@ public class CommunityMapper {
                 .build();
     }
 
-    public static CommunityPreviewDTO toPreviewDTO(Community community) {
+    public static CommunityPreviewDTO toPreviewDTO(Community community, boolean isFavorite) {
 
         if (community == null) return null;
 
@@ -63,6 +63,7 @@ public class CommunityMapper {
                         .imagePositionX(community.getProfileImagePositionX())
                         .imagePositionY(community.getProfileImagePositionY())
                         .build())
+                .isFavorite(isFavorite)
                 .build();
 
     }
