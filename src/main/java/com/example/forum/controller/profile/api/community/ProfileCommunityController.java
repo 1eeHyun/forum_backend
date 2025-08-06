@@ -28,9 +28,9 @@ public class ProfileCommunityController implements ProfileCommunityApiDocs {
             @PathVariable String username,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        authValidator.extractUsername(userDetails);
+        String currentUsername = (userDetails != null) ? authValidator.extractUsername(userDetails) : null;
 
-        List<CommunityPreviewDTO> response = communityService.getJoinedCommunities(username);
+        List<CommunityPreviewDTO> response = communityService.getJoinedCommunities(username, currentUsername);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

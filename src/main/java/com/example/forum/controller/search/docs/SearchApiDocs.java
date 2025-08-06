@@ -102,6 +102,8 @@ public interface SearchApiDocs {
     @GetMapping("/communities")
     ResponseEntity<CommonResponse<List<CommunityPreviewDTO>>> searchCommunities(
             @Parameter(description = "Community keyword", required = true)
-            @RequestParam("keyword") String keyword
+            @RequestParam("keyword") String keyword,
+
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
     );
 }

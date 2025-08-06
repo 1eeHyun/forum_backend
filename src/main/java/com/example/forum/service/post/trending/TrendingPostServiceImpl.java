@@ -3,9 +3,13 @@ package com.example.forum.service.post.trending;
 import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.post.PostMapper;
+import com.example.forum.model.community.Community;
 import com.example.forum.model.post.Post;
+import com.example.forum.model.user.User;
+import com.example.forum.repository.community.CommunityFavoriteRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.post.hidden.HiddenPostService;
+import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,8 @@ public class TrendingPostServiceImpl implements TrendingPostService {
 
     private final PostRepository postRepository;
     private final HiddenPostService hiddenPostService;
+    private final CommunityFavoriteRepository communityFavoriteRepository;
+    private final AuthValidator authValidator;
 
     @Override
     public List<PostResponseDTO> getTrendingPosts(String username) {
@@ -33,9 +39,25 @@ public class TrendingPostServiceImpl implements TrendingPostService {
                 ? hiddenPostService.getHiddenPostIdsByUsername(username)
                 : Collections.emptySet();
 
+        Set<Long> favoriteCommunityIds;
+        if (username != null) {
+            User user = authValidator.validateUserByUsername(username);
+            favoriteCommunityIds = communityFavoriteRepository.findAllByUser(user).stream()
+                    .map(fav -> fav.getCommunity().getId())
+                    .collect(Collectors.toSet());
+        } else {
+            favoriteCommunityIds = Set.of(); // or Collections.emptySet()
+        }
+
         return posts.stream()
                 .filter(post -> !hiddenPostIds.contains(post.getId()))
-                .map(post -> PostMapper.toPostResponseDTO(post, false))
+                .map(post -> {
+                    Community community = post.getCategory() != null
+                            ? post.getCategory().getCommunity()
+                            : null;
+                    boolean isFavorite = (community != null) && favoriteCommunityIds.contains(community.getId());
+                    return PostMapper.toPostResponseDTO(post, false, isFavorite);
+                })
                 .toList();
     }
 

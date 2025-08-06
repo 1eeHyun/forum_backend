@@ -2,6 +2,7 @@ package com.example.forum.service.trending;
 
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.dto.trend.TrendingSidebarDTO;
+import com.example.forum.helper.community.CommunityHelper;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Community;
@@ -27,6 +28,8 @@ public class TrendingServiceImpl implements TrendingService {
 
     private final CommunityRepository communityRepository;
 
+    private final CommunityHelper communityHelper;
+
     @Override
     public List<PostResponseDTO> getTrendingPosts(String username) {
 
@@ -37,22 +40,32 @@ public class TrendingServiceImpl implements TrendingService {
                 ? hiddenPostService.getHiddenPostIdsByUsername(username)
                 : Collections.emptySet();
 
+        Set<Long> favoriteCommunityIds = username != null
+                ? communityHelper.getFavoriteCommunityIdsByUsername(username)
+                : Collections.emptySet();
+
+
         return posts.stream()
                 .filter(post -> !hiddenPostIds.contains(post.getId()))
-                .map(post -> PostMapper.toPostResponseDTO(post, false))
+                .map(post -> PostMapper.toPostResponseDTOWithFlags(post, hiddenPostIds, favoriteCommunityIds))
                 .toList();
     }
 
     @Override
-    public TrendingSidebarDTO getTrendingSidebarData() {
+    public TrendingSidebarDTO getTrendingSidebarData(String username) {
 
         LocalDateTime from = LocalDateTime.now().minusMonths(1);
         List<Community> topCommunities = communityRepository.findTrendingCommunities(from, PageRequest.of(0, 5));
 
+        Set<Long> favoriteCommunityIds = communityHelper.getFavoriteCommunityIdsByUsername(username);
+
         return TrendingSidebarDTO.builder()
                 .trendingCommunities(
                         topCommunities.stream()
-                                .map(CommunityMapper::toPreviewDTO)
+                                .map(community -> CommunityMapper.toPreviewDTO(
+                                        community,
+                                        favoriteCommunityIds.contains(community.getId())
+                                ))
                                 .toList()
                 )
                 .build();

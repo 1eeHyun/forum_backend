@@ -9,18 +9,22 @@ import com.example.forum.mapper.comment.CommentMapper;
 import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.image.ImageMapper;
 import com.example.forum.mapper.user.UserMapper;
+import com.example.forum.model.community.Community;
 import com.example.forum.model.like.PostLike;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostFile;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
+import com.example.forum.util.CommunityUtils;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.example.forum.common.TimeUtils.formatTimeAgo;
 
 public class PostMapper {
-    public static PostResponseDTO toPostResponseDTO(Post post, boolean isHidden) {
+
+    public static PostResponseDTO toPostResponseDTO(Post post, boolean isHidden, boolean isFavoriteCommunity) {
         return PostResponseDTO.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -28,7 +32,7 @@ public class PostMapper {
                 .author(UserMapper.toDtoWithEmail(post.getAuthor()))
                 .community(
                         post.getCategory() != null
-                                ? CommunityMapper.toPreviewDTO(post.getCategory().getCommunity())
+                                ? CommunityMapper.toPreviewDTO(post.getCategory().getCommunity(), isFavoriteCommunity)
                                 : null
                 )
                 .fileUrls(post.getFiles() != null
@@ -42,7 +46,7 @@ public class PostMapper {
                 .build();
     }
 
-    public static PostDetailDTO toPostDetailDTO(Post post, User viewer, boolean isHidden) {
+    public static PostDetailDTO toPostDetailDTO(Post post, User viewer, boolean isHidden, boolean isFavoriteCommunity) {
         return PostDetailDTO.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -53,7 +57,7 @@ public class PostMapper {
 
                 .community(
                         post.getCategory() != null
-                                ? CommunityMapper.toPreviewDTO(post.getCategory().getCommunity())
+                                ? CommunityMapper.toPreviewDTO(post.getCategory().getCommunity(), isFavoriteCommunity)
                                 : null
                 )
 
@@ -145,5 +149,17 @@ public class PostMapper {
                         .type(file.getType())
                         .build())
                 .toList();
+    }
+
+    public static PostResponseDTO toPostResponseDTOWithFlags(Post post, Set<Long> hiddenPostIds, Set<Long> favoriteCommunityIds) {
+        boolean isHidden = hiddenPostIds.contains(post.getId());
+
+        Community community = post.getCategory() != null
+                ? post.getCategory().getCommunity()
+                : null;
+
+        boolean isFavorite = CommunityUtils.isFavorite(community, favoriteCommunityIds);
+
+        return toPostResponseDTO(post, isHidden, isFavorite);
     }
 }

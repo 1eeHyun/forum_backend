@@ -13,10 +13,7 @@ import java.util.Optional;
 public interface CommunityFavoriteRepository extends JpaRepository<CommunityFavorite, Long> {
 
     Optional<CommunityFavorite> findByUserAndCommunity(User user, Community community);
-
     List<CommunityFavorite> findAllByUser(User user);
-
     boolean existsByUserAndCommunity(User user, Community community);
-
     void deleteByUserAndCommunity(User user, Community community);
 }

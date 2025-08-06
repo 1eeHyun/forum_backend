@@ -12,7 +12,6 @@ import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityFavoriteRepository;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.community.CommunityRepository;
-import com.example.forum.service.auth.RedisService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class CommunityServiceImpl implements CommunityService {
     private final CommunityFavoriteRepository communityFavoriteRepository;
 
     // Services
-    private final RedisService redisService;
+//    private final RedisService redisService;
 
     // Default values
     @Value("${app.default-community-image}")
@@ -101,24 +102,37 @@ public class CommunityServiceImpl implements CommunityService {
         User user = authValidator.validateUserByUsername(username);
         List<CommunityMember> memberships = communityMemberRepository.findByUser(user);
 
+        Set<Long> favoriteCommunityIds = communityFavoriteRepository.findAllByUser(user).stream()
+                .map(fav -> fav.getCommunity().getId())
+                .collect(Collectors.toSet());
+
         return memberships.stream()
                 .map(m -> {
                     Community c = m.getCommunity();
-                    return CommunityMapper.toPreviewDTO(c);
+                    boolean isFavorite = favoriteCommunityIds.contains(c.getId());
+                    return CommunityMapper.toPreviewDTO(c, isFavorite);
                 })
                 .toList();
     }
 
     @Override
-    public List<CommunityPreviewDTO> getJoinedCommunities(String target) {
+    public List<CommunityPreviewDTO> getJoinedCommunities(String target, String currentUsername) {
 
-        User user = authValidator.validateUserByUsername(target);
+        User targetUser = authValidator.validateUserByUsername(target);
+        User currentUser = authValidator.validateUserByUsername(currentUsername);
 
-        List<CommunityMember> joinedMemberships = communityMemberRepository.findByUser(user);
+        Set<Long> favoriteCommunityIds = communityFavoriteRepository.findAllByUser(currentUser).stream()
+                .map(fav -> fav.getCommunity().getId())
+                .collect(Collectors.toSet());
+
+        List<CommunityMember> joinedMemberships = communityMemberRepository.findByUser(targetUser);
 
         return joinedMemberships.stream()
                 .map(CommunityMember::getCommunity)
-                .map(CommunityMapper::toPreviewDTO)
+                .map(community -> CommunityMapper.toPreviewDTO(
+                        community,
+                        favoriteCommunityIds.contains(community.getId())
+                ))
                 .toList();
     }
 
@@ -149,7 +163,7 @@ public class CommunityServiceImpl implements CommunityService {
         User user = authValidator.validateUserByUsername(username);
 
         return communityFavoriteRepository.findAllByUser(user).stream()
-                .map(favorite -> CommunityMapper.toPreviewDTO(favorite.getCommunity()))
+                .map(favorite -> CommunityMapper.toPreviewDTO(favorite.getCommunity(), true))
                 .toList();
     }
 

@@ -7,11 +7,13 @@ import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Category;
+import com.example.forum.model.community.Community;
 import com.example.forum.model.post.HiddenPost;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostFile;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
+import com.example.forum.repository.community.CommunityFavoriteRepository;
 import com.example.forum.repository.post.HiddenPostRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.common.RecentViewService;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +48,7 @@ public class PostServiceImpl implements PostService {
     // Repositories
     private final PostRepository postRepository;
     private final HiddenPostRepository hiddenPostRepository;
+    private final CommunityFavoriteRepository communityFavoriteRepository;
 
     // Services
     private final S3Service s3Service;
@@ -62,27 +66,46 @@ public class PostServiceImpl implements PostService {
             case TOP_LIKED -> postRepository.findPagedPostsTopLiked(size, offset);
         };
 
+        User user = (username != null) ? authValidator.validateUserByUsername(username) : null;
+
         Set<Long> hiddenPostIds = hiddenPostService.getHiddenPostIdsByUsername(username);
+        Set<Long> favoriteCommunityIds = (user != null)
+                ? communityFavoriteRepository.findAllByUser(user).stream()
+                .map(fav -> fav.getCommunity().getId())
+                .collect(Collectors.toSet())
+                : Set.of();
+
 
         return posts.stream()
-                .map(post -> PostMapper.toPostResponseDTO(post, hiddenPostIds.contains(post.getId())))
+                .map(post -> {
+                    boolean isHidden = hiddenPostIds.contains(post.getId());
+
+                    Community community = post.getCategory() != null
+                            ? post.getCategory().getCommunity()
+                            : null;
+
+                    boolean isFavorite = community != null && favoriteCommunityIds.contains(community.getId());
+
+                    return PostMapper.toPostResponseDTO(post, isHidden, isFavorite);
+                })
                 .toList();
     }
 
     @Override
     public PostDetailDTO getPostDetail(Long postId, String username) {
 
-        User viewer = null;
-        if (username != null)
-            viewer = authValidator.validateUserByUsername(username);
-
+        User viewer = (username != null) ? authValidator.validateUserByUsername(username) : null;
         Post post = postValidator.validateDetailPostId(postId);
         boolean isHidden = hiddenPostService.isHiddenByUsername(post, username);
+
+        Community community = post.getCategory() != null ? post.getCategory().getCommunity() : null;
+        boolean isFavorite = (community != null && viewer != null) &&
+                communityFavoriteRepository.existsByUserAndCommunity(viewer, community);
 
         if (viewer != null)
             recentViewService.addPostView(viewer.getId(), postId);
 
-        return PostMapper.toPostDetailDTO(post, viewer, isHidden);
+        return PostMapper.toPostDetailDTO(post, viewer, isHidden, isFavorite);
     }
 
     @Override
@@ -100,7 +123,7 @@ public class PostServiceImpl implements PostService {
         savePostFiles(post, dto.getFileUrls());
 
         Post savedPost = postRepository.save(post);
-        return PostMapper.toPostResponseDTO(savedPost, false);
+        return PostMapper.toPostResponseDTO(savedPost, false, false);
     }
 
     @Override
@@ -144,8 +167,13 @@ public class PostServiceImpl implements PostService {
         // 6. Optional: explicit save (if needed by repository listeners)
         Post saved = postRepository.save(post); // make sure Hibernate flushes
 
-        // 7. Return response
-        return PostMapper.toPostResponseDTO(saved, false); // or just `post`
+        // 7. Determine isFavorite
+        Community community = saved.getCategory() != null ? saved.getCategory().getCommunity() : null;
+        boolean isFavorite = community != null &&
+                communityFavoriteRepository.existsByUserAndCommunity(user, community);
+
+        // 8. Return response
+        return PostMapper.toPostResponseDTO(saved, false, isFavorite); // or just `post`
     }
 
     @Override
