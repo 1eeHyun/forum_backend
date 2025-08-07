@@ -1,4 +1,4 @@
-package com.example.forum.service.like.comment;
+package com.example.forum.service.reaction.comment;
 
 import com.example.forum.model.comment.Comment;
 import com.example.forum.model.like.CommentDislike;

@@ -1,12 +1,12 @@
-package com.example.forum.service.like.post;
+package com.example.forum.service.reaction.post;
 
 import com.example.forum.dto.like.LikeUserDTO;
 import com.example.forum.mapper.post.PostMapper;
-import com.example.forum.model.like.PostLike;
+import com.example.forum.model.like.PostReaction;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
-import com.example.forum.repository.like.PostLikeRepository;
+import com.example.forum.repository.like.PostReactionRepository;
 import com.example.forum.service.notification.NotificationHelper;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.post.PostValidator;
@@ -28,13 +28,13 @@ import static org.mockito.Mockito.*;
 class PostLikeServiceImplTest {
 
     @InjectMocks
-    private PostLikeServiceImpl postLikeService;
+    private PostReactionServiceImpl postLikeService;
 
     @Mock private AuthValidator userValidator;
 
     @Mock private PostValidator postValidator;
 
-    @Mock private PostLikeRepository postLikeRepository;
+    @Mock private PostReactionRepository postLikeRepository;
 
     @Mock private NotificationHelper notificationHelper;
 
@@ -63,7 +63,7 @@ class PostLikeServiceImplTest {
         postLikeService.toggleLike(postId, username);
 
         // Assert
-        verify(postLikeRepository).save(any(PostLike.class));
+        verify(postLikeRepository).save(any(PostReaction.class));
     }
 
     @Test
@@ -73,8 +73,8 @@ class PostLikeServiceImplTest {
         String username = "alice";
         User user = mock(User.class);
         Post post = mock(Post.class);
-        PostLike existingLike = mock(PostLike.class);
-        List<PostLike> likeList = mock(List.class);
+        PostReaction existingLike = mock(PostReaction.class);
+        List<PostReaction> likeList = mock(List.class);
 
         when(userValidator.validateUserByUsername(username)).thenReturn(user);
         when(postValidator.validatePost(postId)).thenReturn(post);
@@ -106,8 +106,8 @@ class PostLikeServiceImplTest {
     void getLikeUsers_shouldReturnDTOList() {
         Long postId = 1L;
         Post post = mock(Post.class);
-        PostLike like1 = mock(PostLike.class);
-        PostLike like2 = mock(PostLike.class);
+        PostReaction like1 = mock(PostReaction.class);
+        PostReaction like2 = mock(PostReaction.class);
 
         // User & Profile mock
         User user1 = mock(User.class);

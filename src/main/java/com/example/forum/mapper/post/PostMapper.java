@@ -10,7 +10,7 @@ import com.example.forum.mapper.community.CommunityMapper;
 import com.example.forum.mapper.image.ImageMapper;
 import com.example.forum.mapper.user.UserMapper;
 import com.example.forum.model.community.Community;
-import com.example.forum.model.like.PostLike;
+import com.example.forum.model.like.PostReaction;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostFile;
 import com.example.forum.model.profile.Profile;
@@ -91,7 +91,7 @@ public class PostMapper {
                 .build();
     }
 
-    public static LikeUserDTO toLikeUserDTO(PostLike postLike) {
+    public static LikeUserDTO toLikeUserDTO(PostReaction postLike) {
         User user = postLike.getUser();
         Profile profile = user.getProfile();
 

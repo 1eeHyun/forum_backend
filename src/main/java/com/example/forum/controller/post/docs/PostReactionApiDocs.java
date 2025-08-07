@@ -17,16 +17,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
-@Tag(name = "Post Like", description = "Post like related API")
-public interface PostLikeApiDocs {
+@Tag(name = "Post reaction", description = "Post reaction related API")
+public interface PostReactionApiDocs {
 
     @Operation(
-            summary = "Toggle like on a post",
-            description = "Toggles a like on the given post. If the user has already liked it, the like will be removed.",
+            summary = "Like on a post",
+            description = "Like on the given post. If the user has already liked it, the like will be removed.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Post like toggled successfully",
+                            description = "Post like successfully",
                             content = @Content
                     ),
                     @ApiResponse(
@@ -41,9 +41,39 @@ public interface PostLikeApiDocs {
                     )
             }
     )
-    @PostMapping
+    @PostMapping("/likes")
     ResponseEntity<CommonResponse<Void>> likePost(
-            @Parameter(description = "ID of the post to like or unlike", required = true)
+            @Parameter(description = "ID of the post to like", required = true)
+            @PathVariable Long postId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails
+    );
+
+    @Operation(
+            summary = "Dislike on a post",
+            description = "Dislike on the given post. If the user has already disliked it, the dislike will be removed.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Post like successfully",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized - user not logged in",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Post not found",
+                            content = @Content
+                    )
+            }
+    )
+    @PostMapping("/dislikes")
+    ResponseEntity<CommonResponse<Void>> dislikePost(
+            @Parameter(description = "ID of the post to like", required = true)
             @PathVariable Long postId,
 
             @Parameter(hidden = true)
@@ -70,10 +100,26 @@ public interface PostLikeApiDocs {
                     )
             }
     )
-    @GetMapping
+    @GetMapping("/likes")
     ResponseEntity<CommonResponse<Long>> getLikesCount(
             @Parameter(description = "ID of the post to retrieve like count for", required = true)
             @PathVariable Long postId
+    );
+
+    @Operation(
+            summary = "Get my reaction to a post",
+            description = "Returns the reaction type (LIKE, DISLIKE, or null)",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "404", description = "Post not found")
+            }
+    )
+    @GetMapping("/reaction/me")
+    ResponseEntity<CommonResponse<String>> getMyReaction(
+            @Parameter(description = "ID of the post", required = true)
+            @PathVariable Long postId,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
     );
 
     // ---------------------- Who likes an existing Post ----------------------
@@ -96,7 +142,7 @@ public interface PostLikeApiDocs {
                     )
             }
     )
-    @GetMapping("/users")
+    @GetMapping("/likes/users")
     ResponseEntity<CommonResponse<List<LikeUserDTO>>> getLikeUsers(
             @Parameter(description = "ID of the post", required = true)
             @PathVariable Long postId

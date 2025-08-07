@@ -2,7 +2,7 @@ package com.example.forum.model.post;
 
 import com.example.forum.model.comment.Comment;
 import com.example.forum.model.community.Category;
-import com.example.forum.model.like.PostLike;
+import com.example.forum.model.like.PostReaction;
 import com.example.forum.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,7 +50,7 @@ public class Post {
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostLike> likes;
+    private List<PostReaction> likes;
 
     @PrePersist
     protected void onCreate() {

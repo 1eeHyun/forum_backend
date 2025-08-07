@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Table(name = "post_likes", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id", "post_id"})
 })
-public class PostLike {
+public class PostReaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +26,10 @@ public class PostLike {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReactionType reactionType;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 }

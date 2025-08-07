@@ -1,7 +1,7 @@
 package com.example.forum.validator.like;
 
 import com.example.forum.repository.like.CommentLikeRepository;
-import com.example.forum.repository.like.PostLikeRepository;
+import com.example.forum.repository.like.PostReactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +10,6 @@ import org.springframework.stereotype.Component;
 public class LikeValidator {
 
     private final CommentLikeRepository commentLikeRepository;
-    private final PostLikeRepository postLikeRepository;
+    private final PostReactionRepository postLikeRepository;
 
 }

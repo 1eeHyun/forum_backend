@@ -1,4 +1,4 @@
-package com.example.forum.service.like.comment;
+package com.example.forum.service.reaction.comment;
 
 public interface CommentLikeService {
 

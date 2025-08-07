@@ -2,7 +2,7 @@ package com.example.forum.controller.comment.api;
 
 import com.example.forum.controller.comment.docs.CommentLikeAPIDocs;
 import com.example.forum.dto.CommonResponse;
-import com.example.forum.service.like.comment.CommentLikeService;
+import com.example.forum.service.reaction.comment.CommentLikeService;
 import com.example.forum.validator.auth.AuthValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
