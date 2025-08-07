@@ -13,7 +13,10 @@ import com.example.forum.model.post.Post;
 import com.example.forum.model.post.PostFile;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
+import com.example.forum.repository.bookmark.BookmarkRepository;
+import com.example.forum.repository.comment.CommentRepository;
 import com.example.forum.repository.community.CommunityFavoriteRepository;
+import com.example.forum.repository.like.PostReactionRepository;
 import com.example.forum.repository.post.HiddenPostRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.common.RecentViewService;
@@ -49,6 +52,9 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final HiddenPostRepository hiddenPostRepository;
     private final CommunityFavoriteRepository communityFavoriteRepository;
+    private final BookmarkRepository bookmarkRepository;
+    private final PostReactionRepository postReactionRepository;
+    private final CommentRepository commentRepository;
 
     // Services
     private final S3Service s3Service;
@@ -182,9 +188,15 @@ public class PostServiceImpl implements PostService {
 
         User user = authValidator.validateUserByUsername(username);
         Post post = postValidator.validatePost(postId);
-
         postValidator.validatePostAuthor(post, user);
 
+        // 1) children first
+        bookmarkRepository.deleteByPostId(postId);
+        postReactionRepository.deleteByPostId(postId);
+
+        // S3
+
+        // 2) finally parent
         postRepository.delete(post);
     }
 
