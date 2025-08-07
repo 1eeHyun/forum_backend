@@ -27,7 +27,8 @@ public class TrendingPostController implements TrendingPostApiDocs {
     public ResponseEntity<CommonResponse<List<PostResponseDTO>>> getTrendingPosts(
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        String username = authValidator.extractUsername(userDetails);
+        String username = (userDetails != null) ? authValidator.extractUsername(userDetails) : null;
+
         List<PostResponseDTO> response = trendingService.getTrendingPosts(username);
         return ResponseEntity.ok(CommonResponse.success(response));
     }

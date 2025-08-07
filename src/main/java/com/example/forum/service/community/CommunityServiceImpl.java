@@ -12,6 +12,7 @@ import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityFavoriteRepository;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.community.CommunityRepository;
+import com.example.forum.repository.post.PostRepository;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class CommunityServiceImpl implements CommunityService {
     private final CommunityRepository communityRepository;
     private final CommunityMemberRepository communityMemberRepository;
     private final CommunityFavoriteRepository communityFavoriteRepository;
+    private final PostRepository postRepository;
 
     // Services
 //    private final RedisService redisService;
@@ -93,7 +95,9 @@ public class CommunityServiceImpl implements CommunityService {
         User currentUser = (username != null) ? authValidator.validateUserByUsername(username) : null;
         CommunityRole role = findUserRoleInCommunity(community, currentUser);
 
-        return CommunityMapper.toDetailDTO(community, allMembers, onlineMembers, role);
+        int postCount = postRepository.countByCategoryCommunityId(id);
+
+        return CommunityMapper.toDetailDTO(community, allMembers, onlineMembers, role, postCount);
     }
 
     @Override

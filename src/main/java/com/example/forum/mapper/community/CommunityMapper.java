@@ -20,7 +20,8 @@ public class CommunityMapper {
             Community community,
             List<CommunityMember> allMembers,
             List<CommunityMember> onlineMembers,
-            CommunityRole currentUserRole
+            CommunityRole currentUserRole,
+            int postCount
     ) {
         return CommunityDetailDTO.builder()
                 .id(community.getId())
@@ -48,6 +49,7 @@ public class CommunityMapper {
                 .memberCount(allMembers.size())
                 .role(currentUserRole)
                 .onlineUsers(UserMapper.toListDtoByCommunityMemberList(onlineMembers))
+                .postCount(postCount)
                 .build();
     }
 
@@ -65,7 +67,6 @@ public class CommunityMapper {
                         .build())
                 .isFavorite(isFavorite)
                 .build();
-
     }
 
     public static CommunityRuleResponseDTO toRuleResponseDto(CommunityRule rule) {

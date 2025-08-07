@@ -25,7 +25,7 @@ public class TrendingSidebarController implements TrendingSidebarApiDocs {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
 
-        String username = (userDetails == null) ? null : authValidator.extractUsername(userDetails);
+        String username = (userDetails != null) ? authValidator.extractUsername(userDetails) : null;
 
         TrendingSidebarDTO response = trendingService.getTrendingSidebarData(username);
         return ResponseEntity.ok(CommonResponse.success(response));

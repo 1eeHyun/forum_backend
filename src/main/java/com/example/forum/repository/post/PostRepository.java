@@ -326,4 +326,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         """
     )
     Page<Post> findTrendingPosts(@Param("from") LocalDateTime from, Pageable pageable);
+
+    int countByCategoryCommunityId(Long communityId);
 }
