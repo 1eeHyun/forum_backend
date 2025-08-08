@@ -29,6 +29,7 @@ public class CommunityDetailDTO {
     private int memberCount;
     private int onlineCount;
     private int postCount;
+    private boolean isFavorite;
 
     private CommunityRole role;
 

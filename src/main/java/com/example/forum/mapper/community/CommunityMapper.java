@@ -21,6 +21,7 @@ public class CommunityMapper {
             List<CommunityMember> allMembers,
             List<CommunityMember> onlineMembers,
             CommunityRole currentUserRole,
+            boolean isFavorite,
             int postCount
     ) {
         return CommunityDetailDTO.builder()
@@ -49,6 +50,7 @@ public class CommunityMapper {
                 .memberCount(allMembers.size())
                 .role(currentUserRole)
                 .onlineUsers(UserMapper.toListDtoByCommunityMemberList(onlineMembers))
+                .isFavorite(isFavorite)
                 .postCount(postCount)
                 .build();
     }

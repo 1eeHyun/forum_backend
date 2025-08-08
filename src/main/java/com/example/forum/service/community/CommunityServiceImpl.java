@@ -92,12 +92,14 @@ public class CommunityServiceImpl implements CommunityService {
         List<CommunityMember> allMembers = communityMemberRepository.findByCommunity(community);
         List<CommunityMember> onlineMembers = filterOnlineMembers(allMembers);
 
-        User currentUser = (username != null) ? authValidator.validateUserByUsername(username) : null;
+        User currentUser = authValidator.validateUserByUsername(username);
         CommunityRole role = findUserRoleInCommunity(community, currentUser);
 
         int postCount = postRepository.countByCategoryCommunityId(id);
 
-        return CommunityMapper.toDetailDTO(community, allMembers, onlineMembers, role, postCount);
+        boolean isFavorite = communityFavoriteRepository.findByUserAndCommunity(currentUser, community).isPresent();
+
+        return CommunityMapper.toDetailDTO(community, allMembers, onlineMembers, role, isFavorite, postCount);
     }
 
     @Override
