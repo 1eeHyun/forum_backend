@@ -1,10 +1,13 @@
 package com.example.forum.validator.post;
 
+import com.example.forum.dto.post.PostCreateRequestDTO;
 import com.example.forum.dto.post.PostFileDTO;
 import com.example.forum.exception.post.PostNotAuthorException;
 import com.example.forum.exception.post.PostNotFoundException;
+import com.example.forum.exception.post.TagRequiredException;
 import com.example.forum.exception.post.TooManyPostFilesException;
 import com.example.forum.model.post.Post;
+import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,22 @@ public class PostValidator {
     public Post validatePost(Long id) {
         return postRepository.findById(id)
                 .orElseThrow(PostNotFoundException::new);
+    }
+
+    public void isPublicWithTagsCheckingDTO(PostCreateRequestDTO post) {
+        if (post.getVisibility() == Visibility.PUBLIC) {
+            if (post.getTags() == null || post.getTags().isEmpty()) {
+                throw new TagRequiredException();
+            }
+        }
+    }
+
+    public void isPublicWithTags(Post post) {
+        if (post.getVisibility() == Visibility.PUBLIC) {
+            if (post.getPostTags() == null || post.getPostTags().isEmpty()) {
+                throw new TagRequiredException();
+            }
+        }
     }
 
     public void validatePostAuthor(Post post, User user) {

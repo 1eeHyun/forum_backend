@@ -4,7 +4,7 @@ import com.example.forum.common.SortOrder;
 import com.example.forum.controller.post.docs.PostApiDocs;
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.post.PostDetailDTO;
-import com.example.forum.dto.post.PostRequestDTO;
+import com.example.forum.dto.post.PostCreateRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.service.post.PostService;
 import com.example.forum.validator.auth.AuthValidator;
@@ -59,7 +59,7 @@ public class PostController implements PostApiDocs {
 
     @Override
     public ResponseEntity<CommonResponse<PostResponseDTO>> create(
-            @Valid @RequestBody PostRequestDTO dto,
+            @Valid @RequestBody PostCreateRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);
@@ -71,7 +71,7 @@ public class PostController implements PostApiDocs {
     @Override
     public ResponseEntity<CommonResponse<PostResponseDTO>> update(
             @PathVariable Long postId,
-            @Valid @RequestBody PostRequestDTO dto,
+            @Valid @RequestBody PostCreateRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = authValidator.extractUsername(userDetails);

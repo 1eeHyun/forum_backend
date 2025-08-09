@@ -2,7 +2,7 @@ package com.example.forum.controller.post.docs;
 
 import com.example.forum.dto.CommonResponse;
 import com.example.forum.dto.post.PostDetailDTO;
-import com.example.forum.dto.post.PostRequestDTO;
+import com.example.forum.dto.post.PostCreateRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -118,7 +118,7 @@ public interface PostApiDocs {
             )
             @org.springframework.web.bind.annotation.RequestBody
             @Valid
-            PostRequestDTO dto,
+            PostCreateRequestDTO dto,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
@@ -169,7 +169,7 @@ public interface PostApiDocs {
                     required = true
             )
             @org.springframework.web.bind.annotation.RequestBody
-            PostRequestDTO dto,
+            PostCreateRequestDTO dto,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails

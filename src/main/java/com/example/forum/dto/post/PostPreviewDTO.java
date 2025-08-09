@@ -5,6 +5,7 @@ import com.example.forum.dto.user.UserDTO;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -28,4 +29,7 @@ public class PostPreviewDTO {
     private UserDTO author;
 
     private Boolean isHidden;
+
+    @Builder.Default
+    private List<String> tags = Collections.emptyList();
 }

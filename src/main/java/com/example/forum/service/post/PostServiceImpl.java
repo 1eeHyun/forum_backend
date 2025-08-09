@@ -1,9 +1,9 @@
 package com.example.forum.service.post;
 
 import com.example.forum.common.SortOrder;
+import com.example.forum.dto.post.PostCreateRequestDTO;
 import com.example.forum.dto.post.PostDetailDTO;
 import com.example.forum.dto.post.PostFileDTO;
-import com.example.forum.dto.post.PostRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Category;
@@ -14,14 +14,15 @@ import com.example.forum.model.post.PostFile;
 import com.example.forum.model.post.Visibility;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.bookmark.BookmarkRepository;
-import com.example.forum.repository.comment.CommentRepository;
 import com.example.forum.repository.community.CommunityFavoriteRepository;
 import com.example.forum.repository.like.PostReactionRepository;
 import com.example.forum.repository.post.HiddenPostRepository;
+import com.example.forum.repository.post.PostQueryRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.common.RecentViewService;
 import com.example.forum.service.common.S3Service;
 import com.example.forum.service.post.hidden.HiddenPostService;
+import com.example.forum.service.tag.TaggingService;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CategoryValidator;
 import com.example.forum.validator.community.CommunityValidator;
@@ -54,11 +55,12 @@ public class PostServiceImpl implements PostService {
     private final CommunityFavoriteRepository communityFavoriteRepository;
     private final BookmarkRepository bookmarkRepository;
     private final PostReactionRepository postReactionRepository;
-    private final CommentRepository commentRepository;
+    private final PostQueryRepository postQueryRepository;
 
     // Services
     private final S3Service s3Service;
     private final RecentViewService recentViewService;
+    private final TaggingService taggingService;
 
     private final HiddenPostService hiddenPostService;
 
@@ -116,11 +118,13 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostResponseDTO createPost(PostRequestDTO dto, String username) {
+    public PostResponseDTO createPost(PostCreateRequestDTO dto, String username) {
 
         User user = authValidator.validateUserByUsername(username);
         Category category = getValidCategoryIfNeeded(dto);
         postValidator.validatePostCount(dto.getFileUrls());
+
+        log.info("tags = {}", dto.getTags());
 
         if (category != null)
             communityValidator.validateMemberCommunity(category.getCommunity().getId(), user);
@@ -129,12 +133,22 @@ public class PostServiceImpl implements PostService {
         savePostFiles(post, dto.getFileUrls());
 
         Post savedPost = postRepository.save(post);
-        return PostMapper.toPostResponseDTO(savedPost, false, false);
+
+        if (dto.getVisibility() == Visibility.PUBLIC) {
+
+            postValidator.isPublicWithTagsCheckingDTO(dto);
+            taggingService.setTagsForPost(savedPost.getId(), dto.getTags());
+        }
+
+        Post withTags = postQueryRepository.findByIdWithTags(savedPost.getId())
+                .orElse(savedPost);
+
+        return PostMapper.toPostResponseDTO(withTags, false, false);
     }
 
     @Override
     @Transactional
-    public PostResponseDTO updatePost(Long postId, PostRequestDTO dto, String username) {
+    public PostResponseDTO updatePost(Long postId, PostCreateRequestDTO dto, String username) {
 
         // 1. Get user and post
         User user = authValidator.validateUserByUsername(username);
@@ -152,6 +166,7 @@ public class PostServiceImpl implements PostService {
         s3Service.deleteFiles(oldImageUrls);
 
         // 4. Update fields
+        Visibility oldVisibility = post.getVisibility();
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
         post.setVisibility(dto.getVisibility());
@@ -173,13 +188,23 @@ public class PostServiceImpl implements PostService {
         // 6. Optional: explicit save (if needed by repository listeners)
         Post saved = postRepository.save(post); // make sure Hibernate flushes
 
+        if (oldVisibility == Visibility.PUBLIC && dto.getVisibility() != Visibility.PUBLIC) {
+            // PUBLIC -> Remove all tags
+            taggingService.setTagsForPost(saved.getId(), List.of());
+        } else if (dto.getVisibility() == Visibility.PUBLIC) {
+            // PUBLIC status: dto.tag is null ? -> no change
+            if (dto.getTags() != null) {
+                taggingService.setTagsForPost(saved.getId(), dto.getTags());
+            }
+        }
+
         // 7. Determine isFavorite
-        Community community = saved.getCategory() != null ? saved.getCategory().getCommunity() : null;
+        Post withTags = postQueryRepository.findByIdWithTags(saved.getId()).orElse(saved);
+        Community community = withTags.getCategory() != null ? withTags.getCategory().getCommunity() : null;
         boolean isFavorite = community != null &&
                 communityFavoriteRepository.existsByUserAndCommunity(user, community);
 
-        // 8. Return response
-        return PostMapper.toPostResponseDTO(saved, false, isFavorite); // or just `post`
+        return PostMapper.toPostResponseDTO(withTags, false, isFavorite);
     }
 
     @Override
@@ -224,7 +249,7 @@ public class PostServiceImpl implements PostService {
     }
 
     // ------------------------------ Helper methods -------------------------------------
-    private Category getValidCategoryIfNeeded(PostRequestDTO dto) {
+    private Category getValidCategoryIfNeeded(PostCreateRequestDTO dto) {
 
         if (dto.getVisibility() == Visibility.COMMUNITY) {
             return categoryValidator.validateCategoryById(dto.getCategoryId());
@@ -233,7 +258,7 @@ public class PostServiceImpl implements PostService {
         return null;
     }
 
-    private Post buildPostFromDto(PostRequestDTO dto, User user, Category category) {
+    private Post buildPostFromDto(PostCreateRequestDTO dto, User user, Category category) {
         return Post.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())

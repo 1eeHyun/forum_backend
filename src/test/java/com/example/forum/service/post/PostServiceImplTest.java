@@ -1,7 +1,7 @@
 package com.example.forum.service.post;
 
 import com.example.forum.dto.post.PostDetailDTO;
-import com.example.forum.dto.post.PostRequestDTO;
+import com.example.forum.dto.post.PostCreateRequestDTO;
 import com.example.forum.dto.post.PostResponseDTO;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.post.Visibility;
@@ -123,7 +123,7 @@ class PostServiceImplTest {
         @Test
         @DisplayName("should create and return new post")
         void shouldCreatePost() {
-            PostRequestDTO dto = PostRequestDTO.builder()
+            PostCreateRequestDTO dto = PostCreateRequestDTO.builder()
                     .title("New Post")
                     .content("Post Content")
                     .visibility(Visibility.PUBLIC)

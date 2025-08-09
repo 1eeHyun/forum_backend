@@ -25,6 +25,7 @@ import static com.example.forum.common.TimeUtils.formatTimeAgo;
 public class PostMapper {
 
     public static PostResponseDTO toPostResponseDTO(Post post, boolean isHidden, boolean isFavoriteCommunity) {
+
         return PostResponseDTO.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -43,6 +44,7 @@ public class PostMapper {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .isHidden(isHidden)
+                .tags(extractTagNames(post))
                 .build();
     }
 
@@ -88,6 +90,7 @@ public class PostMapper {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .isHidden(isHidden)
+                .tags(extractTagNames(post))
                 .build();
     }
 
@@ -138,6 +141,7 @@ public class PostMapper {
                 .authorNickname(post.getAuthor().getProfile().getNickname())
                 .author(UserMapper.toDtoWithEmail(post.getAuthor()))
                 .isHidden(isHidden)
+                .tags(extractTagNames(post))
                 .build();
     }
 
@@ -161,5 +165,17 @@ public class PostMapper {
         boolean isFavorite = CommunityUtils.isFavorite(community, favoriteCommunityIds);
 
         return toPostResponseDTO(post, isHidden, isFavorite);
+    }
+
+    private static <T> List<T> safeList(List<T> list) {
+        return list == null ? List.of() : list;
+    }
+
+    private static List<String> extractTagNames(Post post) {
+        if (post.getPostTags() == null) return List.of();
+        return post.getPostTags().stream()
+                .map(pt -> pt.getTag().getName())
+                .sorted()
+                .toList();
     }
 }
