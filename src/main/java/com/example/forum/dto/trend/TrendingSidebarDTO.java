@@ -13,6 +13,7 @@ import java.util.List;
 public class TrendingSidebarDTO {
 
     private List<CommunityPreviewDTO> trendingCommunities;
+    private List<String> hotTags;
 
     // can add more
 }

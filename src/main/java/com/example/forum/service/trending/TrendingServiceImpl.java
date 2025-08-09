@@ -9,6 +9,7 @@ import com.example.forum.model.community.Community;
 import com.example.forum.model.post.Post;
 import com.example.forum.repository.community.CommunityRepository;
 import com.example.forum.repository.post.PostRepository;
+import com.example.forum.repository.tag.TagRepository;
 import com.example.forum.service.post.hidden.HiddenPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,7 @@ public class TrendingServiceImpl implements TrendingService {
     private final HiddenPostService hiddenPostService;
 
     private final CommunityRepository communityRepository;
+    private final TagRepository tagRepository;
 
     private final CommunityHelper communityHelper;
 
@@ -58,6 +60,7 @@ public class TrendingServiceImpl implements TrendingService {
         List<Community> topCommunities = communityRepository.findTrendingCommunities(from, PageRequest.of(0, 5));
 
         Set<Long> favoriteCommunityIds = communityHelper.getFavoriteCommunityIdsByUsername(username);
+        List<String> hotTags = tagRepository.findTopTagsSince(from, PageRequest.of(0, 8));
 
         return TrendingSidebarDTO.builder()
                 .trendingCommunities(
@@ -68,6 +71,7 @@ public class TrendingServiceImpl implements TrendingService {
                                 ))
                                 .toList()
                 )
+                .hotTags(hotTags)
                 .build();
     }
 }

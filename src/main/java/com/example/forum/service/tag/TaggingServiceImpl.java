@@ -32,6 +32,7 @@ public class TaggingServiceImpl implements TaggingService {
     @Override
     @Transactional
     public void setTagsForPost(Long postId, List<String> rawTags) {
+
         Post post = postRepository.getReferenceById(postId);
         // PUBLIC
         if (post.getVisibility() != Visibility.PUBLIC) {
@@ -136,7 +137,9 @@ public class TaggingServiceImpl implements TaggingService {
     @Override
     @Transactional(readOnly = true)
     public List<String> suggest(String q, int limit) {
+
         if (q == null || q.isBlank()) return List.of();
+
         String norm = normalizeToken(q);
         return tagRepository
                 .findByNameStartingWithIgnoreCase(norm, PageRequest.of(0, Math.max(1, limit)))
