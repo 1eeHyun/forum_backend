@@ -52,6 +52,12 @@ public class AuthValidator {
                 .orElseThrow(UserNotFoundException::new);
     }
 
+    public User validateUserById(Long id) {
+
+        return userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new);
+    }
+
     public void validateUniqueUsername(String username) {
         if (userRepository.existsByUsername(username))
             throw new DuplicateUsernameException();
