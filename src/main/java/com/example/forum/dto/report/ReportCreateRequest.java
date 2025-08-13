@@ -15,7 +15,8 @@ public class ReportCreateRequest {
     @NotNull
     private ReportTargetType targetType;
 
-    @NotNull
+    // For POST/COMMENT/COMMUNITY: required
+    // For USER: optional (we'll use targetUsername)
     private Long targetId;
 
     private String targetUsername;
