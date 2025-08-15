@@ -3,17 +3,16 @@ package com.example.forum.service.post.community;
 import com.example.forum.common.SortOrder;
 import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostResponseDTO;
+import com.example.forum.helper.community.CommunityHelper;
 import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Category;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
 import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
-import com.example.forum.repository.community.CommunityFavoriteRepository;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.post.PostRepository;
 import com.example.forum.service.post.hidden.HiddenPostService;
-import com.example.forum.helper.community.CommunityHelper;
 import com.example.forum.validator.auth.AuthValidator;
 import com.example.forum.validator.community.CommunityValidator;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +37,6 @@ public class CommunityPostServiceImpl implements CommunityPostService {
 
     // Repositories
     private final CommunityMemberRepository communityMemberRepository;
-    private final CommunityFavoriteRepository communityFavoriteRepository;
     private final PostRepository postRepository;
 
     // Services

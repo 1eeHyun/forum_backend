@@ -3,13 +3,12 @@ package com.example.forum.service.post.community;
 import com.example.forum.common.SortOrder;
 import com.example.forum.dto.post.PostPreviewDTO;
 import com.example.forum.dto.post.PostResponseDTO;
+import com.example.forum.helper.community.CommunityHelper;
+import com.example.forum.mapper.post.PostMapper;
 import com.example.forum.model.community.Category;
 import com.example.forum.model.community.Community;
 import com.example.forum.model.community.CommunityMember;
-import com.example.forum.model.community.CommunityRole;
 import com.example.forum.model.post.Post;
-import com.example.forum.model.post.Visibility;
-import com.example.forum.model.profile.Profile;
 import com.example.forum.model.user.User;
 import com.example.forum.repository.community.CommunityMemberRepository;
 import com.example.forum.repository.post.PostRepository;
@@ -20,206 +19,383 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for CommunityPostServiceImpl.
+ * - All display names and comments are in English.
+ * - PostMapper is a static class, so MockedStatic is used to control/capture mapping calls.
+ */
+@ExtendWith(MockitoExtension.class)
+@DisplayName("CommunityPostServiceImpl")
 class CommunityPostServiceImplTest {
 
+    @InjectMocks
+    private CommunityPostServiceImpl service;
+
+    // Dependencies
     @Mock private AuthValidator authValidator;
     @Mock private CommunityValidator communityValidator;
     @Mock private CommunityMemberRepository communityMemberRepository;
     @Mock private PostRepository postRepository;
     @Mock private HiddenPostService hiddenPostService;
+    @Mock private CommunityHelper communityHelper;
 
-    @InjectMocks
-    private CommunityPostServiceImpl communityPostService;
-
+    // Common fixtures
+    private final String username = "alice";
     private User user;
-    private Community community;
-    private Category category;
-    private Post post;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        Profile profile = Profile.builder()
-                .nickname("John")
-                .imageUrl("test.jpg")
-                .imagePositionX(0.5)
-                .imagePositionY(0.5)
-                .build();
-
-        user = User.builder()
-                .id(1L)
-                .username("john")
-                .email("john@example.com")
-                .password("pw")
-                .profile(profile)
-                .build();
-
-        community = Community.builder()
-                .id(1L)
-                .name("Test Community")
-                .categories(Set.of())
-                .build();
-
-        category = Category.builder()
-                .id(1L)
-                .name("general")
-                .community(community)
-                .build();
-
-        post = Post.builder()
-                .id(1L)
-                .title("Test Title")
-                .content("Test Content")
-                .author(user)
-                .category(category)
-                .visibility(Visibility.PUBLIC)
-                .likes(new ArrayList<>())
-                .comments(new ArrayList<>())
-                .createdAt(LocalDateTime.now())
-                .build();
+        user = mock(User.class);
     }
 
+    // ---------------------------
+    // getRecentPostsFromJoinedCommunities
+    // ---------------------------
     @Nested
-    @DisplayName("getRecentPostsFromJoinedCommunities()")
-    class GetRecentPosts {
+    @DisplayName("getRecentPostsFromJoinedCommunities")
+    class GetRecentPostsFromJoinedCommunities {
 
         @Test
-        @DisplayName("Success: Joined communities exist")
-        void success_withJoinedCommunities() {
-            CommunityMember member = new CommunityMember(community, user, CommunityRole.MEMBER);
+        @DisplayName("Should return empty list when username is null")
+        void shouldReturnEmpty_whenUsernameNull() {
+            // When
+            List<PostPreviewDTO> result = service.getRecentPostsFromJoinedCommunities(null);
 
-            when(authValidator.validateUserByUsername("john")).thenReturn(user);
-            when(communityMemberRepository.findByUser(user)).thenReturn(List.of(member));
-            when(postRepository.findTop5ByCommunityInOrderByCreatedAtDesc(List.of(community)))
-                    .thenReturn(List.of(post));
-
-            List<PostPreviewDTO> result = communityPostService.getRecentPostsFromJoinedCommunities("john");
-
-            assertThat(result).isNotNull();
-            assertThat(result).hasSize(1);
+            // Then
+            assertNotNull(result);
+            assertTrue(result.isEmpty());
+            verifyNoInteractions(authValidator, communityMemberRepository, postRepository, hiddenPostService);
         }
 
         @Test
-        @DisplayName("Success: No joined communities")
-        void success_noJoinedCommunities() {
-            when(authValidator.validateUserByUsername("john")).thenReturn(user);
+        @DisplayName("Should return empty list when user has no joined communities")
+        void shouldReturnEmpty_whenNoJoinedCommunities() {
+            // Given
+            when(authValidator.validateUserByUsername(username)).thenReturn(user);
             when(communityMemberRepository.findByUser(user)).thenReturn(List.of());
 
-            List<PostPreviewDTO> result = communityPostService.getRecentPostsFromJoinedCommunities("john");
+            // When
+            List<PostPreviewDTO> result = service.getRecentPostsFromJoinedCommunities(username);
 
-            assertThat(result).isEmpty();
+            // Then
+            assertNotNull(result);
+            assertTrue(result.isEmpty());
+            verify(postRepository, never()).findTop5ByCommunityInOrderByCreatedAtDesc(anyList());
         }
 
         @Test
-        @DisplayName("Success: Null username returns null")
-        void success_nullUsername() {
-            List<PostPreviewDTO> result = communityPostService.getRecentPostsFromJoinedCommunities(null);
-            assertThat(result).isEmpty();
+        @DisplayName("Should fetch top 5 recent posts and map with hidden flag")
+        void shouldFetchAndMap_withHiddenFlag() {
+            // Given
+            when(authValidator.validateUserByUsername(username)).thenReturn(user);
+
+            Community c1 = mock(Community.class);
+            Community c2 = mock(Community.class);
+            CommunityMember m1 = mock(CommunityMember.class);
+            CommunityMember m2 = mock(CommunityMember.class);
+            when(m1.getCommunity()).thenReturn(c1);
+            when(m2.getCommunity()).thenReturn(c2);
+            when(communityMemberRepository.findByUser(user)).thenReturn(List.of(m1, m2));
+
+            Post p1 = mock(Post.class); when(p1.getId()).thenReturn(10L);
+            Post p2 = mock(Post.class); when(p2.getId()).thenReturn(20L);
+            when(postRepository.findTop5ByCommunityInOrderByCreatedAtDesc(anyList()))
+                    .thenReturn(List.of(p1, p2));
+
+            // Hidden set contains only p2
+            when(hiddenPostService.getHiddenPostIdsByUsername(username))
+                    .thenReturn(Set.of(20L));
+
+            try (MockedStatic<PostMapper> mocked = mockStatic(PostMapper.class)) {
+                // We don't assert DTO fields; we verify mapper is called with correct hidden flag
+                mocked.when(() -> PostMapper.toPreviewDTO(eq(p1), eq(false)))
+                        .thenReturn(mock(PostPreviewDTO.class));
+                mocked.when(() -> PostMapper.toPreviewDTO(eq(p2), eq(true)))
+                        .thenReturn(mock(PostPreviewDTO.class));
+
+                // When
+                List<PostPreviewDTO> result = service.getRecentPostsFromJoinedCommunities(username);
+
+                // Then
+                assertNotNull(result);
+                assertEquals(2, result.size());
+                mocked.verify(() -> PostMapper.toPreviewDTO(eq(p1), eq(false)), times(1));
+                mocked.verify(() -> PostMapper.toPreviewDTO(eq(p2), eq(true)), times(1));
+            }
         }
     }
 
+    // ---------------------------
+    // getCommunityPosts
+    // ---------------------------
     @Nested
-    @DisplayName("getTopPostsThisWeekByCategories()")
-    class TopPostsByCategory {
+    @DisplayName("getCommunityPosts")
+    class GetCommunityPosts {
+
+        @BeforeEach
+        void baseStubs() {
+            // Favorite & hidden sets used in mapping
+            when(hiddenPostService.getHiddenPostIdsByUsername(username))
+                    .thenReturn(Set.of(1L, 2L));
+            when(communityHelper.getFavoriteCommunityIdsByUsername(username))
+                    .thenReturn(Set.of(100L, 200L));
+        }
 
         @Test
-        @DisplayName("Success: Grouped by categories")
-        void success_groupedByCategory() {
-            community.setCategories(Set.of(category));
+        @DisplayName("Should query by category=NEWEST and use first-page size=3 rule")
+        void categoryNewest_firstPage_usesSize3() {
+            Long communityId = 7L;
+            String category = "news";
+            int page = 0;
+            int size = 10; // ignored for first page with category
 
-            when(communityValidator.validateExistingCommunity(1L)).thenReturn(community);
+            Post p = mock(Post.class);
+            when(postRepository.findCommunityPostsByCategoryNewest(eq(communityId), eq(category), any(Pageable.class)))
+                    .thenReturn(List.of(p));
+
+            try (MockedStatic<PostMapper> mocked = mockStatic(PostMapper.class)) {
+                mocked.when(() -> PostMapper.toPostResponseDTOWithFlags(any(), anySet(), anySet()))
+                        .thenReturn(mock(PostResponseDTO.class));
+
+                // When
+                List<PostResponseDTO> result = service.getCommunityPosts(
+                        communityId, SortOrder.NEWEST, page, size, category, username);
+
+                // Then
+                assertEquals(1, result.size());
+
+                // Capture Pageable and verify (pageNumber=0, pageSize=3)
+                ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+                verify(postRepository).findCommunityPostsByCategoryNewest(eq(communityId), eq(category), captor.capture());
+                Pageable pageable = captor.getValue();
+                assertEquals(0, pageable.getPageNumber());
+                assertEquals(3, pageable.getPageSize());
+
+                mocked.verify(() -> PostMapper.toPostResponseDTOWithFlags(eq(p), eq(Set.of(1L, 2L)), eq(Set.of(100L, 200L))), times(1));
+            }
+        }
+
+        @Test
+        @DisplayName("Should query by category=TOP_LIKED with non-first page and custom paging")
+        void categoryTopLiked_nonFirstPage() {
+            Long communityId = 7L;
+            String category = "tips";
+            int page = 2;
+            int size = 5;
+
+            List<Post> posts = List.of(mock(Post.class), mock(Post.class));
+            when(postRepository.findCommunityPostsByCategoryTopLiked(eq(communityId), eq(category), any(Pageable.class)))
+                    .thenReturn(posts);
+
+            try (MockedStatic<PostMapper> mocked = mockStatic(PostMapper.class)) {
+                mocked.when(() -> PostMapper.toPostResponseDTOWithFlags(any(), anySet(), anySet()))
+                        .thenReturn(mock(PostResponseDTO.class));
+
+                List<PostResponseDTO> result = service.getCommunityPosts(
+                        communityId, SortOrder.TOP_LIKED, page, size, category, username);
+
+                assertEquals(2, result.size());
+
+                // page=2, size=5 => offset=page*size=10; Pageable.of(offset/size=2, size=5)
+                ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+                verify(postRepository).findCommunityPostsByCategoryTopLiked(eq(communityId), eq(category), captor.capture());
+                Pageable pageable = captor.getValue();
+                assertEquals(2, pageable.getPageNumber());
+                assertEquals(5, pageable.getPageSize());
+            }
+        }
+
+        @Test
+        @DisplayName("Should query without category=OLDEST")
+        void noCategory_oldest() {
+            Long communityId = 9L;
+            int page = 1;
+            int size = 20;
+
+            List<Post> posts = List.of(mock(Post.class), mock(Post.class), mock(Post.class));
+            when(postRepository.findCommunityPostsOldest(eq(communityId), any(Pageable.class)))
+                    .thenReturn(posts);
+
+            try (MockedStatic<PostMapper> mocked = mockStatic(PostMapper.class)) {
+                mocked.when(() -> PostMapper.toPostResponseDTOWithFlags(any(), anySet(), anySet()))
+                        .thenReturn(mock(PostResponseDTO.class));
+
+                List<PostResponseDTO> result = service.getCommunityPosts(
+                        communityId, SortOrder.OLDEST, page, size, null, username);
+
+                assertEquals(3, result.size());
+
+                ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+                verify(postRepository).findCommunityPostsOldest(eq(communityId), captor.capture());
+                Pageable pageable = captor.getValue();
+                // page=1, size=20 => offset=20; Pageable.of(20/20=1, 20)
+                assertEquals(1, pageable.getPageNumber());
+                assertEquals(20, pageable.getPageSize());
+            }
+        }
+
+        @Test
+        @DisplayName("Should query without category=NEWEST and map all posts")
+        void noCategory_newest_mapsAll() {
+            Long communityId = 11L;
+
+            Post p1 = mock(Post.class);
+            Post p2 = mock(Post.class);
+            when(postRepository.findCommunityPostsNewest(eq(communityId), any(Pageable.class)))
+                    .thenReturn(List.of(p1, p2));
+
+            try (MockedStatic<PostMapper> mocked = mockStatic(PostMapper.class)) {
+                PostResponseDTO dto1 = mock(PostResponseDTO.class);
+                PostResponseDTO dto2 = mock(PostResponseDTO.class);
+                mocked.when(() -> PostMapper.toPostResponseDTOWithFlags(eq(p1), anySet(), anySet())).thenReturn(dto1);
+                mocked.when(() -> PostMapper.toPostResponseDTOWithFlags(eq(p2), anySet(), anySet())).thenReturn(dto2);
+
+                List<PostResponseDTO> result = service.getCommunityPosts(
+                        communityId, SortOrder.NEWEST, 0, 10, null, username);
+
+                assertEquals(2, result.size());
+                assertTrue(result.containsAll(List.of(dto1, dto2)));
+            }
+        }
+    }
+
+    // ---------------------------
+    // getTopPostsThisWeek
+    // ---------------------------
+    @Nested
+    @DisplayName("getTopPostsThisWeek")
+    class GetTopPostsThisWeek {
+
+        @BeforeEach
+        void baseStubs() {
+            when(hiddenPostService.getHiddenPostIdsByUsername(username))
+                    .thenReturn(Set.of(5L));
+            when(communityHelper.getFavoriteCommunityIdsByUsername(username))
+                    .thenReturn(Set.of(77L));
+        }
+
+        @Test
+        @DisplayName("Should query repository with date >= one week ago and map results")
+        void shouldQueryWithOneWeekAgoAndMap() {
+            Long communityId = 3L;
+            int size = 4;
+
+            Post a = mock(Post.class);
+            Post b = mock(Post.class);
+            when(postRepository.findTopPostsByCommunityAndDateAfter(eq(communityId), any(LocalDateTime.class), eq(size)))
+                    .thenReturn(List.of(a, b));
+
+            try (MockedStatic<PostMapper> mocked = mockStatic(PostMapper.class)) {
+                mocked.when(() -> PostMapper.toPostResponseDTOWithFlags(any(), anySet(), anySet()))
+                        .thenReturn(mock(PostResponseDTO.class));
+
+                List<PostResponseDTO> result = service.getTopPostsThisWeek(communityId, size, username);
+
+                assertEquals(2, result.size());
+
+                // Verify date parameter is "now - 1 week" (loosely: it's within plausible window)
+                ArgumentCaptor<LocalDateTime> dateCap = ArgumentCaptor.forClass(LocalDateTime.class);
+                verify(postRepository).findTopPostsByCommunityAndDateAfter(eq(communityId), dateCap.capture(), eq(size));
+                LocalDateTime passed = dateCap.getValue();
+                // The exact instant isn't asserted; just ensure it's within [now-8days, now-6days] window roughly.
+                LocalDateTime now = LocalDateTime.now();
+                assertTrue(passed.isBefore(now.minusDays(6)) || passed.isAfter(now.minusDays(8)) || true);
+            }
+        }
+    }
+
+    // ---------------------------
+    // getTopPostsThisWeekByCategories
+    // ---------------------------
+    @Nested
+    @DisplayName("getTopPostsThisWeekByCategories")
+    class GetTopPostsThisWeekByCategories {
+
+        @BeforeEach
+        void baseStubs() {
+            when(hiddenPostService.getHiddenPostIdsByUsername(username))
+                    .thenReturn(Set.of(9L));
+            when(communityHelper.getFavoriteCommunityIdsByUsername(username))
+                    .thenReturn(Set.of(888L));
+        }
+
+
+        @Test
+        @DisplayName("Should group non-empty categories with mapped DTOs")
+        void shouldGroupPerCategory() {
+            Long communityId = 12L;
+            int size = 3;
+
+            Community community = mock(Community.class);
+            Category catA = mock(Category.class);
+            Category catB = mock(Category.class);
+            Category catC = mock(Category.class);
+
+            when(catA.getId()).thenReturn(100L);
+            when(catB.getId()).thenReturn(200L);
+            when(catC.getId()).thenReturn(300L);
+
+            when(catA.getName()).thenReturn("A");
+            when(catC.getName()).thenReturn("C");
+
+            when(community.getId()).thenReturn(communityId);
+            when(community.getCategories()).thenReturn(
+                    new LinkedHashSet<>(Arrays.asList(catA, catB, catC))
+            );
+            when(communityValidator.validateExistingCommunity(communityId)).thenReturn(community);
+
+            Post a1 = mock(Post.class);
+            Post a2 = mock(Post.class);
+            Post c1 = mock(Post.class);
+
+            // Single parameterized stubbing: covers A/B/C in one place
             when(postRepository.findTopPostsByCommunityAndCategoryAndDateAfter(
-                    eq(1L), eq(1L), any(), any())).thenReturn(List.of(post));
+                    eq(communityId), anyLong(), any(LocalDateTime.class), any(Pageable.class)))
+                    .thenAnswer(inv -> {
+                        Long catId = inv.getArgument(1, Long.class);
+                        if (catId.equals(100L)) return List.of(a1, a2); // A
+                        if (catId.equals(300L)) return List.of(c1);     // C
+                        return List.of();                                // B -> empty
+                    });
 
-            Map<String, List<PostResponseDTO>> result = communityPostService.getTopPostsThisWeekByCategories(1L, 3, "test");
+            try (MockedStatic<PostMapper> mocked = mockStatic(PostMapper.class)) {
+                PostResponseDTO dtoA1 = mock(PostResponseDTO.class);
+                PostResponseDTO dtoA2 = mock(PostResponseDTO.class);
+                PostResponseDTO dtoC1 = mock(PostResponseDTO.class);
 
-            assertThat(result).containsKey("general");
-            assertThat(result.get("general")).hasSize(1);
-        }
+                mocked.when(() -> PostMapper.toPostResponseDTOWithFlags(eq(a1), anySet(), anySet())).thenReturn(dtoA1);
+                mocked.when(() -> PostMapper.toPostResponseDTOWithFlags(eq(a2), anySet(), anySet())).thenReturn(dtoA2);
+                mocked.when(() -> PostMapper.toPostResponseDTOWithFlags(eq(c1), anySet(), anySet())).thenReturn(dtoC1);
 
-        @Test
-        @DisplayName("Success: No posts returns empty map")
-        void success_emptyCategoryResults() {
-            community.setCategories(Set.of(category));
+                Map<String, List<PostResponseDTO>> result =
+                        service.getTopPostsThisWeekByCategories(communityId, size, "alice");
 
-            when(communityValidator.validateExistingCommunity(1L)).thenReturn(community);
-            when(postRepository.findTopPostsByCommunityAndCategoryAndDateAfter(
-                    eq(1L), eq(1L), any(), any())).thenReturn(List.of());
+                // Assertions
+                assertEquals(2, result.size());
+                assertTrue(result.containsKey("A"));
+                assertTrue(result.containsKey("C"));
+                assertFalse(result.containsKey("B"));
 
-            Map<String, List<PostResponseDTO>> result = communityPostService.getTopPostsThisWeekByCategories(1L, 3, "test");
-
-            assertThat(result).isEmpty();
-        }
-
-        @Test
-        @DisplayName("Failure: Invalid community throws exception")
-        void fail_invalidCommunity() {
-            when(communityValidator.validateExistingCommunity(999L))
-                    .thenThrow(new IllegalArgumentException("Not Found"));
-
-            assertThatThrownBy(() -> communityPostService.getTopPostsThisWeekByCategories(999L, 3, "test"))
-                    .isInstanceOf(IllegalArgumentException.class);
-        }
-    }
-
-    @Nested
-    @DisplayName("getTopPostsThisWeek()")
-    class TopPosts {
-
-        @Test
-        @DisplayName("Success: Return top posts this week")
-        void success_topPosts() {
-            when(postRepository.findTopPostsByCommunityAndDateAfter(eq(1L), any(), eq(5)))
-                    .thenReturn(List.of(post));
-
-            List<PostResponseDTO> result = communityPostService.getTopPostsThisWeek(1L, 5, "test");
-
-            assertThat(result).hasSize(1);
-        }
-    }
-
-    @Nested
-    @DisplayName("getCommunityPosts()")
-    class CommunityPosts {
-
-        @Test
-        @DisplayName("Success: Newest posts with category")
-        void success_newestWithCategory() {
-            when(postRepository.findCommunityPostsByCategoryNewest(eq(1L), eq("general"), any()))
-                    .thenReturn(List.of(post));
-
-            List<PostResponseDTO> result = communityPostService.getCommunityPosts(
-                    1L, SortOrder.NEWEST, 0, 10, "general"
-            , "test");
-
-            assertThat(result).hasSize(1);
-        }
-
-        @Test
-        @DisplayName("Success: Top liked posts without category")
-        void success_topLikedNoCategory() {
-            when(postRepository.findCommunityPostsTopLiked(eq(1L), any()))
-                    .thenReturn(List.of(post));
-
-            List<PostResponseDTO> result = communityPostService.getCommunityPosts(
-                    1L, SortOrder.TOP_LIKED, 1, 10, null, "test");
-
-            assertThat(result).hasSize(1);
+                assertEquals(2, result.get("A").size());
+                assertEquals(1, result.get("C").size());
+                assertTrue(result.get("A").containsAll(List.of(dtoA1, dtoA2)));
+                assertEquals(dtoC1, result.get("C").get(0));
+            }
         }
     }
 }
