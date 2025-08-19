@@ -37,7 +37,6 @@ out/
 .vscode/
 
 ### Properties / tml ###
-application-dev.properties
 application.yml
 
 ### Environment files ###
