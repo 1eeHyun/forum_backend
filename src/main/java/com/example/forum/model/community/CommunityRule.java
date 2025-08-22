@@ -2,8 +2,9 @@ package com.example.forum.model.community;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Getter
@@ -28,10 +29,7 @@ public class CommunityRule {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 }

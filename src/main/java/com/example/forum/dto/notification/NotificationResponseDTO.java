@@ -5,7 +5,7 @@ import com.example.forum.model.notification.Notification.NotificationType;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Builder
@@ -18,5 +18,5 @@ public class NotificationResponseDTO {
     private Long commentId;
     private String message;
     private Boolean isRead;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

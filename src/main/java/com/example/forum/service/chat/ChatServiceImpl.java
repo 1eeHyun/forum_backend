@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,7 +72,7 @@ public class ChatServiceImpl implements ChatService {
 
         User sender = userValidator.validateUserByUsername(dto.getSenderUsername());
 
-        LocalDateTime sentAt = LocalDateTime.now();
+        Instant sentAt = Instant.now();
 
         ChatMessage message = ChatMessage.builder()
                 .roomId(dto.getRoomId())
@@ -125,7 +125,7 @@ public class ChatServiceImpl implements ChatService {
 
             if (status.getLastReadMessageId() == null || lastReadMessageId > status.getLastReadMessageId()) {
                 status.setLastReadMessageId(lastReadMessageId);
-                status.setUpdatedAt(LocalDateTime.now());
+                status.setUpdatedAt(Instant.now());
 
                 chatReadStatusRepository.save(status);
             }
@@ -135,7 +135,7 @@ public class ChatServiceImpl implements ChatService {
                     .roomId(roomId)
                     .user(user)
                     .lastReadMessageId(lastReadMessageId)
-                    .updatedAt(LocalDateTime.now())
+                    .updatedAt(Instant.now())
                     .build();
 
             chatReadStatusRepository.save(status);

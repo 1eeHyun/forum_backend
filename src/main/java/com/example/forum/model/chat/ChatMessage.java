@@ -6,8 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Builder
@@ -16,8 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ChatMessage {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String roomId;
@@ -27,5 +27,9 @@ public class ChatMessage {
     private User sender;
 
     private String content;
-    private LocalDateTime sentAt;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant sentAt;
 }
+

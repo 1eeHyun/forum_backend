@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -16,5 +17,5 @@ public class CommunityRuleResponseDTO {
     private Long id;
     private String title;
     private String content;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

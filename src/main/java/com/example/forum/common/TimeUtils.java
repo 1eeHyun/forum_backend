@@ -1,12 +1,15 @@
 package com.example.forum.common;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class TimeUtils {
 
-    public static String formatTimeAgo(LocalDateTime createdAt) {
-        Duration duration = Duration.between(createdAt, LocalDateTime.now());
+    public static String formatTimeAgo(Instant createdAt) {
+
+        Instant now = Instant.now();
+
+        Duration duration = Duration.between(createdAt, now);
 
         long seconds = duration.getSeconds();
         long minutes = seconds / 60;

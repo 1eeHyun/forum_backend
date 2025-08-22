@@ -5,7 +5,7 @@ import com.example.forum.dto.user.UserDTO;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,8 +23,8 @@ public class PostResponseDTO {
 
     private int commentCount;
     private int likeCount;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     private Boolean isHidden;
 

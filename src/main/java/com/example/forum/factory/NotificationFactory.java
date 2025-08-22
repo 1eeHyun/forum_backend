@@ -4,7 +4,7 @@ import com.example.forum.model.notification.Notification;
 import com.example.forum.model.notification.Notification.NotificationType;
 import com.example.forum.model.user.User;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class NotificationFactory {
 
@@ -20,7 +20,7 @@ public class NotificationFactory {
                 .targetId(targetId)
                 .message(message)
                 .isRead(false)
-                .createdAt(LocalDateTime.now())
+                .createdAt(Instant.now())
                 .build();
     }
 }

@@ -3,8 +3,9 @@ package com.example.forum.model.community;
 import com.example.forum.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "community_favorites", uniqueConstraints = {
@@ -26,10 +27,7 @@ public class CommunityFavorite {
     @ManyToOne(fetch = FetchType.LAZY)
     private Community community;
 
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 }

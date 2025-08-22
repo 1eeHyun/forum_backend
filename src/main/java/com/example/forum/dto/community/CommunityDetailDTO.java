@@ -5,7 +5,7 @@ import com.example.forum.dto.user.UserDTO;
 import com.example.forum.model.community.CommunityRole;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Getter @Setter
@@ -21,7 +21,7 @@ public class CommunityDetailDTO {
     private ImageDTO profileImageDto;
     private String bannerImageUrl;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     private List<CommunityRuleResponseDTO> rules;
     private List<CategoryResponseDTO> categories;

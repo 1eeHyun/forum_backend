@@ -71,7 +71,6 @@ public class Report {
     @Column(nullable = false)
     private int severity = 0;
 
-    // 감사(audit)
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 

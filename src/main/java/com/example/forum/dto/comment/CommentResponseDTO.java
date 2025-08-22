@@ -4,7 +4,7 @@ import com.example.forum.dto.user.UserDTO;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -14,8 +14,8 @@ public class CommentResponseDTO {
     private Long commentId;
     private String content;
     private UserDTO author;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
     private List<CommentResponseDTO> replies;
 
     private long likeCount;

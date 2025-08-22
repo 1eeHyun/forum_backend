@@ -4,8 +4,9 @@ import com.example.forum.model.post.Post;
 import com.example.forum.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -41,17 +42,11 @@ public class Comment {
     private int likeCount;
     private int dislikeCount;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant updatedAt;
 }

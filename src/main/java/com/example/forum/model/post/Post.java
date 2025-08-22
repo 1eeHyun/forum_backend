@@ -6,8 +6,10 @@ import com.example.forum.model.like.PostReaction;
 import com.example.forum.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -41,8 +43,13 @@ public class Post {
     @JoinColumn(name = "category_id", nullable = true)
     private Category category;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private Instant updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
@@ -57,17 +64,6 @@ public class Post {
     @Getter
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PostTag> postTags = new HashSet<>();
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 
     public void setPostTags(Set<PostTag> postTags) {
         this.postTags = postTags;

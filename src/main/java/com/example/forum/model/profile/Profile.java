@@ -3,8 +3,9 @@ package com.example.forum.model.profile;
 import com.example.forum.model.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Getter
@@ -35,7 +36,9 @@ public class Profile {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private LocalDateTime updatedAt;
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant updatedAt;
 
 //    @PrePersist
 //    public void generatePublicId() {
@@ -43,14 +46,4 @@ public class Profile {
 //            this.publicId = UUID.randomUUID().toString();
 //        }
 //    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }
